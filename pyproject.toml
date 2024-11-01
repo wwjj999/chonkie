@@ -25,6 +25,7 @@ classifiers = [
 dependencies = [
     "tokenizers>=0.13.0"
 ]
+packages=["chonkie"]
 
 [project.urls]
 Homepage = "https://github.com/bhavnicksm/chonkie"
