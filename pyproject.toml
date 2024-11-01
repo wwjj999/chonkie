@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "chonkie"
+version = "0.1.0"
+description = "A simple, efficient text chunking library for RAG applications"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {file = "LICENSE"}
+keywords = ["chunking", "rag", "nlp", "text-processing"]
+authors = [
+    {name = "Bhavnick Minhas", email = "bhavnicksm@gmail.com"}
+]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11"
+]
+dependencies = [
+    "tokenizers>=0.13.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/bhavnicksm/chonkie"
