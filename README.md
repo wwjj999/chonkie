@@ -53,10 +53,10 @@ pip install chonkie
 Here's a basic example to get you started:
 
 ```python
-from chonkie.chunkers import Chunker
+from chonkie import TokenChunker
 
 # Initialize the chunker
-chunker = Chunker()
+chunker = TokenChunker()
 
 # Chunk some text
 chunks = chunker.chunk("Your text here")
