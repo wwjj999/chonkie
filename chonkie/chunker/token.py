@@ -1,7 +1,7 @@
 from typing import List
 from tokenizers import Tokenizer
 
-from chonkie.chunker.base import Chunk, BaseChunker
+from .base import Chunk, BaseChunker
 class TokenChunker(BaseChunker):
     def __init__(self, tokenizer: Tokenizer, chunk_size: int, chunk_overlap: int):
         """Initialize the TokenChunker with configuration parameters.

@@ -2,7 +2,7 @@ from typing import List, Tuple
 import re
 from tokenizers import Tokenizer
 
-from chonkie.chunker.base import Chunk, BaseChunker
+from .base import Chunk, BaseChunker
 
 class WordChunker(BaseChunker):
     def __init__(self, tokenizer: Tokenizer, chunk_size: int, chunk_overlap: int, mode: str = "simple"):
