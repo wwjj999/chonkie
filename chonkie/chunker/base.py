@@ -28,6 +28,17 @@ class BaseChunker(ABC):
             List of Chunk objects containing the chunked text and metadata
         """
         pass
+
+    def __call__(self, text: str) -> List[Chunk]:
+        """Make the chunker callable directly.
+        
+        Args:
+            text: Input text to be chunked
+            
+        Returns:
+            List of Chunk objects containing the chunked text and metadata
+        """
+        return self.chunk(text)
     
     def __repr__(self) -> str:
         """Return string representation of the chunker."""
