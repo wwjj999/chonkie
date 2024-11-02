@@ -100,6 +100,74 @@ class SentenceChunker(BaseChunker):
         else:
             self.mode = "simple"
 
+    def _split_into_sentences_via_spacy(self, text: str) -> List[str]:
+        """Split text into sentences via spaCy.
+
+        Args:
+            text: Input text to be split into sentences
+
+        Returns:
+            List of sentences
+        """
+        # Use spaCy's sentence segmentation
+        doc = self.nlp(text)
+        sentences = []
+        current_pos = 0
+        for sent in doc.sents:
+            sent_text = sent.text.strip()
+            if not sent_text:
+                continue
+            start_idx = text.find(sent_text, current_pos)
+            end_idx = start_idx + len(sent_text)
+            current_pos = end_idx
+            
+            # Get the token count for the sentence
+            token_count = len(self.tokenizer.encode(sent_text).ids)
+            sentences.append(
+                Sentence(text=sent_text,
+                         start_index=start_idx,
+                         end_index=end_idx,
+                         token_count=token_count)
+            )
+        return sentences
+    
+    def _split_into_sentences_simple(self, text: str) -> List[str]:
+        # Fallback to heuristic mode
+        # Simple rule-based sentence splitting with common abbreviations
+        text = re.sub(r'([.!?])([^"])', r'\1\n\2', text)  # Add newlines after sentence endings
+        text = re.sub(r'([.!?]")(\s*[A-Z])', r'\1\n\2', text)  # Handle quotes
+
+        # Handle common abbreviations
+        abbrevs = r'(?:Mr|Mrs|Dr|Prof|Sr|Jr|vs|etc|viz|al|Gen|Col|Fig|e\.g|i\.e)\.'
+        text = re.sub(f'{abbrevs}\n', f'{abbrevs} ', text)
+
+        # Handle initials and acronyms
+        text = re.sub(r'([A-Z]\.[A-Z]\.)\n', r'\1 ', text)
+        text = re.sub(r'([A-Z]\.[A-Z]\.)\n', r'\1 ', text)  # Run twice for consecutive initials
+
+        # Handle decimal numbers and ellipsis
+        text = re.sub(r'(\d+)\.\n(\d+)', r'\1.\2', text)  # Decimal numbers
+        text = re.sub(r'\.{3}\n', '... ', text)  # Ellipsis
+
+        sents = [s.strip() for s in text.split('\n') if s.strip()]
+        
+        sentences = []
+        current_pos = 0
+        for sent in sents:
+            start_idx = text.find(sent, current_pos)
+            end_idx = start_idx + len(sent)
+            current_pos = end_idx
+
+            # Get the token count for the sentence
+            token_count = len(self.tokenizer.encode(sent).ids)
+            sentences.append(
+                Sentence(text=sent,
+                         start_index=start_idx,
+                         end_index=end_idx,
+                         token_count=token_count)
+            )
+        return sentences 
+
     def _split_into_sentences(self, text: str) -> List[str]:
         """Split text into sentences based on the selected mode.
 
@@ -110,30 +178,10 @@ class SentenceChunker(BaseChunker):
             List of sentences
         """
         if self.mode == "spacy" and self.nlp is not None:
-            # Use spaCy's sentence segmentation
-            doc = self.nlp(text)
-            return [sent.text.strip() for sent in doc.sents]
+            return self._split_into_sentences_via_spacy(text)
         elif self.mode == "simple":
-            # Fallback to heuristic mode
-            # Simple rule-based sentence splitting with common abbreviations
-            text = re.sub(r'([.!?])([^"])', r'\1\n\2', text)  # Add newlines after sentence endings
-            text = re.sub(r'([.!?]")(\s*[A-Z])', r'\1\n\2', text)  # Handle quotes
-
-            # Handle common abbreviations
-            abbrevs = r'(?:Mr|Mrs|Dr|Prof|Sr|Jr|vs|etc|viz|al|Gen|Col|Fig|e\.g|i\.e)\.'
-            text = re.sub(f'{abbrevs}\n', f'{abbrevs} ', text)
-
-            # Handle initials and acronyms
-            text = re.sub(r'([A-Z]\.[A-Z]\.)\n', r'\1 ', text)
-            text = re.sub(r'([A-Z]\.[A-Z]\.)\n', r'\1 ', text)  # Run twice for consecutive initials
-
-            # Handle decimal numbers and ellipsis
-            text = re.sub(r'(\d+)\.\n(\d+)', r'\1.\2', text)  # Decimal numbers
-            text = re.sub(r'\.{3}\n', '... ', text)  # Ellipsis
-
-            sentences = [s.strip() for s in text.split('\n') if s.strip()]
-            return sentences
-
+            return self._split_into_sentences_simple(text)
+    
     def _get_token_counts(self, sentences: List[str]) -> List[int]:
         """Get token counts for a list of sentences in batch.
 

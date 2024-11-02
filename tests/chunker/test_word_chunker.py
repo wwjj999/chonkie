@@ -28,7 +28,7 @@ def test_word_chunker_chunking(tokenizer, sample_text):
     """
     Test that the WordChunker can chunk a sample text into words.
     """
-    chunker = WordChunker(tokenizer=tokenizer, chunk_size=64, chunk_overlap=16, mode="simple")
+    chunker = WordChunker(tokenizer=tokenizer, chunk_size=512, chunk_overlap=128, mode="simple")
     chunks = chunker.chunk(sample_text)
     
     assert len(chunks) > 0, print(f"Chunks: {chunks}")

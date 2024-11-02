@@ -100,7 +100,7 @@ class SPDMChunker(SemanticChunker):
         initial_groups = self._group_sentences(sentences)
 
         # Second pass: Merge similar groups with skip window
-        merged_groups = self._merge_similar_groups(initial_groups, self.similarity_threshold)
+        merged_groups = self._skip_and_merge(initial_groups, self.similarity_threshold)
         
         # Final pass: Split into size-appropriate chunks
         chunks = self._split_chunks(merged_groups)
