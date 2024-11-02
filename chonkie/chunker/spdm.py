@@ -37,77 +37,52 @@ class SPDMChunker(SemanticChunker):
         )
         self.skip_window = skip_window
 
-    def _merge_similar_groups(
-        self, 
-        groups: List[List[Sentence]], 
-        similarity_threshold: float
-    ) -> List[List[Sentence]]:
-        """Merge similar groups considering skip window.
-        
-        Args:
-            groups: List of sentence groups
-            similarity_threshold: Threshold for merging groups
-            
-        Returns:
-            List of merged sentence groups
-        """
+    def _merge_groups(self, groups: List[List[Sentence]]) -> List[Sentence]:
+        """Merge the groups together"""
+        merged_group = []
+        for group in groups:
+            merged_group.extend(group)
+        return merged_group
+
+    def _skip_and_merge(self,
+                        groups: List[List[Sentence]],
+                        similarity_threshold: float) -> List[List[Sentence]]:
+        """Merge similar groups considering skip window."""
         if len(groups) <= 1:
             return groups
 
-        # Track merged groups and their embeddings
-        merged = [False] * len(groups)
-        embeddings = [self._compute_group_embedding(group) for group in groups]
         result_groups = []
-
-        i = 0
-        while i < len(groups):
-            if merged[i]:
-                i += 1
-                continue
-
-            current_group = groups[i].copy()
-            current_embedding = embeddings[i]
+        grps = groups.copy()
+        embeddings = [self._compute_group_embedding(group) for group in grps]
+        
+        while grps:
+            if len(grps) == 1:
+                result_groups.append(grps[0])
+                break
+                
+            # Calculate skip index ensuring it's valid
+            skip_index = min(self.skip_window + 1, len(grps) - 1)
             
-            # Look ahead with skip window
-            look_ahead_start = i + 1
-            checked_indices = set()
-
-            while look_ahead_start < len(groups):
-                # Find next unmerged group to check
-                j = look_ahead_start
-                while j < min(look_ahead_start + self.skip_window + 1, len(groups)):
-                    if not merged[j] and j not in checked_indices:
-                        break
-                    j += 1
-
-                if j >= len(groups):
-                    break
-
-                # Compare embeddings
-                similarity = self._get_semantic_similarity(
-                    current_embedding,
-                    embeddings[j]
-                )
-
-                if similarity >= similarity_threshold:
-                    # Merge groups
-                    # Add all sentences from intermediate groups
-                    for k in range(i + 1, j + 1):
-                        current_group.extend(groups[k])
-                        merged[k] = True
-
-                    # Update current embedding
-                    current_embedding = self._compute_group_embedding(current_group)
+            # Compare current group with skipped group
+            similarity = self._get_semantic_similarity(embeddings[0], embeddings[skip_index])
+            
+            if similarity >= similarity_threshold:
+                # Merge groups from 0 to skip_index (inclusive)
+                merged = self._merge_groups(grps[:skip_index + 1])
+                
+                # Remove the merged groups
+                for _ in range(skip_index + 1):
+                    grps.pop(0)
+                    embeddings.pop(0)
                     
-                    # Move look ahead window
-                    look_ahead_start = j + 1
-                else:
-                    checked_indices.add(j)
-                    look_ahead_start = j + 1
-
-            result_groups.append(current_group)
-            i += 1
-
+                # Add merged group back at the start
+                grps.insert(0, merged)
+                embeddings.insert(0, self._compute_group_embedding(merged))
+            else:
+                # No merge possible, move first group to results
+                result_groups.append(grps.pop(0))
+                embeddings.pop(0)
+        
         return result_groups
 
     def chunk(self, text: str) -> List[SemanticChunk]:

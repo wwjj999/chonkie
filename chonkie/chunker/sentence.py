@@ -1,10 +1,8 @@
 from typing import List, Optional
 import re
-
+from dataclasses import dataclass
 from tokenizers import Tokenizer
-
 from .base import Chunk, BaseChunker
-
 import importlib.util
 import warnings
 
@@ -18,6 +16,24 @@ if SPACY_AVAILABLE:
         SPACY_AVAILABLE = False
         warnings.warn("Failed to import spacy despite it being installed. Using heuristic mode only.")
 
+
+#TODO: Currently the SentenceChunker does not populate the sentences field in the SentenceChunk object.
+# We need to implement the logic to populate the sentences field in the SentenceChunk object.
+
+@dataclass
+class Sentence: 
+    text: str
+    start_index: int
+    end_index: int
+    token_count: int
+
+@dataclass
+class SentenceChunk(Chunk):
+    text: str
+    start_index: int
+    end_index: int
+    token_count: int
+    sentences: List[Sentence] = None
 
 class SentenceChunker(BaseChunker):
     def __init__(
@@ -148,7 +164,7 @@ class SentenceChunker(BaseChunker):
             Chunk object
         """
         chunk_text = " ".join(sentences)
-        return Chunk(
+        return SentenceChunk(
             text=chunk_text,
             start_index=start_idx,
             end_index=start_idx + token_count,
