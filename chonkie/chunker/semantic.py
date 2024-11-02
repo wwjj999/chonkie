@@ -5,10 +5,11 @@ import re
 import importlib.util
 from tokenizers import Tokenizer
 
-from .base import Chunk, BaseChunker
+from .base import BaseChunker
+from .sentence import Sentence, SentenceChunk
 
 @dataclass
-class Sentence: 
+class SemanticSentence(Sentence): 
     text: str
     start_index: int
     end_index: int
@@ -16,12 +17,12 @@ class Sentence:
     embedding: Optional[np.ndarray] = None
 
 @dataclass
-class SemanticChunk(Chunk):
+class SemanticChunk(SentenceChunk):
     text: str
     start_index: int
     end_index: int
     token_count: int
-    sentences: List[Sentence] = None
+    sentences: List[SemanticSentence] = None
             
 class SemanticChunker(BaseChunker):
     def __init__(
@@ -162,7 +163,7 @@ class SemanticChunker(BaseChunker):
         
         # Create Sentence objects with all precomputed information
         sentences = [
-            Sentence(
+            SemanticSentence(
                 text=sent,
                 start_index=start_idx,
                 end_index=end_idx,

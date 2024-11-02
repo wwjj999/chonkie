@@ -111,10 +111,10 @@ class SentenceChunker(BaseChunker):
         """
         # Use spaCy's sentence segmentation
         doc = self.nlp(text)
-        sentences = []
+        sentences = [sent.text.strip() for sent in doc.sents if sent.text.strip()]  
+        token_counts = self._get_token_counts(sentences)
         current_pos = 0
-        for sent in doc.sents:
-            sent_text = sent.text.strip()
+        for sent_text, token_count in zip(sentences, token_counts):
             if not sent_text:
                 continue
             start_idx = text.find(sent_text, current_pos)
@@ -122,7 +122,6 @@ class SentenceChunker(BaseChunker):
             current_pos = end_idx
             
             # Get the token count for the sentence
-            token_count = len(self.tokenizer.encode(sent_text).ids)
             sentences.append(
                 Sentence(text=sent_text,
                          start_index=start_idx,
@@ -150,16 +149,16 @@ class SentenceChunker(BaseChunker):
         text = re.sub(r'\.{3}\n', '... ', text)  # Ellipsis
 
         sents = [s.strip() for s in text.split('\n') if s.strip()]
-        
+        token_counts = self._get_token_counts(sents)
+
         sentences = []
         current_pos = 0
-        for sent in sents:
+        for sent, token_count in zip(sents, token_counts):
             start_idx = text.find(sent, current_pos)
             end_idx = start_idx + len(sent)
             current_pos = end_idx
 
             # Get the token count for the sentence
-            token_count = len(self.tokenizer.encode(sent).ids)
             sentences.append(
                 Sentence(text=sent,
                          start_index=start_idx,
@@ -197,7 +196,7 @@ class SentenceChunker(BaseChunker):
 
     def _create_chunk(
         self,
-        sentences: List[str],
+        sentences: List[Sentence],
         start_idx: int,
         token_count: int
     ) -> Chunk:
@@ -211,12 +210,13 @@ class SentenceChunker(BaseChunker):
         Returns:
             Chunk object
         """
-        chunk_text = " ".join(sentences)
+        chunk_text = " ".join([sentence.text for sentence in sentences])
         return SentenceChunk(
             text=chunk_text,
             start_index=start_idx,
             end_index=start_idx + token_count,
-            token_count=token_count
+            token_count=token_count, 
+            sentences=sentences
         )
 
     def chunk(self, text: str) -> List[Chunk]:
@@ -232,7 +232,7 @@ class SentenceChunker(BaseChunker):
             return []
 
         sentences = self._split_into_sentences(text)
-        token_counts = self._get_token_counts(sentences)
+        token_counts = [sentence.token_count for sentence in sentences]
         
         chunks = []
         current_sentences = []
