@@ -1,4 +1,4 @@
-![Chonkie Logo](assets/chonkie_logo_br_transparent_bg.png)
+![Chonkie Logo](https://github.com/bhavnicksm/chonkie/blob/6b1b1953494d47dda9a19688c842975184ccc986/assets/chonkie_logo_br_transparent_bg.png)
 # 🦛 Chonkie
 
 so i found myself making another RAG bot (for the 2342148th time) and meanwhile, explaining to my juniors about why we should use chunking in our RAG bots, only to realise that i would have to write chunking all over again unless i use the bloated software library X or the extremely feature-less library Y. _WHY CAN I NOT HAVE GOOD THINGS IN LIFE, UGH?_
