@@ -123,11 +123,6 @@ class SemanticChunker(BaseChunker):
         else:
             return self._split_sentences_spacy(text)
 
-    def _update_embedding(self, current_embedding: np.ndarray, new_embedding: np.ndarray, 
-                         current_count: int) -> np.ndarray:
-        """Update running mean of embeddings when adding a new sentence."""
-        return (current_embedding * current_count + new_embedding) / (current_count + 1)
-
     def _compute_similarity_threshold(self, all_similarities: List[float]) -> float:
         """Compute similarity threshold based on percentile if specified."""
         if self.similarity_threshold is not None:
@@ -135,10 +130,6 @@ class SemanticChunker(BaseChunker):
         else:
             return float(np.percentile(all_similarities, self.similarity_percentile))
     
-    def _get_token_count(self, text: str) -> int:
-        """Count tokens in text."""
-        return len(self.tokenizer.encode(text).ids)
-
     def _prepare_sentences(self, text: str) -> List[Sentence]:
         """Prepare sentences with precomputed information.
         
