@@ -1,7 +1,6 @@
 from typing import List, Tuple
 import re
 from tokenizers import Tokenizer
-
 from .base import Chunk, BaseChunker
 
 class WordChunker(BaseChunker):
@@ -160,7 +159,7 @@ class WordChunker(BaseChunker):
             start_index=start_idx,
             end_index=end_idx,
             token_count=token_count
-        ), token_count
+        )
 
     def _get_word_list_token_counts(self, words: List[str]) -> List[int]:
         """Get the number of tokens for each word in a list.
@@ -199,7 +198,7 @@ class WordChunker(BaseChunker):
                 current_chunk.append(word)
                 current_chunk_length += length
             else:
-                chunk, chunk_length = self._create_chunk(
+                chunk = self._create_chunk(
                     current_chunk,
                     i - len(current_chunk),
                     i - 1
@@ -230,6 +229,15 @@ class WordChunker(BaseChunker):
                 
                 current_chunk.append(word)
                 current_chunk_length += length
+            
+        # Add the final chunk if it has any words
+        if current_chunk:
+            chunk = self._create_chunk(
+            current_chunk,
+            len(words) - len(current_chunk),
+            len(words) - 1
+            )
+            chunks.append(chunk)
         return chunks
 
     def __repr__(self) -> str:
