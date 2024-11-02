@@ -19,9 +19,8 @@ What're you waiting for, **just CHONK it**!
 - [🦛 Chonkie](#-chonkie)
 - [Table of Contents](#table-of-contents)
 - [Why do we need Chunking?](#why-do-we-need-chunking)
-- [Approaches to doing chunking](#approaches-to-doing-chunking)
-- [Installation](#installation)
-- [Usage](#usage)
+- [Quick Instal](#quick-instal)
+- [Quick Usage](#quick-usage)
 - [Citation](#citation)
 
 # Why do we need Chunking?
@@ -32,16 +31,7 @@ Here are some arguments for why one would like to chunk their texts for a RAG sc
 - Even with infinite context, there's no free lunch on the context side - the minimum it takes to understand a string is o(n) and we would never be able to make models more efficient on scaling context. So, if we have smaller context, our search and generation pipeline would be more efficient (in response latency)
 - Research suggests that a lot of random, noisy context can actually lead to higher hallucination in the model responses. However, if we ensure that each chunk that get's passed onto the model is only relevant, the model would end up with better responses.
 
-# Approaches to doing chunking
-
-1. Token Chunking (a.k.a Fixed Size Chunking or Sliding Window Chunking)
-2. Word Chunking
-3. Sentence Chunking
-4. Semantic Chunking
-5. Semantic Double-Pass Merge (SDPM) Chunking
-6. Context-aware Chunking
-
-# Installation
+# Quick Instal
 
 To install chonkie, simply run:
 
@@ -49,7 +39,13 @@ To install chonkie, simply run:
 pip install chonkie
 ```
 
-# Usage
+Chonkie follows the rule to have minimal defualt installs, read the [DOCS](/DOCS.md) to know the installation for your required chunker, or simply install `all` if you don't want to think about it (not recommended).
+
+```bash
+pip install chonkie[all]
+```
+
+# Quick Usage
 
 Here's a basic example to get you started:
 
@@ -60,9 +56,12 @@ from chonkie import TokenChunker
 chunker = TokenChunker()
 
 # Chunk some text
-chunks = chunker.chunk("Your text here")
+chunks = chunker("Your text here")
 print(chunks)
 ```
+
+More example usages given inside the [DOCS](/DOCS.md)
+
 
 # Citation
 
