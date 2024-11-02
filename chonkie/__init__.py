@@ -5,7 +5,7 @@ from .chunker.sentence import Sentence, SentenceChunk, SentenceChunker
 from .chunker.semantic import SemanticSentence, SemanticChunk, SemanticChunker
 from .chunker.spdm import SPDMChunker
 
-__version__ = "0.0.1a4"
+__version__ = "0.0.1a6"
 __name__ = "chonkie"
 __author__ = "Bhavnick Minhas"
 
