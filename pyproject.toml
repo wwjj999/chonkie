@@ -36,4 +36,5 @@ all = ["spacy>=3.0.0", "sentence-transformers>=2.0.0", "numpy>=1.23.0"]
 dev = ["pytest>=6.2.0"]
 
 [tool.setuptools]
-packages = ["chonkie"]
+package-dir = {"" = "src"}
+packages = ["chonkie", "chonkie.chunker"]
