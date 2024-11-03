@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "chonkie"
-version = "0.0.1a6"
+version = "0.0.1a8"
 description = "A simple, efficient text chunking library for RAG applications"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -36,4 +36,5 @@ all = ["spacy>=3.0.0", "sentence-transformers>=2.0.0", "numpy>=1.23.0"]
 dev = ["pytest>=6.2.0"]
 
 [tool.setuptools]
-packages = ["chonkie"]
+package-dir = {"" = "src"}
+packages = ["chonkie", "chonkie.chunker"]
