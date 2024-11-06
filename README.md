@@ -7,35 +7,17 @@ Can't i just install, import and run chunking and not have to worry about depend
 
 Well, with chonkie you can! (chonkie boi is a gud boi)
 
-✅ All the CHONKs you'd ever need </br>
+✅ Feature-rich: All the CHONKs you'd ever need </br>
 ✅ Easy to use: Install, Import, CHONK </br>
-✅ No bloat, just CHONK </br>
+✅ Fast: CHONK at the speed of light! zooooom </br>
+✅ Wide support: Supports all your favorite tokenizer CHONKS </br>
+✅ Light-weight: No bloat, just CHONK </br>
 ✅ Cute CHONK mascoot </br>
 ✅ Moto Moto's favorite python library </br>
 
 What're you waiting for, **just CHONK it**!
 
-# Table of Contents
-- [🦛 Chonkie](#-chonkie)
-- [Table of Contents](#table-of-contents)
-- [Why do we need Chunking?](#why-do-we-need-chunking)
-- [Quick CHONK!](#quick-chonk)
-  - [Installation](#installation)
-  - [Usage](#usage)
-- [Citation](#citation)
-
-# Why do we need Chunking?
-
-Here are some arguments for why one would like to chunk their texts for a RAG scenario:
-
-- Most RAG pipelines are bottlenecked by context length as of today. While we expect future LLMs to exceed 1Mill token lenghts, even then, it's not only LLMs inside the pipeline, but other aspects too, namely, bi-encoder retriever, cross-encoder reranker and even models for particular aspects like answer relevancy models and answer attribution models, that could lead to the context length bottleneck.
-- Even with infinite context, there's no free lunch on the context side - the minimum it takes to understand a string is o(n) and we would never be able to make models more efficient on scaling context. So, if we have smaller context, our search and generation pipeline would be more efficient (in response latency)
-- Research suggests that a lot of random, noisy context can actually lead to higher hallucination in the model responses. However, if we ensure that each chunk that get's passed onto the model is only relevant, the model would end up with better responses.
-
-# Quick CHONK!
-
-
-## Installation
+# Installation
 To install chonkie, simply run:
 
 ```bash
@@ -48,7 +30,7 @@ Chonkie follows the rule to have minimal defualt installs, read the [DOCS](/DOCS
 pip install chonkie[all]
 ```
 
-## Usage
+# Usage
 
 Here's a basic example to get you started:
 
@@ -62,15 +44,40 @@ from tokenizers import Tokenizer
 tokenizer = Tokenizer.from_pretrained("gpt2)
 
 # Initialize the chunker
-chunker = TokenChunker()
+chunker = TokenChunker(tokenizer)
 
 # Chunk some text
-chunks = chunker("Your text here")
+chunks = chunker("Woah! I believe Chonkie, the chunking library is so cool! I love the tiny hippo hehe.")
 print(chunks)
 ```
 
 More example usages given inside the [DOCS](/DOCS.md)
 
+# Supported Methods
+
+Chonkie provides several chunkers to help you split your text efficiently for RAG applications. Here's a quick overview of the available chunkers:
+
+- **TokenChunker**: Splits text into fixed-size token chunks.
+- **WordChunker**: Splits text into chunks based on words.
+- **SentenceChunker**: Splits text into chunks based on sentences.
+- **SemanticChunker**: Splits text into chunks based on semantic similarity.
+- **SPDMChunker**: Splits text using a Semantic Double-Pass Merge approach.
+
+More on these methods and the approaches taken inside the [DOCS](/DOCS.md)
+
+# Acknowledgements
+
+Chonkie was developed with the support and contributions of the open-source community. We would like to thank the following projects and individuals for their invaluable help:
+
+- **Hugging Face** for their amazing [tokenizers](https://github.com/huggingface/tokenizers) library, which provides the backbone for our tokenization needs.
+- **spaCy** for their powerful [spaCy](https://spacy.io/) library, which we use for advanced sentence segmentation.
+- **Sentence Transformers** for their [sentence-transformers](https://www.sbert.net/) library, which enables semantic chunking.
+- The contributors and maintainers of various open-source projects that have inspired and supported the development of Chonkie.
+
+Special thanks to **Moto Moto** for endorsing Chonkie with his famous quote: 
+> "I like them big, I like them chonkie."
+
+And to all the users and contributors who have provided feedback, reported issues, and helped improve Chonkie.
 
 # Citation
 
