@@ -29,9 +29,9 @@ class SemanticChunker(BaseChunker):
         self,
         tokenizer: Tokenizer,
         sentence_transformer_model: str,
-        max_chunk_size: int,
         similarity_threshold: Optional[float] = None,
         similarity_percentile: Optional[float] = None,
+        max_chunk_size: int = 512,
         initial_sentences: int = 1,
         sentence_mode: str = "heuristic",
         spacy_model: str = "en_core_web_sm"

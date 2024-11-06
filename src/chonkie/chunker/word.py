@@ -4,7 +4,7 @@ from tokenizers import Tokenizer
 from .base import Chunk, BaseChunker
 
 class WordChunker(BaseChunker):
-    def __init__(self, tokenizer: Tokenizer, chunk_size: int, chunk_overlap: int, mode: str = "simple"):
+    def __init__(self, tokenizer: Tokenizer, chunk_size: int = 512, chunk_overlap: int = 128, mode: str = "simple"):
         """Initialize the WordChunker with configuration parameters.
 
         Args:

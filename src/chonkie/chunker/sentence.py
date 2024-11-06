@@ -39,8 +39,8 @@ class SentenceChunker(BaseChunker):
     def __init__(
         self,
         tokenizer: Tokenizer,
-        chunk_size: int,
-        chunk_overlap: int,
+        chunk_size: int = 512,
+        chunk_overlap: int = 128,
         mode: str = "simple",
         min_sentences_per_chunk: int = 1,
         spacy_model: str = "en_core_web_sm"
