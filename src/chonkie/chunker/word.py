@@ -16,6 +16,8 @@ class WordChunker(BaseChunker):
         Raises:
             ValueError: If chunk_size <= 0 or chunk_overlap >= chunk_size or invalid mode
         """
+        super().__init__(tokenizer)
+
         if chunk_size <= 0:
             raise ValueError("chunk_size must be positive")
         if chunk_overlap >= chunk_size:
@@ -23,7 +25,6 @@ class WordChunker(BaseChunker):
         if mode not in ["simple", "advanced"]:
             raise ValueError("mode must be either 'heuristic' or 'advanced'")
 
-        self.tokenizer = tokenizer
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
         self.mode = mode
@@ -139,7 +140,7 @@ class WordChunker(BaseChunker):
         Returns:
             Number of tokens
         """
-        return len(self.tokenizer.encode(text).ids)
+        return len(self._encode(text))
 
     def _create_chunk(self, words: List[str], start_idx: int, end_idx: int) -> Tuple[Chunk, int]:
         """Create a chunk from a list of words.
@@ -170,8 +171,8 @@ class WordChunker(BaseChunker):
         Returns:
             List of token counts for each word
         """
-        encodings = self.tokenizer.encode_batch(words)
-        return [len(encoding.ids) for encoding in encodings]
+        encodings = self._encode_batch(words)
+        return [len(encoding) for encoding in encodings]
 
     def chunk(self, text: str) -> List[Chunk]:
         """Split text into overlapping chunks based on words while respecting token limits.

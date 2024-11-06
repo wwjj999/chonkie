@@ -52,6 +52,8 @@ class SemanticChunker(BaseChunker):
             ValueError: If parameters are invalid
             ImportError: If required dependencies aren't installed
         """
+        super().__init__(tokenizer)
+
         if max_chunk_size <= 0:
             raise ValueError("max_chunk_size must be positive")
         if similarity_threshold is not None and (similarity_threshold < 0 or similarity_threshold > 1):
@@ -65,7 +67,6 @@ class SemanticChunker(BaseChunker):
         if sentence_mode not in ["heuristic", "spacy"]:
             raise ValueError("sentence_mode must be 'heuristic' or 'spacy'")
 
-        self.tokenizer = tokenizer
         self.max_chunk_size = max_chunk_size
         self.similarity_threshold = similarity_threshold
         self.similarity_percentile = similarity_percentile
@@ -159,7 +160,7 @@ class SemanticChunker(BaseChunker):
         embeddings = self.sentence_transformer.encode(raw_sentences, convert_to_numpy=True)
         
         # Batch compute token counts
-        token_counts = [len(encoding.ids) for encoding in self.tokenizer.encode_batch(raw_sentences)]
+        token_counts = [len(encoding) for encoding in self._encode_batch(raw_sentences)]
         
         # Create Sentence objects with all precomputed information
         sentences = [
