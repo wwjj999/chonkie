@@ -53,7 +53,13 @@ pip install chonkie[all]
 Here's a basic example to get you started:
 
 ```python
+# First import the chunker you want from Chonkie 
 from chonkie import TokenChunker
+
+# Import your favorite tokenizer library
+# Also supports AutoTokenizers, TikToken and AutoTikTokenizer
+from tokenizers import Tokenizer 
+tokenizer = Tokenizer.from_pretrained("gpt2)
 
 # Initialize the chunker
 chunker = TokenChunker()

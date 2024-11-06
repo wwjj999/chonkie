@@ -39,8 +39,8 @@ class SentenceChunker(BaseChunker):
     def __init__(
         self,
         tokenizer: Tokenizer,
-        chunk_size: int,
-        chunk_overlap: int,
+        chunk_size: int = 512,
+        chunk_overlap: int = 128,
         mode: str = "simple",
         min_sentences_per_chunk: int = 1,
         spacy_model: str = "en_core_web_sm"
@@ -59,6 +59,8 @@ class SentenceChunker(BaseChunker):
             ValueError: If parameters are invalid
             Warning: If spacy mode is requested but spacy is not available
         """
+        super().__init__(tokenizer)
+
         if chunk_size <= 0:
             raise ValueError("chunk_size must be positive")
         if chunk_overlap >= chunk_size:
@@ -68,7 +70,6 @@ class SentenceChunker(BaseChunker):
         if min_sentences_per_chunk < 1:
             raise ValueError("min_sentences_per_chunk must be at least 1")
 
-        self.tokenizer = tokenizer
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
         self.min_sentences_per_chunk = min_sentences_per_chunk
@@ -191,8 +192,8 @@ class SentenceChunker(BaseChunker):
             List of token counts for each sentence
         """
         # Batch encode all sentences at once
-        encoded_sentences = self.tokenizer.encode_batch(sentences)
-        return [len(encoded.ids) for encoded in encoded_sentences]
+        encoded_sentences = self._encode_batch(sentences)
+        return [len(encoded) for encoded in encoded_sentences]
 
     def _create_chunk(
         self,

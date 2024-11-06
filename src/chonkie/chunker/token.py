@@ -3,7 +3,7 @@ from tokenizers import Tokenizer
 
 from .base import Chunk, BaseChunker
 class TokenChunker(BaseChunker):
-    def __init__(self, tokenizer: Tokenizer, chunk_size: int, chunk_overlap: int):
+    def __init__(self, tokenizer: Tokenizer, chunk_size: int = 512, chunk_overlap: int = 128):
         """Initialize the TokenChunker with configuration parameters.
 
         Args:
@@ -14,12 +14,12 @@ class TokenChunker(BaseChunker):
         Raises:
             ValueError: If chunk_size <= 0 or chunk_overlap >= chunk_size
         """
+        super().__init__(tokenizer)
         if chunk_size <= 0:
             raise ValueError("chunk_size must be positive")
         if chunk_overlap >= chunk_size:
             raise ValueError("chunk_overlap must be less than chunk_size")
 
-        self.tokenizer = tokenizer
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
 
@@ -36,8 +36,8 @@ class TokenChunker(BaseChunker):
             return []
 
         # Encode full text
-        encoding = self.tokenizer.encode(text)
-        text_tokens = encoding.ids
+        encoding = self._encode(text)
+        text_tokens = encoding
         chunks = []
 
         # Calculate chunk positions

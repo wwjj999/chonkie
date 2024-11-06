@@ -33,7 +33,7 @@ Homepage = "https://github.com/bhavnicksm/chonkie"
 sentence = ["spacy>=3.0.0"]
 semantic = ["sentence-transformers>=2.0.0", "numpy>=1.23.0"]
 all = ["spacy>=3.0.0", "sentence-transformers>=2.0.0", "numpy>=1.23.0"]
-dev = ["pytest>=6.2.0"]
+dev = ["pytest>=6.2.0", "tranformers>=4.0.0", "tiktoken>=0.2.0"]
 
 [tool.setuptools]
 package-dir = {"" = "src"}
