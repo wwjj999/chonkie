@@ -73,7 +73,7 @@ def test_token_chunker_chunking(tokenizer, sample_text):
     assert all([chunk.start_index is not None for chunk in chunks])
     assert all([chunk.end_index is not None for chunk in chunks])
 
-def test_token_chunker_chunking(transformers_tokenizer, sample_text):
+def test_token_chunker_chunking_hf(transformers_tokenizer, sample_text):
     """
     Test that the TokenChunker can chunk a sample text into tokens.
     """
@@ -88,7 +88,7 @@ def test_token_chunker_chunking(transformers_tokenizer, sample_text):
     assert all([chunk.start_index is not None for chunk in chunks])
     assert all([chunk.end_index is not None for chunk in chunks])
 
-def test_token_chunker_chunking(tiktokenizer, sample_text):
+def test_token_chunker_chunking_tik(tiktokenizer, sample_text):
     """
     Test that the TokenChunker can chunk a sample text into tokens.
     """
