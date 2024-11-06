@@ -39,7 +39,7 @@ class BaseChunker(ABC):
     def _encode(self, text: str):
         """Encode text using the backend tokenizer."""
         if self._tokenizer_backend == "transformers":
-            return self.tokenizer(text)
+            return self.tokenizer.encode(text)
         elif self._tokenizer_backend == "tokenizers":
             return self.tokenizer.encode(text).ids
         elif self._tokenizer_backend == "tiktoken":
@@ -50,7 +50,7 @@ class BaseChunker(ABC):
     def _encode_batch(self, texts: List[str]):
         """Encode a batch of texts using the backend tokenizer."""
         if self._tokenizer_backend == "transformers":
-            return self.tokenizer(texts)
+            return self.tokenizer.batch_encode_plus(texts)['input_ids']
         elif self._tokenizer_backend == "tokenizers":
             return self.tokenizer.encode_batch(texts)
         elif self._tokenizer_backend == "tiktoken":
