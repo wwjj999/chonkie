@@ -41,7 +41,7 @@ from chonkie import TokenChunker
 # Import your favorite tokenizer library
 # Also supports AutoTokenizers, TikToken and AutoTikTokenizer
 from tokenizers import Tokenizer 
-tokenizer = Tokenizer.from_pretrained("gpt2)
+tokenizer = Tokenizer.from_pretrained("gpt2")
 
 # Initialize the chunker
 chunker = TokenChunker(tokenizer)
