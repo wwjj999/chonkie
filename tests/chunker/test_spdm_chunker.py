@@ -1,6 +1,6 @@
 import pytest
 from tokenizers import Tokenizer
-from chonkie.chunker.spdm import SPDMChunker
+from chonkie.chunker.sdpm import SDPMChunker
 from chonkie.chunker.semantic import SemanticChunk
 
 @pytest.fixture
@@ -14,7 +14,7 @@ def sample_text():
 
 def test_spdm_chunker_initialization(tokenizer):
     """Test that the SPDMChunker can be initialized with required parameters."""
-    chunker = SPDMChunker(
+    chunker = SDPMChunker(
         tokenizer=tokenizer,
         sentence_transformer_model="all-MiniLM-L6-v2",
         max_chunk_size=512,
@@ -32,7 +32,7 @@ def test_spdm_chunker_initialization(tokenizer):
 
 def test_spdm_chunker_chunking(tokenizer, sample_text):
     """Test that the SPDMChunker can chunk a sample text."""
-    chunker = SPDMChunker(
+    chunker = SDPMChunker(
         tokenizer=tokenizer,
         sentence_transformer_model="all-MiniLM-L6-v2",
         max_chunk_size=512,
@@ -51,7 +51,7 @@ def test_spdm_chunker_chunking(tokenizer, sample_text):
 
 def test_spdm_chunker_empty_text(tokenizer):
     """Test that the SPDMChunker can handle empty text input."""
-    chunker = SPDMChunker(
+    chunker = SDPMChunker(
         tokenizer=tokenizer,
         sentence_transformer_model="all-MiniLM-L6-v2",
         max_chunk_size=512,
@@ -63,7 +63,7 @@ def test_spdm_chunker_empty_text(tokenizer):
 
 def test_spdm_chunker_single_sentence(tokenizer):
     """Test that the SPDMChunker can handle text with a single sentence."""
-    chunker = SPDMChunker(
+    chunker = SDPMChunker(
         tokenizer=tokenizer,
         sentence_transformer_model="all-MiniLM-L6-v2",
         max_chunk_size=512,
@@ -77,7 +77,7 @@ def test_spdm_chunker_single_sentence(tokenizer):
 
 def test_spdm_chunker_repr(tokenizer):
     """Test that the SPDMChunker has a string representation."""
-    chunker = SPDMChunker(
+    chunker = SDPMChunker(
         tokenizer=tokenizer,
         sentence_transformer_model="all-MiniLM-L6-v2",
         max_chunk_size=512,
