@@ -1,19 +1,31 @@
-![Chonkie Logo](https://github.com/bhavnicksm/chonkie/blob/6b1b1953494d47dda9a19688c842975184ccc986/assets/chonkie_logo_br_transparent_bg.png)
-# 🦛 Chonkie
+<div align='center'>
 
-so i found myself making another RAG bot (for the 2342148th time) and meanwhile, explaining to my juniors about why we should use chunking in our RAG bots, only to realise that i would have to write chunking all over again unless i use the bloated software library X or the extremely feature-less library Y. _WHY CAN I NOT HAVE GOOD THINGS IN LIFE, UGH?_
+![Chonkie Logo](/assets/chonkie_logo_br_transparent_bg.png)
+
+# 🦛 Chonkie ✨
+
+[![PyPI version](https://img.shields.io/pypi/v/chonkie.svg)](https://pypi.org/project/chonkie/)
+[![License](https://img.shields.io/github/license/bhavnicksm/chonkie.svg)](https://github.com/bhavnicksm/chonkie/blob/main/LICENSE)
+[![Documentation](https://img.shields.io/badge/docs-DOCS.md-blue.svg)](DOCS.md)
+![Package size](https://img.shields.io/badge/size-21MB-blue)
+[![Downloads](https://static.pepy.tech/badge/chonkie)](https://pepy.tech/project/chonkie)
+[![GitHub stars](https://img.shields.io/github/stars/bhavnicksm/chonkie.svg)](https://github.com/bhavnicksm/chonkie/stargazers)
+
+</div>
+
+so i found myself making another RAG bot (for the 2342148th time) and meanwhile, explaining to my juniors about why we should use chunking in our RAG bots, only to realise that i would have to write chunking all over again unless i use the bloated software library X or the extremely feature-less library Y. _WHY CAN I NOT HAVE SOMETHING JUST RIGHT, UGH?_
 
 Can't i just install, import and run chunking and not have to worry about dependencies, bloat, speed or other factors?
 
 Well, with chonkie you can! (chonkie boi is a gud boi)
 
-✅ Feature-rich: All the CHONKs you'd ever need </br>
-✅ Easy to use: Install, Import, CHONK </br>
-✅ Fast: CHONK at the speed of light! zooooom </br>
-✅ Wide support: Supports all your favorite tokenizer CHONKS </br>
-✅ Light-weight: No bloat, just CHONK </br>
-✅ Cute CHONK mascoot </br>
-✅ Moto Moto's favorite python library </br>
+**🚀 Feature-rich**: All the CHONKs you'd ever need </br>
+**✨ Easy to use**: Install, Import, CHONK </br>
+**⚡ Fast**: CHONK at the speed of light! zooooom </br>
+**🌐 Wide support**: Supports all your favorite tokenizer CHONKS </br>
+**🪶 Light-weight**: No bloat, just CHONK </br>
+**🦛 Cute CHONK mascot** </br>
+**❤️ [Moto Moto](#acknowledgements)'s favorite python library** </br>
 
 What're you waiting for, **just CHONK it**!
 
@@ -79,10 +91,11 @@ Chonkie was developed with the support and contributions of the open-source comm
 - **Sentence Transformers** for their [sentence-transformers](https://www.sbert.net/) library, which enables semantic chunking.
 - The contributors and maintainers of various open-source projects that have inspired and supported the development of Chonkie.
 
-Special thanks to **Moto Moto** for endorsing Chonkie with his famous quote: 
-> "I like them big, I like them chonkie."
-
 And to all the users and contributors who have provided feedback, reported issues, and helped improve Chonkie.
+
+Special thanks to **[Moto Moto](https://www.youtube.com/watch?v=I0zZC4wtqDQ&t=5s)** for endorsing Chonkie with his famous quote: 
+> "I like them big, I like them chonkie."
+>                                         ~ Moto Moto
 
 # Citation
 
