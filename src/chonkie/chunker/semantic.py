@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Optional, Union
 import numpy as np
 import re
 import importlib.util
@@ -7,6 +7,28 @@ from tokenizers import Tokenizer
 
 from .base import BaseChunker
 from .sentence import Sentence, SentenceChunk
+
+import warnings
+
+# Check if spacy is available
+SPACY_AVAILABLE = importlib.util.find_spec("spacy") is not None
+if SPACY_AVAILABLE:
+    try:
+        import spacy
+    except ImportError:
+        SPACY_AVAILABLE = False
+        warnings.warn("Failed to import spacy despite it being installed. Using heuristic mode only.")
+
+SENTENCE_TRANSFORMERS_AVAILABLE = importlib.util.find_spec("sentence_transformers") is not None
+if SENTENCE_TRANSFORMERS_AVAILABLE:
+    try:
+        from sentence_transformers import SentenceTransformer
+    except ImportError:
+        SENTENCE_TRANSFORMERS_AVAILABLE = False
+        warnings.warn("Failed to import sentence-transformers despite it being installed. SemanticChunker will not work.")
+else:
+    warnings.warn("sentence-transformers is not installed. SemanticChunker will not work.")
+
 
 @dataclass
 class SemanticSentence(Sentence): 
@@ -28,7 +50,7 @@ class SemanticChunker(BaseChunker):
     def __init__(
         self,
         tokenizer: Tokenizer,
-        sentence_transformer_model: str,
+        embedding_model: Union[str, SentenceTransformer],
         similarity_threshold: Optional[float] = None,
         similarity_percentile: Optional[float] = None,
         max_chunk_size: int = 512,
@@ -40,7 +62,7 @@ class SemanticChunker(BaseChunker):
 
         Args:
             tokenizer: Tokenizer for counting tokens
-            sentence_transformer_model: Name of the sentence-transformers model to load
+            embedding_model: Name of the sentence-transformers model to load
             max_chunk_size: Maximum tokens allowed per chunk
             similarity_threshold: Absolute threshold for semantic similarity (0-1)
             similarity_percentile: Percentile threshold for similarity (0-100)
@@ -74,31 +96,26 @@ class SemanticChunker(BaseChunker):
         self.sentence_mode = sentence_mode
 
         # Initialize sentence transformer
-        if not importlib.util.find_spec("sentence_transformers"):
+        if not SENTENCE_TRANSFORMERS_AVAILABLE:
             raise ImportError(
                 "sentence-transformers is not installed. "
                 "Install it with 'pip install sentence-transformers'"
             )
-        try:
-            from sentence_transformers import SentenceTransformer
-            self.sentence_transformer = SentenceTransformer(sentence_transformer_model)
-        except Exception as e:
-            raise ImportError(
-                f"Failed to load sentence-transformers model '{sentence_transformer_model}'. "
-                f"Error: {str(e)}"
-            ) from e
+        if isinstance(embedding_model, str):
+            self.embedding_model = self._load_sentence_transformer_model(embedding_model)
+        else:
+            self.embedding_model = embedding_model
 
         # Initialize spaCy if explicitly requested
         self.nlp = None
         if sentence_mode == "spacy":
-            if not importlib.util.find_spec("spacy"):
+            if not SPACY_AVAILABLE:
                 raise ImportError(
                     "spaCy is not installed. Install it with 'pip install spacy' "
                     "and download the model with 'python -m spacy download en_core_web_sm', "
                     "or use sentence_mode='heuristic' instead."
                 )
             try:
-                import spacy
                 self.nlp = spacy.load(spacy_model)
             except OSError as e:
                 raise ImportError(
@@ -106,6 +123,18 @@ class SemanticChunker(BaseChunker):
                     f"Download it with 'python -m spacy download {spacy_model}' "
                     "or use sentence_mode='heuristic' instead."
                 ) from e
+
+    def _load_sentence_transformer_model(self, model_name: str) -> SentenceTransformer:
+        """Load a sentence-transformers model by name."""
+        try:
+            model = SentenceTransformer(model_name)
+        except Exception as e:
+            raise ImportError(
+                f"Failed to load sentence-transformers model '{model_name}'. "
+                f"Make sure it is installed and available."
+            ) from e
+        return model
+
 
     def _split_sentences_spacy(self, text: str) -> List[str]:
         """Split text into sentences using spaCy."""
@@ -157,7 +186,7 @@ class SemanticChunker(BaseChunker):
             current_idx = end_idx
 
         # Batch compute embeddings for all sentences
-        embeddings = self.sentence_transformer.encode(raw_sentences, convert_to_numpy=True)
+        embeddings = self.embedding_model.encode(raw_sentences, convert_to_numpy=True)
         
         # Batch compute token counts
         token_counts = [len(encoding) for encoding in self._encode_batch(raw_sentences)]
@@ -179,7 +208,7 @@ class SemanticChunker(BaseChunker):
 
     def _get_semantic_similarity(self, embedding1: np.ndarray, embedding2: np.ndarray) -> float:
         """Compute cosine similarity between two embeddings."""
-        similarity = self.sentence_transformer.similarity(embedding1, embedding2)
+        similarity = self.embedding_model.similarity(embedding1, embedding2)
         return similarity
 
     def _compute_group_embedding(self, sentences: List[Sentence]) -> np.ndarray:
