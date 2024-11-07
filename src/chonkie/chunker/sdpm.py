@@ -1,11 +1,26 @@
-from typing import List
+from typing import List, Union
+import warnings
+import importlib
+
 from .semantic import SemanticChunker, SemanticChunk, Sentence
 
-class SPDMChunker(SemanticChunker):
+# Check if sentence-transformers is available
+SENTENCE_TRANSFORMERS_AVAILABLE = importlib.util.find_spec("sentence_transformers") is not None
+if SENTENCE_TRANSFORMERS_AVAILABLE:
+    try:
+        from sentence_transformers import SentenceTransformer
+    except ImportError:
+        SENTENCE_TRANSFORMERS_AVAILABLE = False
+        warnings.warn("Failed to import sentence-transformers despite it being installed. SemanticChunker will not work.")
+else:
+    warnings.warn("sentence-transformers is not installed. SemanticChunker will not work.")
+
+
+class SDPMChunker(SemanticChunker):
     def __init__(
         self,
         tokenizer,
-        sentence_transformer_model: str,
+        embedding_model: Union[str, SentenceTransformer], 
         similarity_threshold: float = None,
         similarity_percentile: float = None,
         max_chunk_size: int = 512,
@@ -14,7 +29,7 @@ class SPDMChunker(SemanticChunker):
         spacy_model: str = "en_core_web_sm",
         skip_window: int = 1  # How many chunks to skip when looking for similarities
     ):
-        """Initialize the SPDMChunker.
+        """Initialize the SDPMChunker.
         
         Args:
             Same as SemanticChunker, plus:
@@ -22,7 +37,7 @@ class SPDMChunker(SemanticChunker):
         """
         super().__init__(
             tokenizer=tokenizer,
-            sentence_transformer_model=sentence_transformer_model,
+            embedding_model=embedding_model,
             max_chunk_size=max_chunk_size,
             similarity_threshold=similarity_threshold,
             similarity_percentile=similarity_percentile,
