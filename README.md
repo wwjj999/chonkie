@@ -47,8 +47,13 @@ tokenizer = Tokenizer.from_pretrained("gpt2")
 chunker = TokenChunker(tokenizer)
 
 # Chunk some text
-chunks = chunker("Woah! I believe Chonkie, the chunking library is so cool! I love the tiny hippo hehe.")
-print(chunks)
+chunks = chunker("Woah! Chonkie, the chunking library is so cool!",
+                  "I love the tiny hippo hehe.")
+
+# Access chunks
+for chunk in chunks:
+    print(f"Chunk: {chunk.text}")
+    print(f"Tokens: {chunk.token_count}")
 ```
 
 More example usages given inside the [DOCS](/DOCS.md)
