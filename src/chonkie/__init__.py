@@ -12,7 +12,7 @@ from .chunker import (
     SemanticSentence
 )
 
-__version__ = "0.0.3"
+__version__ = "0.1.0"
 __name__ = "chonkie"
 __author__ = "Bhavnick Minhas"
 
