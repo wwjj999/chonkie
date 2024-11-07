@@ -15,7 +15,7 @@ _The no-nonsense RAG chunking library that's lightweight, lightning-fast, and re
 
 [Installation](#installation) •
 [Usage](#usage) •
-[Supported Models](#supported-methods) •
+[Supported Methods](#supported-methods) •
 [Acknowledgements](#acknowledgements) •
 [Citation](#citation) 
 
