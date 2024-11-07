@@ -184,7 +184,9 @@ class SemanticChunker(BaseChunker):
 
     def _compute_group_embedding(self, sentences: List[Sentence]) -> np.ndarray:
         """Compute mean embedding for a group of sentences."""
-        return np.mean([sent.embedding for sent in sentences], axis=0)
+        return np.divide(np.sum([(sent.embedding * sent.token_count) for sent in sentences], axis=0),
+                         np.sum([sent.token_count for sent in sentences]),
+                         dtype=np.float32)
 
     def _group_sentences(self, sentences: List[Sentence]) -> List[List[Sentence]]:
         """Group sentences based on semantic similarity, ignoring token count limits.
