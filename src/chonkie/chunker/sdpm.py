@@ -1,7 +1,7 @@
 from typing import List
 from .semantic import SemanticChunker, SemanticChunk, Sentence
 
-class SPDMChunker(SemanticChunker):
+class SDPMChunker(SemanticChunker):
     def __init__(
         self,
         tokenizer,
@@ -14,7 +14,7 @@ class SPDMChunker(SemanticChunker):
         spacy_model: str = "en_core_web_sm",
         skip_window: int = 1  # How many chunks to skip when looking for similarities
     ):
-        """Initialize the SPDMChunker.
+        """Initialize the SDPMChunker.
         
         Args:
             Same as SemanticChunker, plus:

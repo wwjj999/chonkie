@@ -3,7 +3,7 @@ from .token import TokenChunker
 from .word import WordChunker
 from .sentence import Sentence, SentenceChunk, SentenceChunker
 from .semantic import SemanticSentence, SemanticChunk, SemanticChunker
-from .spdm import SPDMChunker
+from .sdpm import SDPMChunker
 
 
 __all__ = [
@@ -17,5 +17,5 @@ __all__ = [
     "SemanticSentence",
     "SemanticChunk",
     "SemanticChunker",
-    "SPDMChunker"
+    "SDPMChunker"
 ]

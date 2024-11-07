@@ -4,7 +4,7 @@ from .chunker import (
     WordChunker,
     SentenceChunker,
     SemanticChunker,
-    SPDMChunker,
+    SDPMChunker,
     Chunk, 
     SentenceChunk,
     SemanticChunk,
@@ -30,5 +30,5 @@ __all__ = [
     "WordChunker",
     "SentenceChunker",
     "SemanticChunker",
-    "SPDMChunker"
+    "SDPMChunker"
 ]
