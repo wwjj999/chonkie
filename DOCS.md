@@ -22,15 +22,15 @@
   - [does speed matter while chunking? (tl;dr: yes!!!)](#does-speed-matter-while-chunking-tldr-yes)
   - [but but but... how? how is chonkie so fast?](#but-but-but-how-how-is-chonkie-so-fast)
 - [chunkers](#chunkers)
-  - [tokenchunker](#tokenchunker)
-  - [wordchunker](#wordchunker)
-  - [sentencechunker](#sentencechunker)
-  - [semanticchunker](#semanticchunker)
-  - [sdpmchunker](#sdpmchunker)
+  - [TokenChunker](#tokenchunker)
+  - [WordChunker](#wordchunker)
+  - [SentenceChunker](#sentencechunker)
+  - [SemanticChunker](#semanticchunker)
+  - [SDPMChunker](#sdpmchunker)
 - [api reference](#api-reference)
-  - [chunk object](#chunk-object)
-  - [sentence chunk object](#sentence-chunk-object)
-  - [semantic chunk object](#semantic-chunk-object)
+  - [Chunk object](#chunk-object)
+  - [SentenceChunk object](#sentencechunk-object)
+  - [SemanticChunk object](#semanticchunk-object)
   
 
 # installation
@@ -69,14 +69,14 @@ what you could infer from the table is that, while it might be of inconvinience 
 # quick start
 
 ```python
-from chonkie import tokenchunker
+from chonkie import TokenChunker
 from tokenizers import tokenizer
 
 # initialize tokenizer
 tokenizer = tokenizer.from_pretrained("gpt2")
 
 # create chunker
-chunker = tokenchunker(
+chunker = TokenChunker(
     tokenizer=tokenizer,
     chunk_size=512,
     chunk_overlap=128
@@ -181,16 +181,18 @@ we used a lot of optimizations when building each and every chunker inside chonk
 
 # chunkers
 
-## tokenchunker
+## TokenChunker
 
-the `tokenchunker` splits text into chunks based on token count.
+The `TokenChunker` splits text into chunks based on token count.
 
 ```python
-from chonkie import tokenchunker
-from tokenizers import tokenizer
+from chonkie import TokenChunker
+from autotiktokenizer import AutoTikTokenizer
 
-chunker = tokenchunker(
-    tokenizer=tokenizer.from_pretrained("gpt2"),
+tokenizer = AutoTikTokenizer.from_pretrained("gpt2")
+
+chunker = TokenChunker(
+    tokenizer=tokenizer,
     chunk_size=512,  # maximum tokens per chunk
     chunk_overlap=128  # overlap between chunks
 )
@@ -201,14 +203,17 @@ chunker = tokenchunker(
 - `chunk_size`: maximum tokens per chunk
 - `chunk_overlap`: number of overlapping tokens between chunks
 
-## wordchunker
+## WordChunker
 
-the `wordchunker` maintains word boundaries while chunking.
+the `WordChunker` maintains word boundaries while chunking.
 
 ```python
-from chonkie import wordchunker
+from chonkie import WordChunker
+from autotiktokenizer import AutoTikTokenizer
 
-chunker = wordchunker(
+tokenizer = AutoTikTokenizer.from_pretrained("gpt2")
+
+chunker = WordChunker(
     tokenizer=tokenizer,
     chunk_size=512,
     chunk_overlap=128,
@@ -221,14 +226,17 @@ chunker = wordchunker(
   - `simple`: basic space-based splitting
   - `advanced`: handles punctuation and special cases
 
-## sentencechunker
+## SentenceChunker
 
-the `sentencechunker` preserves sentence boundaries.
+the `SentenceChunker` preserves sentence boundaries.
 
 ```python
-from chonkie import sentencechunker
+from chonkie import SentenceChunker
+from autotiktokenizer import AutoTikTokenizer
 
-chunker = sentencechunker(
+tokenizer = AutoTikTokenizer.from_pretrained("gpt2")
+
+chunker = SentenceChunker(
     tokenizer=tokenizer,
     chunk_size=512,
     chunk_overlap=128,
@@ -241,36 +249,40 @@ chunker = sentencechunker(
 - `mode`: sentence detection mode
 - `min_sentences_per_chunk`: minimum sentences per chunk
 
-## semanticchunker
+## SemanticChunker
 
-the `semanticchunker` groups content by semantic similarity.
+the `SemanticChunker` groups content by semantic similarity.
 
 ```python
-from chonkie import semanticchunker
+from chonkie import SemanticChunker
+from autotiktokenizer import AutoTikTokenizer
 
-chunker = semanticchunker(
+tokenizer = AutoTikTokenizer.from_pretrained("gpt2")
+
+chunker = SemanticChunker(
     tokenizer=tokenizer,
-    sentence_transformer_model="all-minilm-l6-v2",
+    embedding_model="all-minilm-l6-v2",
     max_chunk_size=512,
     similarity_threshold=0.7
 )
 ```
 
 **key parameters:**
-- `sentence_transformer_model`: model for semantic embeddings
+- `embedding_model`: model for semantic embeddings. This can either be a `str` or a `SentenceTransformer` model. If a `str` is passed, it uses `SentenceTransformer` to load it. 
 - `similarity_threshold`: threshold for semantic grouping
 
 
-## sdpmchunker
+## SDPMChunker
 
-the `sdpmchunker` groups content via the semantic double-pass merging method, which groups paragraphs that are semantically similar even if they do not occur consecutively, by making use of a skip-window.
+the `SDPMChunker` groups content via the semantic double-pass merging method, which groups paragraphs that are semantically similar even if they do not occur consecutively, by making use of a skip-window.
 
 ```python
 from chonkie import sdpmchunker
+from autotiktokenizer import AutoTikTokenizer
 
-chunker = sdpmchunker(
+chunker = SDPMChunker(
     tokenizer=tokenizer,
-    sentence_transformer_model="all-minilm-l6-v2",
+    embedding_model="all-minilm-l6-v2",
     max_chunk_size=512,
     similarity_threshold=0.7, 
     skip_window=1
@@ -282,41 +294,41 @@ chunker = sdpmchunker(
 
 # api reference
 
-## chunk object
+## Chunk object
 
 ```python
 @dataclass
-class chunk:
+class Chunk:
     text: str           # the chunk text
     start_index: int    # starting position in original text
     end_index: int      # ending position in original text
     token_count: int    # number of tokens in chunk
 ```
 
-## sentence chunk object
+## SentenceChunk object
 
 ```python
 @dataclass
-class sentence: 
+class Sentence: 
     text: str
     start_index: int
     end_index: int
     token_count: int
 
 @dataclass
-class sentencechunk(chunk):
+class SentenceChunk(Chunk):
     text: str
     start_index: int
     end_index: int
     token_count: int
-    sentences: list[sentence] 
+    sentences: list[Sentence] 
 ```
 
-## semantic chunk object
+## SemanticChunk object
 
 ```python
 @dataclass
-class semanticsentence(sentence): 
+class SemanticSentence(Sentence): 
     text: str
     start_index: int
     end_index: int
@@ -324,10 +336,10 @@ class semanticsentence(sentence):
     embedding: optional[np.ndarray]
 
 @dataclass
-class semanticchunk(sentencechunk):
+class SemanticChunk(SentenceChunk):
     text: str
     start_index: int
     end_index: int
     token_count: int
-    sentences: list[semanticsentence] 
+    sentences: list[SemanticSentence] 
 ```
