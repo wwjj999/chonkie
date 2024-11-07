@@ -11,6 +11,14 @@
 [![Downloads](https://static.pepy.tech/badge/chonkie)](https://pepy.tech/project/chonkie)
 [![GitHub stars](https://img.shields.io/github/stars/bhavnicksm/chonkie.svg)](https://github.com/bhavnicksm/chonkie/stargazers)
 
+_The no-nonsense RAG chunking library that's lightweight, lightning-fast, and ready to CHONK your texts_
+
+[Installation](#installation) •
+[Usage](#usage) •
+[Supported Models](#supported-methods) •
+[Acknowledgements](#acknowledgements) •
+[Citation](#citation) 
+
 </div>
 
 so i found myself making another RAG bot (for the 2342148th time) and meanwhile, explaining to my juniors about why we should use chunking in our RAG bots, only to realise that i would have to write chunking all over again unless i use the bloated software library X or the extremely feature-less library Y. _WHY CAN I NOT HAVE SOMETHING JUST RIGHT, UGH?_
@@ -104,7 +112,7 @@ If you use Chonkie in your research, please cite it as follows:
 ```
 @misc{chonkie2024,
   author = {Minhas, Bhavnick},
-  title = {Chonkie: A Lightweight Chunking Library for RAG Bots},
+  title = {Chonkie: A Fast Feature-full Chunking Library for RAG Bots},
   year = {2024},
   publisher = {GitHub},
   journal = {GitHub repository},
