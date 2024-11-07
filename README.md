@@ -24,7 +24,7 @@ Well, with chonkie you can! (chonkie boi is a gud boi)
 **⚡ Fast**: CHONK at the speed of light! zooooom </br>
 **🌐 Wide support**: Supports all your favorite tokenizer CHONKS </br>
 **🪶 Light-weight**: No bloat, just CHONK </br>
-**🦛 Cute CHONK mascot** </br>
+**🦛 Cute CHONK mascot**: psst it's a pygmy hippo btw </br>
 **❤️ [Moto Moto](#acknowledgements)'s favorite python library** </br>
 
 What're you waiting for, **just CHONK it**!
@@ -86,7 +86,7 @@ More on these methods and the approaches taken inside the [DOCS](/DOCS.md)
 
 Chonkie was developed with the support and contributions of the open-source community. We would like to thank the following projects and individuals for their invaluable help:
 
-- **Hugging Face** for their amazing [tokenizers](https://github.com/huggingface/tokenizers) library, which provides the backbone for our tokenization needs.
+- **OpenAI** for their amazing [tiktoken](https://github.com/openai/tiktoken) library, which provides the backbone for our tokenization needs.
 - **spaCy** for their powerful [spaCy](https://spacy.io/) library, which we use for advanced sentence segmentation.
 - **Sentence Transformers** for their [sentence-transformers](https://www.sbert.net/) library, which enables semantic chunking.
 - The contributors and maintainers of various open-source projects that have inspired and supported the development of Chonkie.
