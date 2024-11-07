@@ -78,7 +78,7 @@ Chonkie provides several chunkers to help you split your text efficiently for RA
 - **WordChunker**: Splits text into chunks based on words.
 - **SentenceChunker**: Splits text into chunks based on sentences.
 - **SemanticChunker**: Splits text into chunks based on semantic similarity.
-- **SPDMChunker**: Splits text using a Semantic Double-Pass Merge approach.
+- **SDPMChunker**: Splits text using a Semantic Double-Pass Merge approach.
 
 More on these methods and the approaches taken inside the [DOCS](/DOCS.md)
 
