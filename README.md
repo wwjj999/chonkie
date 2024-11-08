@@ -16,7 +16,6 @@ _The no-nonsense RAG chunking library that's lightweight, lightning-fast, and re
 [Installation](#installation) •
 [Usage](#usage) •
 [Supported Methods](#supported-methods) •
-[Benchmarks](#benchmarks) •
 [Acknowledgements](#acknowledgements) •
 [Citation](#citation) 
 
@@ -90,20 +89,6 @@ Chonkie provides several chunkers to help you split your text efficiently for RA
 - **SDPMChunker**: Splits text using a Semantic Double-Pass Merge approach.
 
 More on these methods and the approaches taken inside the [DOCS](/DOCS.md)
-
-# Benchmarks
-
-Benchmarking results for tokenizing **1 billion tokens** from fineweb-edu dataset using **Llama 3.2 tokenizer** on CPU (Google colab)
-
-| Configuration | Processing Type | AutoTikTokenizer | HuggingFace | Speed Ratio | 
-|--------------|-----------------|------------------|--------------|-------------|
-| Single Thread | Sequential | **14:58** (898s) | 40:43 (2443s) | 2.72x faster |
-| Batch x1 | Batched | 15:58 (958s) | **10:30** (630s) | 0.66x slower |
-| Batch x4 | Batched | **8:00** (480s) | 10:30 (630s) | 1.31x faster |
-| Batch x8 | Batched | **6:32** (392s) | 10:30 (630s) | 1.62x faster |
-| 4 Processes | Parallel | **2:34** (154s) | 8:59 (539s) | 3.50x faster |
-
-The above table shows that AutoTikTokenizer's tokenizer (TikToken) is actually way faster than HuggingFace's Tokenizer by 1.6-3.5 times under fair comparison! While, it's not making the most optimal use of TikToken (yet), its still way faster than the stock solutions you might be getting otherwise. 
 
 # Acknowledgements
 
