@@ -16,6 +16,7 @@ _The no-nonsense RAG chunking library that's lightweight, lightning-fast, and re
 [Installation](#installation) •
 [Usage](#usage) •
 [Supported Methods](#supported-methods) •
+[Benchmarks](#benchmarks-️) •
 [Acknowledgements](#acknowledgements) •
 [Citation](#citation) 
 
@@ -89,6 +90,25 @@ Chonkie provides several chunkers to help you split your text efficiently for RA
 - **SDPMChunker**: Splits text using a Semantic Double-Pass Merge approach.
 
 More on these methods and the approaches taken inside the [DOCS](/DOCS.md)
+
+# Benchmarks 🏃‍♂️
+
+> "I may be smol hippo, but I pack a punch!" 🦛
+
+Here's a quick peek at how Chonkie performs:
+
+**Size**📦
+
+* **Default Install:** 21MB (vs 80-171MB for alternatives)
+* **With Semantic:** Still lighter than the competition!
+
+**Speed**⚡
+
+* **Token Chunking:** 33x faster than the slowest alternative
+* **Sentence Chunking:** Almost 2x faster than competitors
+* **Semantic Chunking:** Up to 2.5x faster than others
+
+Check out our detailed [benchmarks](/benchmarks/README.md) to see how Chonkie races past the competition! 🏃‍♂️💨
 
 # Acknowledgements
 
