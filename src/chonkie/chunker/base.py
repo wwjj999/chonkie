@@ -2,6 +2,8 @@ from typing import List
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
 
+import importlib
+
 @dataclass
 class Chunk:
     """Dataclass representing a text chunk with metadata."""
@@ -22,8 +24,11 @@ class BaseChunker(ABC):
         Args:
             tokenizer: Tokenizer object to be used for tokenizing text
         """
-        self.tokenizer = tokenizer
-        self._tokenizer_backend = self._get_tokenizer_backend()
+        if isinstance(tokenizer, str):
+            self.tokenizer = self._load_tokenizer(tokenizer)
+        else:
+            self.tokenizer = tokenizer
+            self._tokenizer_backend = self._get_tokenizer_backend()
 
     def _get_tokenizer_backend(self):
         """Return the backend tokenizer object."""
@@ -36,6 +41,41 @@ class BaseChunker(ABC):
         else:
             raise ValueError("Tokenizer backend not supported")
     
+    def _load_tokenizer(self, tokenizer_name: str):
+        """Load a tokenizer based on the backend."""
+        try: 
+            if importlib.util.find_spec("tiktoken") is not None:
+                from tiktoken import get_encoding
+                self._tokenizer_backend = "tiktoken"
+                return get_encoding(tokenizer_name)
+            else:
+                raise Warning("TikToken library not found. Trying autotiktokenizer.")
+        except Exception:
+            try:
+                if importlib.util.find_spec("autotiktokenizer") is not None:
+                    from autotiktokenizer import AutoTikTokenizer
+                    self._tokenizer_backend = "tiktoken"
+                    return AutoTikTokenizer.from_pretrained(tokenizer_name)
+                else:
+                    raise Warning("AutoTikTokenizer library not found. Trying tokenizers.")
+            except Exception:
+                try:
+                    if importlib.util.find_spec("tokenizers") is not None:
+                        from tokenizers import Tokenizer
+                        self._tokenizer_backend = "tokenizers"
+                        return Tokenizer.from_pretrained(tokenizer_name)
+                    else:
+                        raise Warning("Tokenizers library not found. Trying transformers.")
+                except Exception:
+                    try:
+                        if importlib.util.find_spec("transformers") is not None:
+                            from transformers import AutoTokenizer
+                            self._tokenizer_backend  = "transformers"
+                            return AutoTokenizer.from_pretrained(tokenizer_name)
+                    except Exception:
+                        raise ValueError("Tokenizer not found in the following libraries: transformers, tokenizers, autotiktokenizer, tiktoken", 
+                                         "Please install one of these libraries to use the chunker.")    
+
     def _encode(self, text: str):
         """Encode text using the backend tokenizer."""
         if self._tokenizer_backend == "transformers":
@@ -58,6 +98,28 @@ class BaseChunker(ABC):
         else:
             raise ValueError("Tokenizer backend not supported.")
 
+    def _decode(self, tokens) -> str:
+        """Decode tokens using the backend tokenizer."""
+        if self._tokenizer_backend == "transformers":
+            return self.tokenizer.decode(tokens)
+        elif self._tokenizer_backend == "tokenizers":
+            return self.tokenizer.decode(tokens)
+        elif self._tokenizer_backend == "tiktoken":
+            return self.tokenizer.decode(tokens)
+        else:
+            raise ValueError("Tokenizer backend not supported.")
+    
+    def _decode_batch(self, token_lists: List[List[int]]) -> List[str]:
+        """Decode a batch of token lists using the backend tokenizer."""
+        if self._tokenizer_backend == "transformers":
+            return [self.tokenizer.decode(tokens) for tokens in token_lists]
+        elif self._tokenizer_backend == "tokenizers":
+            return [self.tokenizer.decode(tokens) for tokens in token_lists]
+        elif self._tokenizer_backend == "tiktoken":
+            return [self.tokenizer.decode(tokens) for tokens in token_lists]
+        else:
+            raise ValueError("Tokenizer backend not supported.")
+    
     @abstractmethod
     def chunk(self, text: str) -> List[Chunk]:
         """Split text into chunks according to the implementation strategy.
