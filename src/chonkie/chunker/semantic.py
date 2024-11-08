@@ -130,7 +130,7 @@ class SemanticChunker(BaseChunker):
         else:
             warnings.warn("sentence-transformers is not installed. SemanticChunker will not work.") 
 
-    def _load_sentence_transformer_model(self, model_name: str) -> SentenceTransformer:
+    def _load_sentence_transformer_model(self, model_name: str) -> Any:
         """Load a sentence-transformers model by name."""
         try:
             model = SentenceTransformer(model_name)
