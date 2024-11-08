@@ -1,5 +1,3 @@
-import importlib
-import warnings
 from typing import Any, List, Union
 
 from .semantic import SemanticChunk, SemanticChunker, Sentence
