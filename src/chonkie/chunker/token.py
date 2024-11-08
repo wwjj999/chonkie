@@ -1,9 +1,10 @@
-from typing import List
-from tokenizers import Tokenizer
-
+from typing import Any, Union, List
 from .base import Chunk, BaseChunker
 class TokenChunker(BaseChunker):
-    def __init__(self, tokenizer: Tokenizer, chunk_size: int = 512, chunk_overlap: int = 128):
+    def __init__(self,
+                 tokenizer: Union[str, Any] = "gpt2",
+                 chunk_size: int = 512,
+                 chunk_overlap: Union[int, float] = 128):
         """Initialize the TokenChunker with configuration parameters.
 
         Args:
@@ -17,11 +18,13 @@ class TokenChunker(BaseChunker):
         super().__init__(tokenizer)
         if chunk_size <= 0:
             raise ValueError("chunk_size must be positive")
-        if chunk_overlap >= chunk_size:
+        if isinstance(chunk_overlap, int) and chunk_overlap >= chunk_size:
             raise ValueError("chunk_overlap must be less than chunk_size")
-
+        if isinstance(chunk_overlap, float) and chunk_overlap >= 1:
+            raise ValueError("chunk_overlap must be less than 1")
+        
         self.chunk_size = chunk_size
-        self.chunk_overlap = chunk_overlap
+        self.chunk_overlap = chunk_overlap if isinstance(chunk_overlap, int) else int(chunk_overlap * chunk_size)
 
     def chunk(self, text: str) -> List[Chunk]:
         """Split text into overlapping chunks of specified token size.
@@ -36,8 +39,7 @@ class TokenChunker(BaseChunker):
             return []
 
         # Encode full text
-        encoding = self._encode(text)
-        text_tokens = encoding
+        text_tokens = self._encode(text)
         chunks = []
 
         # Calculate chunk positions
@@ -49,7 +51,7 @@ class TokenChunker(BaseChunker):
 
             # Extract and decode tokens for this chunk
             chunk_tokens = text_tokens[start_idx:end_idx]
-            chunk_text = self.tokenizer.decode(chunk_tokens)
+            chunk_text = self._decode(chunk_tokens)
 
             chunks.append(Chunk(
                 text=chunk_text,

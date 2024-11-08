@@ -1,33 +1,12 @@
 from dataclasses import dataclass
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Any
 import numpy as np
 import re
 import importlib.util
-from tokenizers import Tokenizer
+import warnings
 
 from .base import BaseChunker
 from .sentence import Sentence, SentenceChunk
-
-import warnings
-
-# Check if spacy is available
-SPACY_AVAILABLE = importlib.util.find_spec("spacy") is not None
-if SPACY_AVAILABLE:
-    try:
-        import spacy
-    except ImportError:
-        SPACY_AVAILABLE = False
-        warnings.warn("Failed to import spacy despite it being installed. Using heuristic mode only.")
-
-SENTENCE_TRANSFORMERS_AVAILABLE = importlib.util.find_spec("sentence_transformers") is not None
-if SENTENCE_TRANSFORMERS_AVAILABLE:
-    try:
-        from sentence_transformers import SentenceTransformer
-    except ImportError:
-        SENTENCE_TRANSFORMERS_AVAILABLE = False
-        warnings.warn("Failed to import sentence-transformers despite it being installed. SemanticChunker will not work.")
-else:
-    warnings.warn("sentence-transformers is not installed. SemanticChunker will not work.")
 
 
 @dataclass
@@ -49,8 +28,8 @@ class SemanticChunk(SentenceChunk):
 class SemanticChunker(BaseChunker):
     def __init__(
         self,
-        tokenizer: Tokenizer,
-        embedding_model: Union[str, SentenceTransformer],
+        tokenizer: Union[str, Any] = "gpt2",
+        embedding_model: Union[str, Any] = "sentence-transformers/all-MiniLM-L6-v2",
         similarity_threshold: Optional[float] = None,
         similarity_percentile: Optional[float] = None,
         max_chunk_size: int = 512,
@@ -95,21 +74,18 @@ class SemanticChunker(BaseChunker):
         self.initial_sentences = initial_sentences
         self.sentence_mode = sentence_mode
 
-        # Initialize sentence transformer
-        if not SENTENCE_TRANSFORMERS_AVAILABLE:
-            raise ImportError(
-                "sentence-transformers is not installed. "
-                "Install it with 'pip install sentence-transformers'"
-            )
+        # Load sentence-transformers model
+        self._import_sentence_transformers()
         if isinstance(embedding_model, str):
             self.embedding_model = self._load_sentence_transformer_model(embedding_model)
         else:
             self.embedding_model = embedding_model
 
         # Initialize spaCy if explicitly requested
-        self.nlp = None
         if sentence_mode == "spacy":
-            if not SPACY_AVAILABLE:
+            self._import_spacy()
+
+            if not self.SPACY_AVAILABLE:
                 raise ImportError(
                     "spaCy is not installed. Install it with 'pip install spacy' "
                     "and download the model with 'python -m spacy download en_core_web_sm', "
@@ -124,7 +100,37 @@ class SemanticChunker(BaseChunker):
                     "or use sentence_mode='heuristic' instead."
                 ) from e
 
-    def _load_sentence_transformer_model(self, model_name: str) -> SentenceTransformer:
+    def _import_spacy(self) -> Any:
+        """Import spaCy library. Imports mentioned inside the class, 
+        because it takes too long to import the whole library at the beginning of the file."""
+        # Check if spaCy is available
+        self.SPACY_AVAILABLE = importlib.util.find_spec("spacy") is not None
+        if self.SPACY_AVAILABLE:
+            try:
+                global spacy
+                import spacy
+            except ImportError:
+                self.SPACY_AVAILABLE = False
+                warnings.warn("Failed to import spaCy despite it being installed. SemanticChunker will not work.")
+        else:
+            warnings.warn("spaCy is not installed. SemanticChunker will not work.")
+
+    def _import_sentence_transformers(self) -> Any:
+        """Import sentence-transformers library. Imports mentioned inside the class, 
+        because it takes too long to import the whole library at the beginning of the file."""
+        # Check if sentence-transformers is available
+        SENTENCE_TRANSFORMERS_AVAILABLE = importlib.util.find_spec("sentence_transformers") is not None
+        if SENTENCE_TRANSFORMERS_AVAILABLE:
+            try:
+                global SentenceTransformer
+                from sentence_transformers import SentenceTransformer
+            except ImportError:
+                SENTENCE_TRANSFORMERS_AVAILABLE = False
+                warnings.warn("Failed to import sentence-transformers despite it being installed. SemanticChunker will not work.")
+        else:
+            warnings.warn("sentence-transformers is not installed. SemanticChunker will not work.") 
+
+    def _load_sentence_transformer_model(self, model_name: str) -> Any:
         """Load a sentence-transformers model by name."""
         try:
             model = SentenceTransformer(model_name)

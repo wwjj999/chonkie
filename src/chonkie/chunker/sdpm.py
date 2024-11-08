@@ -1,26 +1,15 @@
-from typing import List, Union
+from typing import List, Union, Any
 import warnings
 import importlib
 
 from .semantic import SemanticChunker, SemanticChunk, Sentence
 
-# Check if sentence-transformers is available
-SENTENCE_TRANSFORMERS_AVAILABLE = importlib.util.find_spec("sentence_transformers") is not None
-if SENTENCE_TRANSFORMERS_AVAILABLE:
-    try:
-        from sentence_transformers import SentenceTransformer
-    except ImportError:
-        SENTENCE_TRANSFORMERS_AVAILABLE = False
-        warnings.warn("Failed to import sentence-transformers despite it being installed. SemanticChunker will not work.")
-else:
-    warnings.warn("sentence-transformers is not installed. SemanticChunker will not work.")
-
 
 class SDPMChunker(SemanticChunker):
     def __init__(
         self,
-        tokenizer,
-        embedding_model: Union[str, SentenceTransformer], 
+        tokenizer: Union[str, Any] = "gpt2",
+        embedding_model: Union[str, Any] = "sentence-transformers/all-MiniLM-L6-v2", 
         similarity_threshold: float = None,
         similarity_percentile: float = None,
         max_chunk_size: int = 512,

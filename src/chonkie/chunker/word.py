@@ -171,6 +171,7 @@ class WordChunker(BaseChunker):
         Returns:
             List of token counts for each word
         """
+        words = [" " + word.strip() for word in words] # Add space in the beginning because tokenizers usually split that differently
         encodings = self._encode_batch(words)
         return [len(encoding) for encoding in encodings]
 

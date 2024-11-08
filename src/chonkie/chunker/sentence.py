@@ -1,24 +1,9 @@
-from typing import List, Optional
+from typing import List, Union, Any
 import re
 from dataclasses import dataclass
-from tokenizers import Tokenizer
 from .base import Chunk, BaseChunker
 import importlib.util
 import warnings
-
-# Check if spacy is available
-SPACY_AVAILABLE = importlib.util.find_spec("spacy") is not None
-if SPACY_AVAILABLE:
-    try:
-        import spacy
-        from spacy.language import Language
-    except ImportError:
-        SPACY_AVAILABLE = False
-        warnings.warn("Failed to import spacy despite it being installed. Using heuristic mode only.")
-
-
-#TODO: Currently the SentenceChunker does not populate the sentences field in the SentenceChunk object.
-# We need to implement the logic to populate the sentences field in the SentenceChunk object.
 
 @dataclass
 class Sentence: 
@@ -38,7 +23,7 @@ class SentenceChunk(Chunk):
 class SentenceChunker(BaseChunker):
     def __init__(
         self,
-        tokenizer: Tokenizer,
+        tokenizer: Union[str, Any] = "gpt2",
         chunk_size: int = 512,
         chunk_overlap: int = 128,
         mode: str = "simple",
@@ -75,9 +60,10 @@ class SentenceChunker(BaseChunker):
         self.min_sentences_per_chunk = min_sentences_per_chunk
 
         # Initialize mode and spaCy
-        self.nlp: Optional[Language] = None
         if mode == "spacy":
-            if not SPACY_AVAILABLE:
+            self.nlp = None
+            self._import_spacy()
+            if not self.SPACY_AVAILABLE:
                 warnings.warn(
                     "Spacy not found in environment. To use spacy mode, install it using:\n"
                     "pip install spacy\n"
@@ -100,6 +86,17 @@ class SentenceChunker(BaseChunker):
                     self.mode = "simple"
         else:
             self.mode = "simple"
+
+    def _import_spacy(self):
+        # Check if spacy is available
+        self.SPACY_AVAILABLE = importlib.util.find_spec("spacy") is not None
+        if self.SPACY_AVAILABLE:
+            try:
+                global spacy
+                import spacy
+            except ImportError:
+                self.SPACY_AVAILABLE = False
+                warnings.warn("Failed to import spacy despite it being installed. Using heuristic mode only.")
 
     def _split_into_sentences_via_spacy(self, text: str) -> List[str]:
         """Split text into sentences via spaCy.
