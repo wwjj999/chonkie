@@ -11,12 +11,13 @@ from .sentence import Sentence, SentenceChunk
 
 
 @dataclass
-class SemanticSentence(Sentence): 
+class SemanticSentence(Sentence):
     text: str
     start_index: int
     end_index: int
     token_count: int
     embedding: Optional[np.ndarray] = None
+
 
 @dataclass
 class SemanticChunk(SentenceChunk):
@@ -25,7 +26,8 @@ class SemanticChunk(SentenceChunk):
     end_index: int
     token_count: int
     sentences: List[SemanticSentence] = None
-            
+
+
 class SemanticChunker(BaseChunker):
     def __init__(
         self,
@@ -36,7 +38,7 @@ class SemanticChunker(BaseChunker):
         max_chunk_size: int = 512,
         initial_sentences: int = 1,
         sentence_mode: str = "heuristic",
-        spacy_model: str = "en_core_web_sm"
+        spacy_model: str = "en_core_web_sm",
     ):
         """Initialize the SemanticChunker.
 
@@ -58,14 +60,22 @@ class SemanticChunker(BaseChunker):
 
         if max_chunk_size <= 0:
             raise ValueError("max_chunk_size must be positive")
-        if similarity_threshold is not None and (similarity_threshold < 0 or similarity_threshold > 1):
+        if similarity_threshold is not None and (
+            similarity_threshold < 0 or similarity_threshold > 1
+        ):
             raise ValueError("similarity_threshold must be between 0 and 1")
-        if similarity_percentile is not None and (similarity_percentile < 0 or similarity_percentile > 100):
+        if similarity_percentile is not None and (
+            similarity_percentile < 0 or similarity_percentile > 100
+        ):
             raise ValueError("similarity_percentile must be between 0 and 100")
         if similarity_threshold is not None and similarity_percentile is not None:
-            raise ValueError("Cannot specify both similarity_threshold and similarity_percentile")
+            raise ValueError(
+                "Cannot specify both similarity_threshold and similarity_percentile"
+            )
         if similarity_threshold is None and similarity_percentile is None:
-            raise ValueError("Must specify either similarity_threshold or similarity_percentile")
+            raise ValueError(
+                "Must specify either similarity_threshold or similarity_percentile"
+            )
         if sentence_mode not in ["heuristic", "spacy"]:
             raise ValueError("sentence_mode must be 'heuristic' or 'spacy'")
 
@@ -78,7 +88,9 @@ class SemanticChunker(BaseChunker):
         # Load sentence-transformers model
         self._import_sentence_transformers()
         if isinstance(embedding_model, str):
-            self.embedding_model = self._load_sentence_transformer_model(embedding_model)
+            self.embedding_model = self._load_sentence_transformer_model(
+                embedding_model
+            )
         else:
             self.embedding_model = embedding_model
 
@@ -102,8 +114,9 @@ class SemanticChunker(BaseChunker):
                 ) from e
 
     def _import_spacy(self) -> Any:
-        """Import spaCy library. Imports mentioned inside the class, 
-        because it takes too long to import the whole library at the beginning of the file."""
+        """Import spaCy library. Imports mentioned inside the class,
+        because it takes too long to import the whole library at the beginning of the file.
+        """
         # Check if spaCy is available
         self.SPACY_AVAILABLE = importlib.util.find_spec("spacy") is not None
         if self.SPACY_AVAILABLE:
@@ -112,24 +125,33 @@ class SemanticChunker(BaseChunker):
                 import spacy
             except ImportError:
                 self.SPACY_AVAILABLE = False
-                warnings.warn("Failed to import spaCy despite it being installed. SemanticChunker will not work.")
+                warnings.warn(
+                    "Failed to import spaCy despite it being installed. SemanticChunker will not work."
+                )
         else:
             warnings.warn("spaCy is not installed. SemanticChunker will not work.")
 
     def _import_sentence_transformers(self) -> Any:
-        """Import sentence-transformers library. Imports mentioned inside the class, 
-        because it takes too long to import the whole library at the beginning of the file."""
+        """Import sentence-transformers library. Imports mentioned inside the class,
+        because it takes too long to import the whole library at the beginning of the file.
+        """
         # Check if sentence-transformers is available
-        SENTENCE_TRANSFORMERS_AVAILABLE = importlib.util.find_spec("sentence_transformers") is not None
+        SENTENCE_TRANSFORMERS_AVAILABLE = (
+            importlib.util.find_spec("sentence_transformers") is not None
+        )
         if SENTENCE_TRANSFORMERS_AVAILABLE:
             try:
                 global SentenceTransformer
                 from sentence_transformers import SentenceTransformer
             except ImportError:
                 SENTENCE_TRANSFORMERS_AVAILABLE = False
-                warnings.warn("Failed to import sentence-transformers despite it being installed. SemanticChunker will not work.")
+                warnings.warn(
+                    "Failed to import sentence-transformers despite it being installed. SemanticChunker will not work."
+                )
         else:
-            warnings.warn("sentence-transformers is not installed. SemanticChunker will not work.") 
+            warnings.warn(
+                "sentence-transformers is not installed. SemanticChunker will not work."
+            )
 
     def _load_sentence_transformer_model(self, model_name: str) -> Any:
         """Load a sentence-transformers model by name."""
@@ -142,7 +164,6 @@ class SemanticChunker(BaseChunker):
             ) from e
         return model
 
-
     def _split_sentences_spacy(self, text: str) -> List[str]:
         """Split text into sentences using spaCy."""
         doc = self.nlp(text)
@@ -150,7 +171,7 @@ class SemanticChunker(BaseChunker):
 
     def _split_sentences_heuristic(self, text: str) -> List[str]:
         """Split text into sentences using rule-based approach."""
-        pattern = r'(?<=[.!?])\s+(?=[A-Z])|(?<=[.!?])(?=\s*[A-Z])|(?<=[.!?])\s*$'
+        pattern = r"(?<=[.!?])\s+(?=[A-Z])|(?<=[.!?])(?=\s*[A-Z])|(?<=[.!?])\s*$"
         sentences = re.split(pattern, text)
         return [s.strip() for s in sentences if s.strip()]
 
@@ -167,22 +188,22 @@ class SemanticChunker(BaseChunker):
             return self.similarity_threshold
         else:
             return float(np.percentile(all_similarities, self.similarity_percentile))
-    
+
     def _prepare_sentences(self, text: str) -> List[Sentence]:
         """Prepare sentences with precomputed information.
-        
+
         Args:
             text: Input text to be processed
-            
+
         Returns:
             List of Sentence objects with precomputed token counts and embeddings
         """
         if not text.strip():
             return []
-            
+
         # Split text into sentences
         raw_sentences = self._split_sentences(text)
-        
+
         # Get start and end indices for each sentence
         sentence_indices = []
         current_idx = 0
@@ -194,10 +215,10 @@ class SemanticChunker(BaseChunker):
 
         # Batch compute embeddings for all sentences
         embeddings = self.embedding_model.encode(raw_sentences, convert_to_numpy=True)
-        
+
         # Batch compute token counts
         token_counts = [len(encoding) for encoding in self._encode_batch(raw_sentences)]
-        
+
         # Create Sentence objects with all precomputed information
         sentences = [
             SemanticSentence(
@@ -205,62 +226,67 @@ class SemanticChunker(BaseChunker):
                 start_index=start_idx,
                 end_index=end_idx,
                 token_count=count,
-                embedding=embedding
+                embedding=embedding,
             )
-            for sent, (start_idx, end_idx), count, embedding 
-            in zip(raw_sentences, sentence_indices, token_counts, embeddings)
+            for sent, (start_idx, end_idx), count, embedding in zip(
+                raw_sentences, sentence_indices, token_counts, embeddings
+            )
         ]
-        
+
         return sentences
 
-    def _get_semantic_similarity(self, embedding1: np.ndarray, embedding2: np.ndarray) -> float:
+    def _get_semantic_similarity(
+        self, embedding1: np.ndarray, embedding2: np.ndarray
+    ) -> float:
         """Compute cosine similarity between two embeddings."""
         similarity = self.embedding_model.similarity(embedding1, embedding2)
         return similarity
 
     def _compute_group_embedding(self, sentences: List[Sentence]) -> np.ndarray:
         """Compute mean embedding for a group of sentences."""
-        return np.divide(np.sum([(sent.embedding * sent.token_count) for sent in sentences], axis=0),
-                         np.sum([sent.token_count for sent in sentences]),
-                         dtype=np.float32)
+        return np.divide(
+            np.sum([(sent.embedding * sent.token_count) for sent in sentences], axis=0),
+            np.sum([sent.token_count for sent in sentences]),
+            dtype=np.float32,
+        )
 
     def _group_sentences(self, sentences: List[Sentence]) -> List[List[Sentence]]:
         """Group sentences based on semantic similarity, ignoring token count limits.
-        
+
         Args:
             sentences: List of Sentence objects with precomputed embeddings
-            
+
         Returns:
             List of sentence groups, where each group is semantically coherent
         """
         if len(sentences) <= self.initial_sentences:
             return [sentences]
-            
+
         # Get or compute similarity threshold
         if self.similarity_percentile is not None:
             # Compute all pairwise similarities
             all_similarities = [
                 self._get_semantic_similarity(
-                    sentences[i].embedding,
-                    sentences[i+1].embedding
+                    sentences[i].embedding, sentences[i + 1].embedding
                 )
-                for i in range(len(sentences)-1)
+                for i in range(len(sentences) - 1)
             ]
-            similarity_threshold = float(np.percentile(all_similarities, self.similarity_percentile))
+            similarity_threshold = float(
+                np.percentile(all_similarities, self.similarity_percentile)
+            )
         else:
             similarity_threshold = self.similarity_threshold
 
         groups = []
-        current_group = sentences[:self.initial_sentences]
+        current_group = sentences[: self.initial_sentences]
         current_embedding = self._compute_group_embedding(current_group)
-        
-        for sentence in sentences[self.initial_sentences:]:
+
+        for sentence in sentences[self.initial_sentences :]:
             # Compare new sentence against mean embedding of entire current group
             similarity = self._get_semantic_similarity(
-                current_embedding,
-                sentence.embedding
+                current_embedding, sentence.embedding
             )
-            
+
             if similarity >= similarity_threshold:
                 # Add to current group
                 current_group.append(sentence)
@@ -272,50 +298,58 @@ class SemanticChunker(BaseChunker):
                     groups.append(current_group)
                 current_group = [sentence]
                 current_embedding = sentence.embedding
-        
+
         # Add final group
         if current_group:
             groups.append(current_group)
-            
+
         return groups
 
-    def _create_chunk(self, 
-                     sentences: List[Sentence], 
-                     similarity_scores: List[float] = None) -> SemanticChunk:
+    def _create_chunk(
+        self, sentences: List[Sentence], similarity_scores: List[float] = None
+    ) -> SemanticChunk:
         """Create a chunk from a list of sentences."""
         if not sentences:
             raise ValueError("Cannot create chunk from empty sentence list")
-            
+
         # Compute chunk text and token count from sentences
         text = " ".join(sent.text for sent in sentences)
-        token_count = sum(sent.token_count for sent in sentences) + (len(sentences) - 1)  # Add spaces
-        
+        token_count = sum(sent.token_count for sent in sentences) + (
+            len(sentences) - 1
+        )  # Add spaces
+
         return SemanticChunk(
             text=text,
             start_index=sentences[0].start_index,
             end_index=sentences[-1].end_index,
             token_count=token_count,
-            sentences=sentences
+            sentences=sentences,
         )
 
-    def _split_chunks(self, sentence_groups: List[List[Sentence]]) -> List[SemanticChunk]:
+    def _split_chunks(
+        self, sentence_groups: List[List[Sentence]]
+    ) -> List[SemanticChunk]:
         """Split sentence groups into chunks that respect max_chunk_size.
-        
+
         Args:
             sentence_groups: List of semantically coherent sentence groups
-            
+
         Returns:
             List of SemanticChunk objects
         """
         chunks = []
-        
+
         for group in sentence_groups:
             current_chunk_sentences = []
             current_tokens = 0
-            
+
             for sentence in group:
-                test_tokens = current_tokens + sentence.token_count + (1 if current_chunk_sentences else 0)
-                
+                test_tokens = (
+                    current_tokens
+                    + sentence.token_count
+                    + (1 if current_chunk_sentences else 0)
+                )
+
                 if test_tokens <= self.max_chunk_size:
                     # Add to current chunk
                     current_chunk_sentences.append(sentence)
@@ -324,20 +358,20 @@ class SemanticChunker(BaseChunker):
                     # Create chunk if we have sentences
                     if current_chunk_sentences:
                         chunks.append(self._create_chunk(current_chunk_sentences))
-                    
+
                     # Start new chunk with current sentence
                     current_chunk_sentences = [sentence]
                     current_tokens = sentence.token_count
-            
+
             # Create final chunk for this group
             if current_chunk_sentences:
                 chunks.append(self._create_chunk(current_chunk_sentences))
-        
+
         return chunks
 
     def chunk(self, text: str) -> List[SemanticChunk]:
         """Split text into semantically coherent chunks using two-pass approach.
-        
+
         First groups sentences by semantic similarity, then splits groups to respect
         max_chunk_size while maintaining sentence boundaries.
 
@@ -357,10 +391,10 @@ class SemanticChunker(BaseChunker):
 
         # First pass: Group sentences by semantic similarity
         sentence_groups = self._group_sentences(sentences)
-        
+
         # Second pass: Split groups into size-appropriate chunks
         chunks = self._split_chunks(sentence_groups)
-        
+
         return chunks
 
     def __repr__(self) -> str:
@@ -369,7 +403,9 @@ class SemanticChunker(BaseChunker):
             if self.similarity_threshold is not None
             else f"similarity_percentile={self.similarity_percentile}"
         )
-        return (f"SemanticChunker(max_chunk_size={self.max_chunk_size}, "
-                f"{threshold_info}, "
-                f"initial_sentences={self.initial_sentences}, "
-                f"sentence_mode='{self.sentence_mode}')")
+        return (
+            f"SemanticChunker(max_chunk_size={self.max_chunk_size}, "
+            f"{threshold_info}, "
+            f"initial_sentences={self.initial_sentences}, "
+            f"sentence_mode='{self.sentence_mode}')"
+        )

@@ -4,10 +4,12 @@ from .base import BaseChunker, Chunk
 
 
 class TokenChunker(BaseChunker):
-    def __init__(self,
-                 tokenizer: Union[str, Any] = "gpt2",
-                 chunk_size: int = 512,
-                 chunk_overlap: Union[int, float] = 128):
+    def __init__(
+        self,
+        tokenizer: Union[str, Any] = "gpt2",
+        chunk_size: int = 512,
+        chunk_overlap: Union[int, float] = 128,
+    ):
         """Initialize the TokenChunker with configuration parameters.
 
         Args:
@@ -25,9 +27,13 @@ class TokenChunker(BaseChunker):
             raise ValueError("chunk_overlap must be less than chunk_size")
         if isinstance(chunk_overlap, float) and chunk_overlap >= 1:
             raise ValueError("chunk_overlap must be less than 1")
-        
+
         self.chunk_size = chunk_size
-        self.chunk_overlap = chunk_overlap if isinstance(chunk_overlap, int) else int(chunk_overlap * chunk_size)
+        self.chunk_overlap = (
+            chunk_overlap
+            if isinstance(chunk_overlap, int)
+            else int(chunk_overlap * chunk_size)
+        )
 
     def chunk(self, text: str) -> List[Chunk]:
         """Split text into overlapping chunks of specified token size.
@@ -56,12 +62,14 @@ class TokenChunker(BaseChunker):
             chunk_tokens = text_tokens[start_idx:end_idx]
             chunk_text = self._decode(chunk_tokens)
 
-            chunks.append(Chunk(
-                text=chunk_text,
-                start_index=start_idx,
-                end_index=end_idx,
-                token_count=len(chunk_tokens)
-            ))
+            chunks.append(
+                Chunk(
+                    text=chunk_text,
+                    start_index=start_idx,
+                    end_index=end_idx,
+                    token_count=len(chunk_tokens),
+                )
+            )
 
             # Break if we've reached the end of the text
             if end_idx == len(text_tokens):
@@ -70,5 +78,7 @@ class TokenChunker(BaseChunker):
         return chunks
 
     def __repr__(self) -> str:
-        return (f"TokenChunker(chunk_size={self.chunk_size}, "
-                f"chunk_overlap={self.chunk_overlap})")
+        return (
+            f"TokenChunker(chunk_size={self.chunk_size}, "
+            f"chunk_overlap={self.chunk_overlap})"
+        )

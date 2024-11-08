@@ -6,7 +6,7 @@ from .token import TokenChunker
 from .word import WordChunker
 
 __all__ = [
-    "Chunk", 
+    "Chunk",
     "BaseChunker",
     "TokenChunker",
     "WordChunker",
@@ -16,5 +16,5 @@ __all__ = [
     "SemanticSentence",
     "SemanticChunk",
     "SemanticChunker",
-    "SDPMChunker"
+    "SDPMChunker",
 ]

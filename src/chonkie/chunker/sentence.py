@@ -8,11 +8,12 @@ from .base import BaseChunker, Chunk
 
 
 @dataclass
-class Sentence: 
+class Sentence:
     text: str
     start_index: int
     end_index: int
     token_count: int
+
 
 @dataclass
 class SentenceChunk(Chunk):
@@ -22,6 +23,7 @@ class SentenceChunk(Chunk):
     token_count: int
     sentences: List[Sentence] = None
 
+
 class SentenceChunker(BaseChunker):
     def __init__(
         self,
@@ -30,7 +32,7 @@ class SentenceChunker(BaseChunker):
         chunk_overlap: int = 128,
         mode: str = "simple",
         min_sentences_per_chunk: int = 1,
-        spacy_model: str = "en_core_web_sm"
+        spacy_model: str = "en_core_web_sm",
     ):
         """Initialize the SentenceChunker with configuration parameters.
 
@@ -98,7 +100,9 @@ class SentenceChunker(BaseChunker):
                 import spacy
             except ImportError:
                 self.SPACY_AVAILABLE = False
-                warnings.warn("Failed to import spacy despite it being installed. Using heuristic mode only.")
+                warnings.warn(
+                    "Failed to import spacy despite it being installed. Using heuristic mode only."
+                )
 
     def _split_into_sentences_via_spacy(self, text: str) -> List[str]:
         """Split text into sentences via spaCy.
@@ -111,7 +115,7 @@ class SentenceChunker(BaseChunker):
         """
         # Use spaCy's sentence segmentation
         doc = self.nlp(text)
-        sentences = [sent.text.strip() for sent in doc.sents if sent.text.strip()]  
+        sentences = [sent.text.strip() for sent in doc.sents if sent.text.strip()]
         token_counts = self._get_token_counts(sentences)
         current_pos = 0
         for sent_text, token_count in zip(sentences, token_counts):
@@ -120,35 +124,41 @@ class SentenceChunker(BaseChunker):
             start_idx = text.find(sent_text, current_pos)
             end_idx = start_idx + len(sent_text)
             current_pos = end_idx
-            
+
             # Get the token count for the sentence
             sentences.append(
-                Sentence(text=sent_text,
-                         start_index=start_idx,
-                         end_index=end_idx,
-                         token_count=token_count)
+                Sentence(
+                    text=sent_text,
+                    start_index=start_idx,
+                    end_index=end_idx,
+                    token_count=token_count,
+                )
             )
         return sentences
-    
+
     def _split_into_sentences_simple(self, text: str) -> List[str]:
         # Fallback to heuristic mode
         # Simple rule-based sentence splitting with common abbreviations
-        text = re.sub(r'([.!?])([^"])', r'\1\n\2', text)  # Add newlines after sentence endings
-        text = re.sub(r'([.!?]")(\s*[A-Z])', r'\1\n\2', text)  # Handle quotes
+        text = re.sub(
+            r'([.!?])([^"])', r"\1\n\2", text
+        )  # Add newlines after sentence endings
+        text = re.sub(r'([.!?]")(\s*[A-Z])', r"\1\n\2", text)  # Handle quotes
 
         # Handle common abbreviations
-        abbrevs = r'(?:Mr|Mrs|Dr|Prof|Sr|Jr|vs|etc|viz|al|Gen|Col|Fig|e\.g|i\.e)\.'
-        text = re.sub(f'{abbrevs}\n', f'{abbrevs} ', text)
+        abbrevs = r"(?:Mr|Mrs|Dr|Prof|Sr|Jr|vs|etc|viz|al|Gen|Col|Fig|e\.g|i\.e)\."
+        text = re.sub(f"{abbrevs}\n", f"{abbrevs} ", text)
 
         # Handle initials and acronyms
-        text = re.sub(r'([A-Z]\.[A-Z]\.)\n', r'\1 ', text)
-        text = re.sub(r'([A-Z]\.[A-Z]\.)\n', r'\1 ', text)  # Run twice for consecutive initials
+        text = re.sub(r"([A-Z]\.[A-Z]\.)\n", r"\1 ", text)
+        text = re.sub(
+            r"([A-Z]\.[A-Z]\.)\n", r"\1 ", text
+        )  # Run twice for consecutive initials
 
         # Handle decimal numbers and ellipsis
-        text = re.sub(r'(\d+)\.\n(\d+)', r'\1.\2', text)  # Decimal numbers
-        text = re.sub(r'\.{3}\n', '... ', text)  # Ellipsis
+        text = re.sub(r"(\d+)\.\n(\d+)", r"\1.\2", text)  # Decimal numbers
+        text = re.sub(r"\.{3}\n", "... ", text)  # Ellipsis
 
-        sents = [s.strip() for s in text.split('\n') if s.strip()]
+        sents = [s.strip() for s in text.split("\n") if s.strip()]
         token_counts = self._get_token_counts(sents)
 
         sentences = []
@@ -160,12 +170,14 @@ class SentenceChunker(BaseChunker):
 
             # Get the token count for the sentence
             sentences.append(
-                Sentence(text=sent,
-                         start_index=start_idx,
-                         end_index=end_idx,
-                         token_count=token_count)
+                Sentence(
+                    text=sent,
+                    start_index=start_idx,
+                    end_index=end_idx,
+                    token_count=token_count,
+                )
             )
-        return sentences 
+        return sentences
 
     def _split_into_sentences(self, text: str) -> List[str]:
         """Split text into sentences based on the selected mode.
@@ -180,7 +192,7 @@ class SentenceChunker(BaseChunker):
             return self._split_into_sentences_via_spacy(text)
         elif self.mode == "simple":
             return self._split_into_sentences_simple(text)
-    
+
     def _get_token_counts(self, sentences: List[str]) -> List[int]:
         """Get token counts for a list of sentences in batch.
 
@@ -195,10 +207,7 @@ class SentenceChunker(BaseChunker):
         return [len(encoded) for encoded in encoded_sentences]
 
     def _create_chunk(
-        self,
-        sentences: List[Sentence],
-        start_idx: int,
-        token_count: int
+        self, sentences: List[Sentence], start_idx: int, token_count: int
     ) -> Chunk:
         """Create a chunk from a list of sentences.
 
@@ -215,8 +224,8 @@ class SentenceChunker(BaseChunker):
             text=chunk_text,
             start_index=start_idx,
             end_index=start_idx + token_count,
-            token_count=token_count, 
-            sentences=sentences
+            token_count=token_count,
+            sentences=sentences,
         )
 
     def chunk(self, text: str) -> List[Chunk]:
@@ -233,7 +242,7 @@ class SentenceChunker(BaseChunker):
 
         sentences = self._split_into_sentences(text)
         token_counts = [sentence.token_count for sentence in sentences]
-        
+
         chunks = []
         current_sentences = []
         current_tokens = 0
@@ -241,11 +250,13 @@ class SentenceChunker(BaseChunker):
 
         for i, (sentence, token_count) in enumerate(zip(sentences, token_counts)):
             # Calculate total tokens if we add this sentence
-            test_tokens = current_tokens + token_count + (1 if current_sentences else 0)  # Add 1 for space between sentences
-            
-            can_add_sentence = (
-                test_tokens <= self.chunk_size or
-                (len(current_sentences) < self.min_sentences_per_chunk and len(current_sentences) + 1 <= self.min_sentences_per_chunk)
+            test_tokens = (
+                current_tokens + token_count + (1 if current_sentences else 0)
+            )  # Add 1 for space between sentences
+
+            can_add_sentence = test_tokens <= self.chunk_size or (
+                len(current_sentences) < self.min_sentences_per_chunk
+                and len(current_sentences) + 1 <= self.min_sentences_per_chunk
             )
 
             if can_add_sentence:
@@ -256,9 +267,7 @@ class SentenceChunker(BaseChunker):
                 # Sentence would exceed limits, create chunk if we have enough sentences
                 if len(current_sentences) >= self.min_sentences_per_chunk:
                     chunk = self._create_chunk(
-                        current_sentences,
-                        last_chunk_end,
-                        current_tokens
+                        current_sentences, last_chunk_end, current_tokens
                     )
                     chunks.append(chunk)
 
@@ -267,8 +276,15 @@ class SentenceChunker(BaseChunker):
                         # Keep sentences from the end of current chunk until we hit overlap limit
                         overlap_sentences = []
                         overlap_tokens = 0
-                        for sent, tokens in zip(reversed(current_sentences), reversed(token_counts[i-len(current_sentences):i])):
-                            test_overlap_tokens = overlap_tokens + tokens + (1 if overlap_sentences else 0)
+                        for sent, tokens in zip(
+                            reversed(current_sentences),
+                            reversed(token_counts[i - len(current_sentences) : i]),
+                        ):
+                            test_overlap_tokens = (
+                                overlap_tokens
+                                + tokens
+                                + (1 if overlap_sentences else 0)
+                            )
                             if test_overlap_tokens <= self.chunk_overlap:
                                 overlap_sentences.insert(0, sent)
                                 overlap_tokens = test_overlap_tokens
@@ -282,23 +298,27 @@ class SentenceChunker(BaseChunker):
                         current_tokens = 0
 
                     last_chunk_end += current_tokens
-                
+
                 # Add current sentence (either after creating chunk or when forced to meet minimum)
                 current_sentences.append(sentence)
-                current_tokens = current_tokens + token_count + (1 if len(current_sentences) > 1 else 0)
+                current_tokens = (
+                    current_tokens
+                    + token_count
+                    + (1 if len(current_sentences) > 1 else 0)
+                )
 
         # Handle remaining sentences
         if current_sentences:
             chunk = self._create_chunk(
-                current_sentences,
-                last_chunk_end,
-                current_tokens
+                current_sentences, last_chunk_end, current_tokens
             )
             chunks.append(chunk)
 
         return chunks
 
     def __repr__(self) -> str:
-        return (f"SentenceChunker(chunk_size={self.chunk_size}, "
-                f"chunk_overlap={self.chunk_overlap}, mode='{self.mode}', "
-                f"min_sentences_per_chunk={self.min_sentences_per_chunk})")
+        return (
+            f"SentenceChunker(chunk_size={self.chunk_size}, "
+            f"chunk_overlap={self.chunk_overlap}, mode='{self.mode}', "
+            f"min_sentences_per_chunk={self.min_sentences_per_chunk})"
+        )
