@@ -112,16 +112,9 @@ Check out our detailed [benchmarks](/benchmarks/README.md) to see how Chonkie ra
 
 # Acknowledgements
 
-Chonkie was developed with the support and contributions of the open-source community. We would like to thank the following projects and individuals for their invaluable help:
+Chonkie would like to CHONK its way through a special thanks to all the users and contributors who have helped make this library what it is today! Your feedback, issue reports, and improvements have helped make Chonkie the CHONKIEST it can be.
 
-- **OpenAI** for their amazing [tiktoken](https://github.com/openai/tiktoken) library, which provides the backbone for our tokenization needs.
-- **spaCy** for their powerful [spaCy](https://spacy.io/) library, which we use for advanced sentence segmentation.
-- **Sentence Transformers** for their [sentence-transformers](https://www.sbert.net/) library, which enables semantic chunking.
-- The contributors and maintainers of various open-source projects that have inspired and supported the development of Chonkie.
-
-And to all the users and contributors who have provided feedback, reported issues, and helped improve Chonkie.
-
-Special thanks to **[Moto Moto](https://www.youtube.com/watch?v=I0zZC4wtqDQ&t=5s)** for endorsing Chonkie with his famous quote: 
+And of course, special thanks to [Moto Moto](https://www.youtube.com/watch?v=I0zZC4wtqDQ&t=5s) for endorsing Chonkie with his famous quote:
 > "I like them big, I like them chonkie."
 >                                         ~ Moto Moto
 
