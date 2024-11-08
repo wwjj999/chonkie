@@ -1,10 +1,9 @@
-from .base import Chunk, BaseChunker
+from .base import BaseChunker, Chunk
+from .sdpm import SDPMChunker
+from .semantic import SemanticChunk, SemanticChunker, SemanticSentence
+from .sentence import Sentence, SentenceChunk, SentenceChunker
 from .token import TokenChunker
 from .word import WordChunker
-from .sentence import Sentence, SentenceChunk, SentenceChunker
-from .semantic import SemanticSentence, SemanticChunk, SemanticChunker
-from .sdpm import SDPMChunker
-
 
 __all__ = [
     "Chunk", 

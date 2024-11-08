@@ -1,8 +1,8 @@
-from typing import List
-from dataclasses import dataclass
-from abc import ABC, abstractmethod
-
 import importlib
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from typing import List
+
 
 @dataclass
 class Chunk:

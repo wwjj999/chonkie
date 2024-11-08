@@ -1,7 +1,9 @@
 import pytest
 from tokenizers import Tokenizer
+
 from chonkie.chunker.base import Chunk
 from chonkie.chunker.word import WordChunker
+
 
 @pytest.fixture
 def tokenizer():

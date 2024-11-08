@@ -1,9 +1,11 @@
 import pytest
+from sentence_transformers import SentenceTransformer
 from tokenizers import Tokenizer
+
 from chonkie.chunker.sdpm import SDPMChunker
 from chonkie.chunker.semantic import SemanticChunk
 
-from sentence_transformers import SentenceTransformer
+
 @pytest.fixture
 def tokenizer():
     return Tokenizer.from_pretrained("gpt2")

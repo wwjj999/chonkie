@@ -1,9 +1,11 @@
-from typing import List, Union, Any
-import re
-from dataclasses import dataclass
-from .base import Chunk, BaseChunker
 import importlib.util
+import re
 import warnings
+from dataclasses import dataclass
+from typing import Any, List, Union
+
+from .base import BaseChunker, Chunk
+
 
 @dataclass
 class Sentence: 

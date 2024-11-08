@@ -1,7 +1,10 @@
-from typing import List, Tuple
 import re
+from typing import List, Tuple
+
 from tokenizers import Tokenizer
-from .base import Chunk, BaseChunker
+
+from .base import BaseChunker, Chunk
+
 
 class WordChunker(BaseChunker):
     def __init__(self, tokenizer: Tokenizer, chunk_size: int = 512, chunk_overlap: int = 128, mode: str = "simple"):

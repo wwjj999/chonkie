@@ -1,8 +1,9 @@
 import pytest
-from tokenizers import Tokenizer
-from chonkie.chunker.semantic import SemanticChunker, SemanticChunk
-
 from sentence_transformers import SentenceTransformer
+from tokenizers import Tokenizer
+
+from chonkie.chunker.semantic import SemanticChunk, SemanticChunker
+
 
 @pytest.fixture
 def tokenizer():

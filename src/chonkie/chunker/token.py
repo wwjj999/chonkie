@@ -1,5 +1,8 @@
-from typing import Any, Union, List
-from .base import Chunk, BaseChunker
+from typing import Any, List, Union
+
+from .base import BaseChunker, Chunk
+
+
 class TokenChunker(BaseChunker):
     def __init__(self,
                  tokenizer: Union[str, Any] = "gpt2",

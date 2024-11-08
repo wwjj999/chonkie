@@ -1,8 +1,8 @@
-from typing import List, Union, Any
-import warnings
 import importlib
+import warnings
+from typing import Any, List, Union
 
-from .semantic import SemanticChunker, SemanticChunk, Sentence
+from .semantic import SemanticChunk, SemanticChunker, Sentence
 
 
 class SDPMChunker(SemanticChunker):

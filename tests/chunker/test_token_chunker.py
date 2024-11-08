@@ -1,11 +1,10 @@
 import pytest
-
 import tiktoken
-from transformers import AutoTokenizer
 from tokenizers import Tokenizer
+from transformers import AutoTokenizer
 
-from chonkie import Chunk
-from chonkie import TokenChunker
+from chonkie import Chunk, TokenChunker
+
 
 @pytest.fixture
 def transformers_tokenizer():

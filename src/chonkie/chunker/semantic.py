@@ -1,9 +1,10 @@
-from dataclasses import dataclass
-from typing import List, Optional, Union, Any
-import numpy as np
-import re
 import importlib.util
+import re
 import warnings
+from dataclasses import dataclass
+from typing import Any, List, Optional, Union
+
+import numpy as np
 
 from .base import BaseChunker
 from .sentence import Sentence, SentenceChunk

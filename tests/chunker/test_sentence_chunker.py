@@ -1,7 +1,9 @@
 import pytest
 from tokenizers import Tokenizer
+
 from chonkie.chunker.base import Chunk
 from chonkie.chunker.sentence import SentenceChunker
+
 
 @pytest.fixture
 def tokenizer():
