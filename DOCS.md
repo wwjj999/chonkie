@@ -251,7 +251,7 @@ chunker = SentenceChunker(
 
 ## SemanticChunker
 
-the `SemanticChunker` groups content by semantic similarity.
+The `SemanticChunker` groups content by semantic similarity. The implementation is inspired by the semantic chunking approach described in the [FullStackRetrieval Tutorials](https://github.com/FullStackRetrieval-com/RetrievalTutorials/blob/main/tutorials/LevelsOfTextSplitting/5_Levels_Of_Text_Splitting.ipynb), with modifications and optimizations for better performance and integration with Chonkie's architecture.
 
 ```python
 from chonkie import SemanticChunker
@@ -270,7 +270,6 @@ chunker = SemanticChunker(
 **key parameters:**
 - `embedding_model`: model for semantic embeddings. This can either be a `str` or a `SentenceTransformer` model. If a `str` is passed, it uses `SentenceTransformer` to load it. 
 - `similarity_threshold`: threshold for semantic grouping
-
 
 ## SDPMChunker
 
