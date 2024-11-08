@@ -1,18 +1,9 @@
-from .chunker import (
-    BaseChunker,
-    TokenChunker,
-    WordChunker,
-    SentenceChunker,
-    SemanticChunker,
-    SDPMChunker,
-    Chunk, 
-    SentenceChunk,
-    SemanticChunk,
-    Sentence,
-    SemanticSentence
-)
+from .chunker import (BaseChunker, Chunk, SDPMChunker, SemanticChunk,
+                      SemanticChunker, SemanticSentence, Sentence,
+                      SentenceChunk, SentenceChunker, TokenChunker,
+                      WordChunker)
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 __name__ = "chonkie"
 __author__ = "Bhavnick Minhas"
 
@@ -21,14 +12,14 @@ __all__ = [
     "__version__",
     "__author__",
     "Sentence",
-    "SemanticSentence", 
+    "SemanticSentence",
     "Chunk",
     "SentenceChunk",
     "SemanticChunk",
     "BaseChunker",
-    "TokenChunker", 
+    "TokenChunker",
     "WordChunker",
     "SentenceChunker",
     "SemanticChunker",
-    "SDPMChunker"
+    "SDPMChunker",
 ]
