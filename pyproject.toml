@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "chonkie"
-version = "0.1.1"
+version = "0.1.2"
 description = "🦛 CHONK your texts with Chonkie ✨ - The no-nonsense RAG chunking library"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -19,11 +19,20 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11"
+    "Programming Language :: Python :: 3.10","
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Information Technology",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Text Processing :: Linguistic"
 ]
 dependencies = [
-    "autotiktokenizer", "tokenizers>=0.13.0"
+    "autotiktokenizer", "tokenizers>=0.13.0", "tiktoken>=0.2.0"
 ]
 
 [project.urls]
@@ -33,7 +42,7 @@ Homepage = "https://github.com/bhavnicksm/chonkie"
 sentence = ["spacy>=3.0.0"]
 semantic = ["sentence-transformers>=2.0.0", "numpy>=1.23.0"]
 all = ["spacy>=3.0.0", "sentence-transformers>=2.0.0", "numpy>=1.23.0"]
-dev = ["pytest>=6.2.0", "tranformers>=4.0.0", "tiktoken>=0.2.0"]
+dev = ["pytest>=6.2.0", "tranformers>=4.0.0", "tiktoken>=0.2.0", "black>=21.12b0", "isort>=5.10.2", "flake8>=4.0.0", "mypy>=0.910", "pylint>=2.11.1", "pre-commit>=2.15.0"]
 
 [tool.setuptools]
 package-dir = {"" = "src"}
