@@ -105,8 +105,6 @@ Benchmarking results for tokenizing **1 billion tokens** from fineweb-edu datase
 
 The above table shows that AutoTikTokenizer's tokenizer (TikToken) is actually way faster than HuggingFace's Tokenizer by 1.6-3.5 times under fair comparison! While, it's not making the most optimal use of TikToken (yet), its still way faster than the stock solutions you might be getting otherwise. 
 
-Read more about the benchmarks from the [DOCS](/DOCS.md)
-
 # Acknowledgements
 
 Chonkie was developed with the support and contributions of the open-source community. We would like to thank the following projects and individuals for their invaluable help:
