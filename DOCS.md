@@ -290,6 +290,8 @@ the `SDPMChunker` groups content via the semantic double-pass merging method, wh
 from chonkie import SDPMChunker
 from autotiktokenizer import AutoTikTokenizer
 
+tokenizer = AutoTikTokenizer.from_pretrained("gpt2")
+
 chunker = SDPMChunker(
     tokenizer=tokenizer,
     embedding_model="all-minilm-l6-v2",
