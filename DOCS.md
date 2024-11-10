@@ -287,7 +287,7 @@ chunker = SemanticChunker(
 the `SDPMChunker` groups content via the semantic double-pass merging method, which groups paragraphs that are semantically similar even if they do not occur consecutively, by making use of a skip-window.
 
 ```python
-from chonkie import sdpmchunker
+from chonkie import SDPMChunker
 from autotiktokenizer import AutoTikTokenizer
 
 chunker = SDPMChunker(
