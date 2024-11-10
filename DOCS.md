@@ -1,17 +1,17 @@
-# 🦛 chonkie docs
+# 🦛 Chonkie DOCS
 
-> ugh, do i _need_ to explain how to use chonkie? man, that's a bummer... to be honest, chonkie is very easy, with little documentation necessary, but just in case, i'll include some here. 
+> ugh, do i _need_ to explain how to use chonkie? man, that's a bummer... to be honest, chonkie is very easy, with little documentation necessary, but just in case, i'll include some here.
 
-# table of contents
+# Table of Contents
 
-- [🦛 chonkie docs](#-chonkie-docs)
-- [table of contents](#table-of-contents)
-- [installation](#installation)
-  - [basic installation](#basic-installation)
-  - [installation options](#installation-options)
+- [🦛 Chonkie DOCS](#-chonkie-docs)
+- [Table of Contents](#table-of-contents)
+- [Installation](#installation)
+  - [Basic installation](#basic-installation)
+  - [Installation options](#installation-options)
   - [dependency table](#dependency-table)
-- [quick start](#quick-start)
-- [design chonkosophy](#design-chonkosophy)
+- [Quick Start](#quick-start)
+- [Design CHONKosophy](#design-chonkosophy)
   - [core chonk principles](#core-chonk-principles)
     - [1. 🎯 small but precise](#1--small-but-precise)
     - [2. 🚀 surprisingly quick](#2--surprisingly-quick)
@@ -21,26 +21,28 @@
   - [why chunking is needed? (and may always be needed!)](#why-chunking-is-needed-and-may-always-be-needed)
   - [does speed matter while chunking? (tl;dr: yes!!!)](#does-speed-matter-while-chunking-tldr-yes)
   - [but but but... how? how is chonkie so fast?](#but-but-but-how-how-is-chonkie-so-fast)
-- [chunkers](#chunkers)
+- [Chunkers](#chunkers)
   - [TokenChunker](#tokenchunker)
   - [WordChunker](#wordchunker)
   - [SentenceChunker](#sentencechunker)
   - [SemanticChunker](#semanticchunker)
   - [SDPMChunker](#sdpmchunker)
-- [api reference](#api-reference)
+- [API Reference](#api-reference)
   - [Chunk object](#chunk-object)
   - [SentenceChunk object](#sentencechunk-object)
   - [SemanticChunk object](#semanticchunk-object)
   
 
-# installation
+# Installation
 
-## basic installation
+## Basic installation
+
 ```bash
 pip install chonkie
 ```
 
-## installation options
+## Installation options
+
 chonkie uses optional dependencies to keep the base installation lightweight. choose the installation that best fits your needs:
 
 | installation command | use case | dependencies added |
@@ -66,7 +68,7 @@ note: in the above table `⚠️/✅` meant that some features would be disabled
 
 what you could infer from the table is that, while it might be of inconvinience in the short-run to have it split like that, you can do surprisingly a lot with just the defualt dependencies (which btw are super light). furthermore, even our max dependencies option `all` is lightweight in comparison to some of the other libraries that one might use for such tasks. 
 
-# quick start
+# Quick Start
 
 ```python
 from chonkie import TokenChunker
@@ -92,7 +94,7 @@ for chunk in chunks:
     print(f"tokens: {chunk.token_count}")
 ```
 
-# design chonkosophy
+# Design CHONKosophy
 
 > did you know that pygmy hippos are only 1/4 the size of regular hippos, but they're just as mighty? that's the chonkie spirit - tiny but powerful! 🦛
 
@@ -103,6 +105,7 @@ listen up chonkers! just like our adorable pygmy hippo mascot, chonkie proves th
 ### 1. 🎯 small but precise
 
 like how pygmy hippos take perfect little bites of their favorite fruits, chonkie knows exactly how to size your chunks:
+
 - **compact & efficient**: just like our tiny mascot, every chunk is exactly the size it needs to be
 - **smart defaults**: we've done the research so you don't have to! our default parameters are battle-tested
 - **flexible sizing**: because sometimes you need a smaller bite!
@@ -110,6 +113,7 @@ like how pygmy hippos take perfect little bites of their favorite fruits, chonki
 ### 2. 🚀 surprisingly quick
 
 fun fact: pygmy hippos might be small, but they can zoom through the forest at impressive speeds! similarly, chonkie is:
+
 - **lightning fast**: small size doesn't mean slow performance
 - **optimized paths**: like our mascot's forest shortcuts, we take the most efficient route (we use cacheing extensively btw!)
 - **minimal overhead**: no wasted energy, just pure chonk power
@@ -117,6 +121,7 @@ fun fact: pygmy hippos might be small, but they can zoom through the forest at i
 ### 3. 🪶 tiny but complete
 
 just as pygmy hippos pack all hippo features into a compact frame, chonkie is:
+
 - **minimum footprint**: base installation smaller than a pygmy hippo footprint
 - **modular growth**: add features as you need them, like a growing hippo
 - **zero bloat**: every feature has a purpose, just like every trait of our tiny friend
@@ -144,11 +149,13 @@ why chunking still matters (from a tiny hippo's perspective):
 ### 5. 🌱 growing with purpose
 
 like how pygmy hippos stay small but mighty, chonkie grows sensibly:
+
 ```
 smart chunks → better embeddings → precise retrieval → quality generation
 ```
 
 even as models grow bigger, you'll appreciate our tiny-but-mighty approach:
+
 - focused context (like a pygmy hippo's keen senses)
 - efficient processing (like our mascot's energy-saving size)
 - clean, purposeful design (like nature's perfect mini-hippo)
@@ -167,19 +174,19 @@ all this brings me back to chunking. chunking, done well, can make sure your rep
 
 ## does speed matter while chunking? (tl;dr: yes!!!)
 
-human time is limited, and if you have an option that gives you faster chunks, why would you not? 
+human time is limited, and if you have an option that gives you faster chunks, why would you not?
 
-but speed is not just a bonus; it's central to chonkie! whether you are doing rag on the entirity of wikipedia or working for large scale organization data that updates regularly, you would need the speed that chonkie comes with. stock solutions just don't cut it in these scenarios. 
+but speed is not just a bonus; it's central to chonkie! whether you are doing rag on the entirity of wikipedia or working for large scale organization data that updates regularly, you would need the speed that chonkie comes with. stock solutions just don't cut it in these scenarios.
 
 ## but but but... how? how is chonkie so fast?
 
-we used a lot of optimizations when building each and every chunker inside chonkie, making sure it's as optimized as possible. 
+we used a lot of optimizations when building each and every chunker inside chonkie, making sure it's as optimized as possible.
 
 1. **using tiktoken (as a default):** tiktoken is around 3-6x faster than it's counterparts; and it is blazing fast when used with multiple threads. we see the available threads on the cpu at the moment, and use about ~70-80% of them (so as to not hog all resources), which inturn let's us tokenize fast.
 2. **pre-compute and cache:** we never tokenize or embed on the fly! as long as something can be pre-computed and cached we do that, store it and re-use it wherever possible. ram is cheap but time is priceless. (of course, we also provide options to turn off the pre-computation and make it memory efficient if need be)
 3. **running mean pooling:** most semantic chunkers re-embed the chunks every time they get updated, but we don't do that. we pre-compute the embeddings for the sentences, and use mathematical trickery (which is theoretically found) to instead have a running mean pooling of tokens -- which allows us to save the cost from the embedding models. 
 
-# chunkers
+# Chunkers
 
 ## TokenChunker
 
@@ -199,6 +206,7 @@ chunker = TokenChunker(
 ```
 
 **key parameters:**
+
 - `tokenizer`: any tokenizer implementing the encode/decode interface
 - `chunk_size`: maximum tokens per chunk
 - `chunk_overlap`: number of overlapping tokens between chunks
@@ -222,6 +230,7 @@ chunker = WordChunker(
 ```
 
 **key parameters:**
+
 - `mode`: chunking mode
   - `simple`: basic space-based splitting
   - `advanced`: handles punctuation and special cases
@@ -246,12 +255,13 @@ chunker = SentenceChunker(
 ```
 
 **key parameters:**
+
 - `mode`: sentence detection mode
 - `min_sentences_per_chunk`: minimum sentences per chunk
 
 ## SemanticChunker
 
-the `SemanticChunker` groups content by semantic similarity.
+The `SemanticChunker` groups content by semantic similarity. The implementation is inspired by the semantic chunking approach described in the [FullStackRetrieval Tutorials](https://github.com/FullStackRetrieval-com/RetrievalTutorials/blob/main/tutorials/LevelsOfTextSplitting/5_Levels_Of_Text_Splitting.ipynb), with modifications and optimizations for better performance and integration with Chonkie's architecture.
 
 ```python
 from chonkie import SemanticChunker
@@ -268,16 +278,16 @@ chunker = SemanticChunker(
 ```
 
 **key parameters:**
+
 - `embedding_model`: model for semantic embeddings. This can either be a `str` or a `SentenceTransformer` model. If a `str` is passed, it uses `SentenceTransformer` to load it. 
 - `similarity_threshold`: threshold for semantic grouping
-
 
 ## SDPMChunker
 
 the `SDPMChunker` groups content via the semantic double-pass merging method, which groups paragraphs that are semantically similar even if they do not occur consecutively, by making use of a skip-window.
 
 ```python
-from chonkie import sdpmchunker
+from chonkie import SDPMChunker
 from autotiktokenizer import AutoTikTokenizer
 
 chunker = SDPMChunker(
@@ -290,9 +300,10 @@ chunker = SDPMChunker(
 ```
 
 **key parameters:**
-- `skip_window`: size of the skip-window the chunker should pay attention to. defaults to 1. 
 
-# api reference
+- `skip_window`: size of the skip-window the chunker should pay attention to. defaults to 1.
+
+# API Reference
 
 ## Chunk object
 

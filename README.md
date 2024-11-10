@@ -18,7 +18,7 @@ _The no-nonsense RAG chunking library that's lightweight, lightning-fast, and re
 [Supported Methods](#supported-methods) •
 [Benchmarks](#benchmarks-️) •
 [Acknowledgements](#acknowledgements) •
-[Citation](#citation) 
+[Citation](#citation)
 
 </div>
 
@@ -39,6 +39,7 @@ Well, with chonkie you can! (chonkie boi is a gud boi)
 What're you waiting for, **just CHONK it**!
 
 # Installation
+
 To install chonkie, simply run:
 
 ```bash
@@ -99,14 +100,14 @@ Here's a quick peek at how Chonkie performs:
 
 **Size**📦
 
-* **Default Install:** 21MB (vs 80-171MB for alternatives)
-* **With Semantic:** Still lighter than the competition!
+- **Default Install:** 21MB (vs 80-171MB for alternatives)
+- **With Semantic:** Still lighter than the competition!
 
 **Speed**⚡
 
-* **Token Chunking:** 33x faster than the slowest alternative
-* **Sentence Chunking:** Almost 2x faster than competitors
-* **Semantic Chunking:** Up to 2.5x faster than others
+- **Token Chunking:** 33x faster than the slowest alternative
+- **Sentence Chunking:** Almost 2x faster than competitors
+- **Semantic Chunking:** Up to 2.5x faster than others
 
 Check out our detailed [benchmarks](/benchmarks/README.md) to see how Chonkie races past the competition! 🏃‍♂️💨
 
