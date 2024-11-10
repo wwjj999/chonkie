@@ -69,8 +69,7 @@ tokenizer = Tokenizer.from_pretrained("gpt2")
 chunker = TokenChunker(tokenizer)
 
 # Chunk some text
-chunks = chunker("Woah! Chonkie, the chunking library is so cool!",
-                  "I love the tiny hippo hehe.")
+chunks = chunker("Woah! Chonkie, the chunking library is so cool! I love the tiny hippo hehe.")
 
 # Access chunks
 for chunk in chunks:
