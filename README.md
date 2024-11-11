@@ -7,7 +7,7 @@
 [![PyPI version](https://img.shields.io/pypi/v/chonkie.svg)](https://pypi.org/project/chonkie/)
 [![License](https://img.shields.io/github/license/bhavnicksm/chonkie.svg)](https://github.com/bhavnicksm/chonkie/blob/main/LICENSE)
 [![Documentation](https://img.shields.io/badge/docs-DOCS.md-blue.svg)](DOCS.md)
-![Package size](https://img.shields.io/badge/size-21MB-blue)
+![Package size](https://img.shields.io/badge/size-9.7MB-blue)
 [![Downloads](https://static.pepy.tech/badge/chonkie)](https://pepy.tech/project/chonkie)
 [![GitHub stars](https://img.shields.io/github/stars/bhavnicksm/chonkie.svg)](https://github.com/bhavnicksm/chonkie/stargazers)
 
@@ -99,7 +99,7 @@ Here's a quick peek at how Chonkie performs:
 
 **Size**📦
 
-- **Default Install:** 21MB (vs 80-171MB for alternatives)
+- **Default Install:** 9.7MB (vs 80-171MB for alternatives)
 - **With Semantic:** Still lighter than the competition!
 
 **Speed**⚡
