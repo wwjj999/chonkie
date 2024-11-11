@@ -235,7 +235,7 @@ chunker = WordChunker(
 
 ## SentenceChunker
 
-the `SentenceChunker` preserves sentence boundaries.
+The `SentenceChunker` preserves sentence boundaries.
 
 ```python
 from chonkie import SentenceChunker
@@ -247,15 +247,20 @@ chunker = SentenceChunker(
     tokenizer=tokenizer,
     chunk_size=512,
     chunk_overlap=128,
-    mode="spacy",  # 'simple' or 'spacy'
     min_sentences_per_chunk=1
 )
 ```
 
-**key parameters:**
+**Key Parameters:**
 
-- `mode`: sentence detection mode
-- `min_sentences_per_chunk`: minimum sentences per chunk
+- `tokenizer` :  (Optional) Pass in the tokenizer of your choice, can accept `tiktoken`, `tokenizers` and `transformers` tokenizers, with precidence given to `tiktoken`.
+- `chunk_size` : (Optional) Pass the size of the chunks. Defaults to the maximum size supported by the tokenizer if any, or `512`.
+- `chunk_overlap`: (Optional) Accepts `int or float`. The overlap between consecutive chunks of the text. Defaults to `min(0.25 * chunk_size, 128)`.
+- `min_sentences_per_chunk`: Minimum sentences per chunk
+
+**Returns**
+
+- `List[SentenceChunk]`: Returns a list of `SentenceChunk` each containing `text` containing the text of the chunk as well as the `sentences` which is a `List[Sentence]` so you can reference the individual sentences in the chunk.  
 
 ## SemanticChunker
 

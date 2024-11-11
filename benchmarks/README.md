@@ -10,9 +10,9 @@ Ever wondered how much CHONKier other text splitting libraries are? Well, wonder
 
 | Library | Size | Chonk Factor |
 |---------|------|--------------|
-| 🦛 Chonkie | 21 MiB | 1x (base CHONK) |
-| 🔗 LangChain | 80 MiB | ~3.8x CHONKier |
-| 📚 LlamaIndex | 171 MiB | ~8.1x CHONKier |
+| 🦛 Chonkie | 9.7 MiB | 1x (base CHONK) |
+| 🔗 LangChain | 80 MiB | ~8.3x CHONKier |
+| 📚 LlamaIndex | 171 MiB | ~17.6x CHONKier |
 
 ### With Semantic Features
 
