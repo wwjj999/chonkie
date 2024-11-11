@@ -23,13 +23,25 @@ class SentenceChunk(Chunk):
 
 
 class SentenceChunker(BaseChunker):
+    """
+    SentenceChunker splits the sentences in a text based on token limits and sentence boundaries.
+
+    Args:
+        tokenizer: The tokenizer instance to use for encoding/decoding
+        chunk_size: Maximum number of tokens per chunk
+        chunk_overlap: Number of tokens to overlap between chunks
+        min_sentences_per_chunk: Minimum number of sentences per chunk (defaults to 1)
+    
+    Raises:
+        ValueError: If parameters are invalid
+    """
+
     def __init__(
         self,
         tokenizer: Union[str, Any] = "gpt2",
         chunk_size: int = 512,
         chunk_overlap: int = 128,
-        min_sentences_per_chunk: int = 1,
-        spacy_model: str = "en_core_web_sm",
+        min_sentences_per_chunk: int = 1
     ):
         """Initialize the SentenceChunker with configuration parameters.
 
@@ -40,11 +52,9 @@ class SentenceChunker(BaseChunker):
             chunk_size: Maximum number of tokens per chunk
             chunk_overlap: Number of tokens to overlap between chunks
             min_sentences_per_chunk: Minimum number of sentences per chunk (defaults to 1)
-            spacy_model: Name of spaCy model to use (defaults to "en_core_web_sm")
 
         Raises:
             ValueError: If parameters are invalid
-            Warning: If spacy mode is requested but spacy is not available
         """
         super().__init__(tokenizer)
 
