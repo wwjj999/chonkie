@@ -235,7 +235,7 @@ chunker = WordChunker(
 
 ## SentenceChunker
 
-the `SentenceChunker` preserves sentence boundaries.
+The `SentenceChunker` preserves sentence boundaries.
 
 ```python
 from chonkie import SentenceChunker
@@ -247,14 +247,12 @@ chunker = SentenceChunker(
     tokenizer=tokenizer,
     chunk_size=512,
     chunk_overlap=128,
-    mode="spacy",  # 'simple' or 'spacy'
     min_sentences_per_chunk=1
 )
 ```
 
 **key parameters:**
 
-- `mode`: sentence detection mode
 - `min_sentences_per_chunk`: minimum sentences per chunk
 
 ## SemanticChunker
