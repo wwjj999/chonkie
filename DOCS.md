@@ -49,7 +49,6 @@ Chonkie uses optional dependencies to keep the base installation lightweight. Ch
 | installation command | use case | dependencies added |
 |---------------------|----------|-------------------|
 | `pip install chonkie` | basic token and word chunking | autotiktokenizer |
-| `pip install chonkie[sentence]` | sentence-based chunking | + spacy |
 | `pip install chonkie[semantic]` | semantic chunking | + sentence-transformers, numpy |
 | `pip install chonkie[all]` | all features | all dependencies |
 
@@ -57,15 +56,13 @@ Chonkie uses optional dependencies to keep the base installation lightweight. Ch
 
 As per the details mentioned in the [design](#design-chonkosophy) section, Chonkie is lightweight because it keeps most of the dependencies for each chunker seperate, making it more of an aggregate of multiple repositories and python packages. The optional dependencies feature in python really helps with this. 
 
-| chunker  | default | 'sentence' | 'semantic' | 'all' |
-|----------|----------|----------|----------|----------|
-| TokenChunker        |✅|✅|✅|✅|
-| WordChunker         |✅|✅|✅|✅|
-| SentenceChunker     |⚠️|✅|⚠️|✅|
-| SemanticChunker     |❌|❌|⚠️/✅|✅|
-| SDPMChunker         |❌|❌|⚠️/✅|✅|
-
-NOTE: in the above table `⚠️/✅` meant that some features would be disabled but the chunker would work nonetheless. 
+| chunker  | default |  'semantic' | 'all' |
+|----------|----------|----------|----------|
+| TokenChunker        |✅|✅|✅|
+| WordChunker         |✅|✅|✅|
+| SentenceChunker     |✅|✅|✅|
+| SemanticChunker     |❌|✅|✅|
+| SDPMChunker         |❌|✅|✅|
 
 What you could infer from the table is that, while it might be of inconvinience in the short-run to have it split like that, you can do surprisingly a lot with just the defualt dependencies (which btw are super light). Furthermore, even our max dependencies option `all` is lightweight in comparison to some of the other libraries that one might use for such tasks. 
 
