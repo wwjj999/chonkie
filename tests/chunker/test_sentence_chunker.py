@@ -24,7 +24,6 @@ def test_sentence_chunker_initialization(tokenizer):
     assert chunker.tokenizer == tokenizer
     assert chunker.chunk_size == 512
     assert chunker.chunk_overlap == 128
-    assert chunker.mode == "simple"
     assert chunker.min_sentences_per_chunk == 1
 
 
@@ -74,7 +73,7 @@ def test_sentence_chunker_repr(tokenizer):
 
     assert (
         repr(chunker)
-        == "SentenceChunker(chunk_size=512, chunk_overlap=128, mode='simple', min_sentences_per_chunk=1)"
+        == "SentenceChunker(chunk_size=512, chunk_overlap=128, min_sentences_per_chunk=1)"
     )
 
 
@@ -85,23 +84,6 @@ def test_sentence_chunker_overlap(tokenizer, sample_text):
 
     for i in range(1, len(chunks)):
         assert chunks[i].start_index < chunks[i - 1].end_index
-
-
-def test_sentence_chunker_modes(tokenizer):
-    """Test that the SentenceChunker can handle different modes."""
-    # Test simple mode
-    chunker_simple = SentenceChunker(
-        tokenizer=tokenizer, chunk_size=512, chunk_overlap=128, mode="simple"
-    )
-    assert chunker_simple.mode == "simple"
-
-    # Test spacy mode
-    chunker_spacy = SentenceChunker(
-        tokenizer=tokenizer, chunk_size=512, chunk_overlap=128, mode="spacy"
-    )
-    # Note: This might fall back to simple mode if spacy is not installed
-    assert chunker_spacy.mode in ["simple", "spacy"]
-
 
 def test_sentence_chunker_min_sentences(tokenizer):
     """Test that the SentenceChunker respects minimum sentences per chunk."""

@@ -1,6 +1,4 @@
-import importlib.util
 import re
-import warnings
 from dataclasses import dataclass
 from typing import Any, List, Union
 
@@ -30,17 +28,17 @@ class SentenceChunker(BaseChunker):
         tokenizer: Union[str, Any] = "gpt2",
         chunk_size: int = 512,
         chunk_overlap: int = 128,
-        mode: str = "simple",
         min_sentences_per_chunk: int = 1,
         spacy_model: str = "en_core_web_sm",
     ):
         """Initialize the SentenceChunker with configuration parameters.
 
+        SentenceChunker splits the sentences in a text based on token limits and sentence boundaries.
+
         Args:
             tokenizer: The tokenizer instance to use for encoding/decoding
             chunk_size: Maximum number of tokens per chunk
             chunk_overlap: Number of tokens to overlap between chunks
-            mode: Sentence detection mode - "heuristic" (rule-based) or "spacy" (ML-based)
             min_sentences_per_chunk: Minimum number of sentences per chunk (defaults to 1)
             spacy_model: Name of spaCy model to use (defaults to "en_core_web_sm")
 
@@ -54,144 +52,110 @@ class SentenceChunker(BaseChunker):
             raise ValueError("chunk_size must be positive")
         if chunk_overlap >= chunk_size:
             raise ValueError("chunk_overlap must be less than chunk_size")
-        if mode not in ["simple", "spacy"]:
-            raise ValueError("mode must be either 'simple' or 'spacy'")
         if min_sentences_per_chunk < 1:
             raise ValueError("min_sentences_per_chunk must be at least 1")
 
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
         self.min_sentences_per_chunk = min_sentences_per_chunk
-
-        # Initialize mode and spaCy
-        if mode == "spacy":
-            self.nlp = None
-            self._import_spacy()
-            if not self.SPACY_AVAILABLE:
-                warnings.warn(
-                    "Spacy not found in environment. To use spacy mode, install it using:\n"
-                    "pip install spacy\n"
-                    "python -m spacy download en_core_web_sm\n"
-                    "Falling back to simple mode."
-                )
-                self.mode = "simple"
-            else:
-                try:
-                    self.nlp = spacy.load(spacy_model)
-                    # Optimize for sentence segmentation only
-                    self.nlp.select_pipes(enable=["senter"])
-                    self.mode = "spacy"
-                except OSError:
-                    warnings.warn(
-                        f"Spacy model '{spacy_model}' not found. To use spacy mode, "
-                        f"install it using: python -m spacy download {spacy_model}\n"
-                        "Falling back to simple mode."
-                    )
-                    self.mode = "simple"
-        else:
-            self.mode = "simple"
-
-    def _import_spacy(self):
-        # Check if spacy is available
-        self.SPACY_AVAILABLE = importlib.util.find_spec("spacy") is not None
-        if self.SPACY_AVAILABLE:
-            try:
-                global spacy
-                import spacy
-            except ImportError:
-                self.SPACY_AVAILABLE = False
-                warnings.warn(
-                    "Failed to import spacy despite it being installed. Using heuristic mode only."
-                )
-
-    def _split_into_sentences_via_spacy(self, text: str) -> List[str]:
-        """Split text into sentences via spaCy.
+    
+    def _split_sentences(self, text: str) -> List[str]:
+        """Split text into sentences using enhanced regex patterns.
+        
+        Handles various cases including:
+        - Standard sentence endings across multiple writing systems
+        - Quotations and parentheses
+        - Common abbreviations
+        - Decimal numbers
+        - Ellipsis
+        - Lists and enumerations
+        - Special punctuation
+        - Common honorifics and titles
 
         Args:
             text: Input text to be split into sentences
-
+        
         Returns:
             List of sentences
         """
-        # Use spaCy's sentence segmentation
-        doc = self.nlp(text)
-        sentences = [sent.text.strip() for sent in doc.sents if sent.text.strip()]
+        # Define sentence ending punctuation marks from various writing systems
+        sent_endings = (
+            r'[!.?։؟۔܀܁܂߹।॥၊။።፧፨᙮᜵᜶᠃᠉᥄᥅᪨᪩᪪᪫᭚᭛᭞᭟᰻᰼᱾᱿'
+            r'‼‽⁇⁈⁉⸮⸼꓿꘎꘏꛳꛷꡶꡷꣎꣏꤯꧈꧉꩝꩞꩟꫰꫱꯫﹒﹖﹗！．？𐩖𐩗'
+            r'𑁇𑁈𑂾𑂿𑃀𑃁𑅁𑅂𑅃𑇅𑇆𑇍𑇞𑇟𑈸𑈹𑈻𑈼𑊩𑑋𑑌𑗂𑗃𑗉𑗊𑗋𑗌𑗍𑗎𑗏𑗐𑗑𑗒'
+            r'𑗓𑗔𑗕𑗖𑗗𑙁𑙂𑜼𑜽𑜾𑩂𑩃𑪛𑪜𑱁𑱂𖩮𖩯𖫵𖬷𖬸𖭄𛲟𝪈｡。]'
+        )
+        
+        # Common abbreviations and titles that don't end sentences
+        abbrevs = (
+            r"(?:Mr|Mrs|Ms|Dr|Prof|Sr|Jr|vs|etc|viz|al|Gen|Col|Fig|Lt|Mt|St"
+            r"|etc|approx|appt|apt|dept|est|min|max|misc|no|ps|seq|temp|etal"
+            r"|e\.g|i\.e|vol|vs|cm|mm|km|kg|lb|ft|pd|hr|sec|min|sq|fx|Feb|Mar"
+            r"|Apr|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)"
+        )
+        
+        # First, protect periods in known abbreviations
+        text = re.sub(rf"({abbrevs})\.", r"\1@POINT@", text, flags=re.IGNORECASE)
+        
+        # Protect decimal numbers
+        text = re.sub(r"(\d+)\.(\d+)", r"\1@POINT@\2", text)
+        
+        # Protect ellipsis
+        text = re.sub(r"\.{3}", "@ELLIPSIS@", text)
+        
+        # Protect email addresses and websites
+        text = re.sub(r"([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})", r"@EMAIL@\1@EMAIL@", text)
+        text = re.sub(r"(https?://[^\s]+)", r"@URL@\1@URL@", text)
+        
+        # Handle parentheses and brackets
+        text = re.sub(r'\([^)]*\.[^)]*\)', lambda m: m.group().replace('.', '@POINT@'), text)
+        text = re.sub(r'\[[^\]]*\.[^\]]*\]', lambda m: m.group().replace('.', '@POINT@'), text)
+        
+        # Handle quotations with sentence endings
+        text = re.sub(rf'({sent_endings})"(\s+[A-Z])', r'\1"\n\2', text)
+        
+        # Handle standard sentence endings
+        text = re.sub(rf'({sent_endings})(\s+[A-Z"])', r'\1\n\2', text)
+        text = re.sub(rf'({sent_endings})(\s*$)', r'\1\n', text)
+        
+        # Handle lists and enumerations
+        text = re.sub(r'(\d+\.)(\s+[A-Z])', r'\1\n\2', text)
+        text = re.sub(r'([a-zA-Z]\.)(\s+[A-Z])', r'\1\n\2', text)
+        
+        # Handle special cases
+        text = re.sub(rf'({sent_endings})\s*([);:,"])*\s*(\n|\s*$)', r'\1\2\n', text)
+        
+        # Restore protected periods and symbols
+        text = text.replace("@POINT@", ".")
+        text = text.replace("@ELLIPSIS@", "...")
+        text = re.sub(r'@EMAIL@([^@]+)@EMAIL@', r'\1', text)
+        text = re.sub(r'@URL@([^@]+)@URL@', r'\1', text)
+        
+        # Split into sentences and clean up
+        sentences = [s.strip() for s in text.split('\n') if s.strip()]
+        
+        # Get token counts for sentences
         token_counts = self._get_token_counts(sentences)
+        
+        # Create Sentence objects
+        result_sentences = []
         current_pos = 0
-        for sent_text, token_count in zip(sentences, token_counts):
-            if not sent_text:
-                continue
-            start_idx = text.find(sent_text, current_pos)
-            end_idx = start_idx + len(sent_text)
-            current_pos = end_idx
-
-            # Get the token count for the sentence
-            sentences.append(
-                Sentence(
-                    text=sent_text,
-                    start_index=start_idx,
-                    end_index=end_idx,
-                    token_count=token_count,
-                )
-            )
-        return sentences
-
-    def _split_into_sentences_simple(self, text: str) -> List[str]:
-        # Fallback to heuristic mode
-        # Simple rule-based sentence splitting with common abbreviations
-        text = re.sub(
-            r'([.!?])([^"])', r"\1\n\2", text
-        )  # Add newlines after sentence endings
-        text = re.sub(r'([.!?]")(\s*[A-Z])', r"\1\n\2", text)  # Handle quotes
-
-        # Handle common abbreviations
-        abbrevs = r"(?:Mr|Mrs|Dr|Prof|Sr|Jr|vs|etc|viz|al|Gen|Col|Fig|e\.g|i\.e)\."
-        text = re.sub(f"{abbrevs}\n", f"{abbrevs} ", text)
-
-        # Handle initials and acronyms
-        text = re.sub(r"([A-Z]\.[A-Z]\.)\n", r"\1 ", text)
-        text = re.sub(
-            r"([A-Z]\.[A-Z]\.)\n", r"\1 ", text
-        )  # Run twice for consecutive initials
-
-        # Handle decimal numbers and ellipsis
-        text = re.sub(r"(\d+)\.\n(\d+)", r"\1.\2", text)  # Decimal numbers
-        text = re.sub(r"\.{3}\n", "... ", text)  # Ellipsis
-
-        sents = [s.strip() for s in text.split("\n") if s.strip()]
-        token_counts = self._get_token_counts(sents)
-
-        sentences = []
-        current_pos = 0
-        for sent, token_count in zip(sents, token_counts):
+        for sent, token_count in zip(sentences, token_counts):
+            # Find the actual position in original text
             start_idx = text.find(sent, current_pos)
             end_idx = start_idx + len(sent)
             current_pos = end_idx
-
-            # Get the token count for the sentence
-            sentences.append(
+            
+            result_sentences.append(
                 Sentence(
                     text=sent,
                     start_index=start_idx,
                     end_index=end_idx,
-                    token_count=token_count,
+                    token_count=token_count
                 )
             )
-        return sentences
-
-    def _split_into_sentences(self, text: str) -> List[str]:
-        """Split text into sentences based on the selected mode.
-
-        Args:
-            text: Input text to be split into sentences
-
-        Returns:
-            List of sentences
-        """
-        if self.mode == "spacy" and self.nlp is not None:
-            return self._split_into_sentences_via_spacy(text)
-        elif self.mode == "simple":
-            return self._split_into_sentences_simple(text)
+        
+        return result_sentences
 
     def _get_token_counts(self, sentences: List[str]) -> List[int]:
         """Get token counts for a list of sentences in batch.
@@ -240,7 +204,7 @@ class SentenceChunker(BaseChunker):
         if not text.strip():
             return []
 
-        sentences = self._split_into_sentences(text)
+        sentences = self._split_sentences(text)
         token_counts = [sentence.token_count for sentence in sentences]
 
         chunks = []
@@ -319,6 +283,6 @@ class SentenceChunker(BaseChunker):
     def __repr__(self) -> str:
         return (
             f"SentenceChunker(chunk_size={self.chunk_size}, "
-            f"chunk_overlap={self.chunk_overlap}, mode='{self.mode}', "
+            f"chunk_overlap={self.chunk_overlap}, "
             f"min_sentences_per_chunk={self.min_sentences_per_chunk})"
         )

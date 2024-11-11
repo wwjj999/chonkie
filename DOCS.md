@@ -1,6 +1,6 @@
 # 🦛 Chonkie DOCS
 
-> ugh, do i _need_ to explain how to use chonkie? man, that's a bummer... to be honest, chonkie is very easy, with little documentation necessary, but just in case, i'll include some here.
+> ugh, do i _need_ to explain how to use chonkie? man, that's a bummer... to be honest, Chonkie is very easy, with little documentation necessary, but just in case, i'll include some here.
 
 # Table of Contents
 
@@ -31,7 +31,8 @@
   - [Chunk object](#chunk-object)
   - [SentenceChunk object](#sentencechunk-object)
   - [SemanticChunk object](#semanticchunk-object)
-  
+- [FAQ](#faq)
+  - [Can I run a Chunker multiple times on different texts? Is Chonkie thread-safe?](#can-i-run-a-chunker-multiple-times-on-different-texts-is-chonkie-thread-safe)
 
 # Installation
 
@@ -43,30 +44,27 @@ pip install chonkie
 
 ## Installation options
 
-chonkie uses optional dependencies to keep the base installation lightweight. choose the installation that best fits your needs:
+Chonkie uses optional dependencies to keep the base installation lightweight. Choose the installation that best fits your needs:
 
 | installation command | use case | dependencies added |
 |---------------------|----------|-------------------|
-| `pip install chonkie` | basic token and word chunking | tokenizers |
-| `pip install chonkie[sentence]` | sentence-based chunking | + spacy |
+| `pip install chonkie` | basic token and word chunking | autotiktokenizer |
 | `pip install chonkie[semantic]` | semantic chunking | + sentence-transformers, numpy |
 | `pip install chonkie[all]` | all features | all dependencies |
 
 ## dependency table
 
-as per the details mentioned in the [design](#design-chonkosophy) section, chonkie is lightweight because it keeps most of the dependencies for each chunker seperate, making it more of an aggregate of multiple repositories and python packages. the optional dependencies feature in python really helps with this. 
+As per the details mentioned in the [design](#design-chonkosophy) section, Chonkie is lightweight because it keeps most of the dependencies for each chunker seperate, making it more of an aggregate of multiple repositories and python packages. The optional dependencies feature in python really helps with this. 
 
-| chunker  | default | 'sentence' | 'semantic' | 'all' |
-|----------|----------|----------|----------|----------|
-| tokenchunker        |✅|✅|✅|✅|
-| wordchunker         |✅|✅|✅|✅|
-| sentencechunker     |⚠️|✅|⚠️|✅|
-| semanticchunker     |❌|❌|⚠️/✅|✅|
-| spdmchunker         |❌|❌|⚠️/✅|✅|
+| chunker  | default |  'semantic' | 'all' |
+|----------|----------|----------|----------|
+| TokenChunker        |✅|✅|✅|
+| WordChunker         |✅|✅|✅|
+| SentenceChunker     |✅|✅|✅|
+| SemanticChunker     |❌|✅|✅|
+| SDPMChunker         |❌|✅|✅|
 
-note: in the above table `⚠️/✅` meant that some features would be disabled but the chunker would work nonetheless. 
-
-what you could infer from the table is that, while it might be of inconvinience in the short-run to have it split like that, you can do surprisingly a lot with just the defualt dependencies (which btw are super light). furthermore, even our max dependencies option `all` is lightweight in comparison to some of the other libraries that one might use for such tasks. 
+What you could infer from the table is that, while it might be of inconvinience in the short-run to have it split like that, you can do surprisingly a lot with just the defualt dependencies (which btw are super light). Furthermore, even our max dependencies option `all` is lightweight in comparison to some of the other libraries that one might use for such tasks. 
 
 # Quick Start
 
@@ -356,3 +354,11 @@ class SemanticChunk(SentenceChunk):
     token_count: int
     sentences: list[SemanticSentence] 
 ```
+
+# FAQ
+
+## Can I run a Chunker multiple times on different texts? Is Chonkie thread-safe? 
+
+Yes! Chonkie's Chunkers can be run multiple times without having to re-initialize them. Just initialise them once like you would expect to, and run them on any piece of text you might want to.
+
+That also means it is absolutely thread-safe! But I would recommend monitoring the CPU usage, since few Chunkers frequently default to multi-threaded chunking (like WordChunker and SentenceChunker) so your resources might be depleted faster than usual running these Chunkers.
