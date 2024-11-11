@@ -256,7 +256,7 @@ chunker = SentenceChunker(
 - `tokenizer` :  (Optional) Pass in the tokenizer of your choice, can accept `tiktoken`, `tokenizers` and `transformers` tokenizers, with precidence given to `tiktoken`.
 - `chunk_size` : (Optional) Pass the size of the chunks. Defaults to the maximum size supported by the tokenizer if any, or `512`.
 - `chunk_overlap`: (Optional) Accepts `int or float`. The overlap between consecutive chunks of the text. Defaults to `min(0.25 * chunk_size, 128)`.
-- `min_sentences_per_chunk`: minimum sentences per chunk
+- `min_sentences_per_chunk`: Minimum sentences per chunk
 
 **Returns**
 
