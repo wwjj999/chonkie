@@ -251,9 +251,14 @@ chunker = SentenceChunker(
 )
 ```
 
-**key parameters:**
+**Key Parameters:**
 
+- `tokenizer` :  (Optional) Pass in the tokenizer of your choice, can accept `tiktoken`, `tokenizers` and `transformers` tokenizers, with precidence given to `tiktoken`.
 - `min_sentences_per_chunk`: minimum sentences per chunk
+
+**Returns**
+
+- `List[SentenceChunk]`: Returns a list of `SentenceChunk` each containing `text` containing the text of the chunk as well as the `sentences` which is a `List[Sentence]` so you can reference the individual sentences in the chunk.  
 
 ## SemanticChunker
 
