@@ -36,7 +36,6 @@ def test_spdm_chunker_initialization(tokenizer, embedding_model):
     assert chunker.tokenizer == tokenizer
     assert chunker.max_chunk_size == 512
     assert chunker.similarity_threshold == 0.5
-    assert chunker.sentence_mode == "heuristic"
     assert chunker.initial_sentences == 1
     assert chunker.skip_window == 2
 
@@ -101,7 +100,7 @@ def test_spdm_chunker_repr(tokenizer, embedding_model):
 
     expected = (
         "SPDMChunker(max_chunk_size=512, similarity_threshold=0.5, "
-        "initial_sentences=1, sentence_mode='heuristic', skip_window=2)"
+        "initial_sentences=1, skip_window=2)"
     )
     assert repr(chunker) == expected
 

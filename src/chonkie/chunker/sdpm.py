@@ -12,8 +12,6 @@ class SDPMChunker(SemanticChunker):
         similarity_percentile: float = None,
         max_chunk_size: int = 512,
         initial_sentences: int = 1,
-        sentence_mode: str = "heuristic",
-        spacy_model: str = "en_core_web_sm",
         skip_window: int = 1,  # How many chunks to skip when looking for similarities
     ):
         """Initialize the SDPMChunker.
@@ -29,8 +27,6 @@ class SDPMChunker(SemanticChunker):
             similarity_threshold=similarity_threshold,
             similarity_percentile=similarity_percentile,
             initial_sentences=initial_sentences,
-            sentence_mode=sentence_mode,
-            spacy_model=spacy_model,
         )
         self.skip_window = skip_window
 
@@ -121,6 +117,5 @@ class SDPMChunker(SemanticChunker):
             f"SPDMChunker(max_chunk_size={self.max_chunk_size}, "
             f"{threshold_info}, "
             f"initial_sentences={self.initial_sentences}, "
-            f"sentence_mode='{self.sentence_mode}', "
             f"skip_window={self.skip_window})"
         )

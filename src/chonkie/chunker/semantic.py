@@ -36,11 +36,11 @@ class SemanticChunker(BaseChunker):
         similarity_threshold: Optional[float] = None,
         similarity_percentile: Optional[float] = None,
         max_chunk_size: int = 512,
-        initial_sentences: int = 1,
-        sentence_mode: str = "heuristic",
-        spacy_model: str = "en_core_web_sm",
+        initial_sentences: int = 1
     ):
         """Initialize the SemanticChunker.
+
+        SemanticChunkers split text into semantically coherent chunks using embeddings.
 
         Args:
             tokenizer: Tokenizer for counting tokens
@@ -49,8 +49,6 @@ class SemanticChunker(BaseChunker):
             similarity_threshold: Absolute threshold for semantic similarity (0-1)
             similarity_percentile: Percentile threshold for similarity (0-100)
             initial_sentences: Number of sentences to start each chunk with
-            sentence_mode: "heuristic" or "spacy" for sentence splitting
-            spacy_model: Name of spaCy model to use if sentence_mode="spacy"
 
         Raises:
             ValueError: If parameters are invalid
@@ -76,14 +74,11 @@ class SemanticChunker(BaseChunker):
             raise ValueError(
                 "Must specify either similarity_threshold or similarity_percentile"
             )
-        if sentence_mode not in ["heuristic", "spacy"]:
-            raise ValueError("sentence_mode must be 'heuristic' or 'spacy'")
 
         self.max_chunk_size = max_chunk_size
         self.similarity_threshold = similarity_threshold
         self.similarity_percentile = similarity_percentile
         self.initial_sentences = initial_sentences
-        self.sentence_mode = sentence_mode
 
         # Load sentence-transformers model
         self._import_sentence_transformers()
@@ -93,43 +88,6 @@ class SemanticChunker(BaseChunker):
             )
         else:
             self.embedding_model = embedding_model
-
-        # Initialize spaCy if explicitly requested
-        if sentence_mode == "spacy":
-            self._import_spacy()
-
-            if not self.SPACY_AVAILABLE:
-                raise ImportError(
-                    "spaCy is not installed. Install it with 'pip install spacy' "
-                    "and download the model with 'python -m spacy download en_core_web_sm', "
-                    "or use sentence_mode='heuristic' instead."
-                )
-            try:
-                self.nlp = spacy.load(spacy_model)
-            except OSError as e:
-                raise ImportError(
-                    f"spaCy model '{spacy_model}' not found. "
-                    f"Download it with 'python -m spacy download {spacy_model}' "
-                    "or use sentence_mode='heuristic' instead."
-                ) from e
-
-    def _import_spacy(self) -> Any:
-        """Import spaCy library. Imports mentioned inside the class,
-        because it takes too long to import the whole library at the beginning of the file.
-        """
-        # Check if spaCy is available
-        self.SPACY_AVAILABLE = importlib.util.find_spec("spacy") is not None
-        if self.SPACY_AVAILABLE:
-            try:
-                global spacy
-                import spacy
-            except ImportError:
-                self.SPACY_AVAILABLE = False
-                warnings.warn(
-                    "Failed to import spaCy despite it being installed. SemanticChunker will not work."
-                )
-        else:
-            warnings.warn("spaCy is not installed. SemanticChunker will not work.")
 
     def _import_sentence_transformers(self) -> Any:
         """Import sentence-transformers library. Imports mentioned inside the class,
@@ -164,23 +122,103 @@ class SemanticChunker(BaseChunker):
             ) from e
         return model
 
-    def _split_sentences_spacy(self, text: str) -> List[str]:
-        """Split text into sentences using spaCy."""
-        doc = self.nlp(text)
-        return [str(sent).strip() for sent in doc.sents if str(sent).strip()]
-
-    def _split_sentences_heuristic(self, text: str) -> List[str]:
-        """Split text into sentences using rule-based approach."""
-        pattern = r"(?<=[.!?])\s+(?=[A-Z])|(?<=[.!?])(?=\s*[A-Z])|(?<=[.!?])\s*$"
-        sentences = re.split(pattern, text)
-        return [s.strip() for s in sentences if s.strip()]
-
     def _split_sentences(self, text: str) -> List[str]:
-        """Split text into sentences using specified mode."""
-        if self.sentence_mode == "heuristic":
-            return self._split_sentences_heuristic(text)
-        else:
-            return self._split_sentences_spacy(text)
+        """Split text into sentences using enhanced regex patterns.
+        
+        Handles various cases including:
+        - Standard sentence endings across multiple writing systems
+        - Quotations and parentheses
+        - Common abbreviations
+        - Decimal numbers
+        - Ellipsis
+        - Lists and enumerations
+        - Special punctuation
+        - Common honorifics and titles
+
+        Args:
+            text: Input text to be split into sentences
+        
+        Returns:
+            List of sentences
+        """
+        # Define sentence ending punctuation marks from various writing systems
+        sent_endings = (
+            r'[!.?։؟۔܀܁܂߹।॥၊။።፧፨᙮᜵᜶᠃᠉᥄᥅᪨᪩᪪᪫᭚᭛᭞᭟᰻᰼᱾᱿'
+            r'‼‽⁇⁈⁉⸮⸼꓿꘎꘏꛳꛷꡶꡷꣎꣏꤯꧈꧉꩝꩞꩟꫰꫱꯫﹒﹖﹗！．？𐩖𐩗'
+            r'𑁇𑁈𑂾𑂿𑃀𑃁𑅁𑅂𑅃𑇅𑇆𑇍𑇞𑇟𑈸𑈹𑈻𑈼𑊩𑑋𑑌𑗂𑗃𑗉𑗊𑗋𑗌𑗍𑗎𑗏𑗐𑗑𑗒'
+            r'𑗓𑗔𑗕𑗖𑗗𑙁𑙂𑜼𑜽𑜾𑩂𑩃𑪛𑪜𑱁𑱂𖩮𖩯𖫵𖬷𖬸𖭄𛲟𝪈｡。]'
+        )
+        
+        # Common abbreviations and titles that don't end sentences
+        abbrevs = (
+            r"(?:Mr|Mrs|Ms|Dr|Prof|Sr|Jr|vs|etc|viz|al|Gen|Col|Fig|Lt|Mt|St"
+            r"|etc|approx|appt|apt|dept|est|min|max|misc|no|ps|seq|temp|etal"
+            r"|e\.g|i\.e|vol|vs|cm|mm|km|kg|lb|ft|pd|hr|sec|min|sq|fx|Feb|Mar"
+            r"|Apr|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)"
+        )
+        
+        # First, protect periods in known abbreviations
+        text = re.sub(rf"({abbrevs})\.", r"\1@POINT@", text, flags=re.IGNORECASE)
+        
+        # Protect decimal numbers
+        text = re.sub(r"(\d+)\.(\d+)", r"\1@POINT@\2", text)
+        
+        # Protect ellipsis
+        text = re.sub(r"\.{3}", "@ELLIPSIS@", text)
+        
+        # Protect email addresses and websites
+        text = re.sub(r"([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})", r"@EMAIL@\1@EMAIL@", text)
+        text = re.sub(r"(https?://[^\s]+)", r"@URL@\1@URL@", text)
+        
+        # Handle parentheses and brackets
+        text = re.sub(r'\([^)]*\.[^)]*\)', lambda m: m.group().replace('.', '@POINT@'), text)
+        text = re.sub(r'\[[^\]]*\.[^\]]*\]', lambda m: m.group().replace('.', '@POINT@'), text)
+        
+        # Handle quotations with sentence endings
+        text = re.sub(rf'({sent_endings})"(\s+[A-Z])', r'\1"\n\2', text)
+        
+        # Handle standard sentence endings
+        text = re.sub(rf'({sent_endings})(\s+[A-Z"])', r'\1\n\2', text)
+        text = re.sub(rf'({sent_endings})(\s*$)', r'\1\n', text)
+        
+        # Handle lists and enumerations
+        text = re.sub(r'(\d+\.)(\s+[A-Z])', r'\1\n\2', text)
+        text = re.sub(r'([a-zA-Z]\.)(\s+[A-Z])', r'\1\n\2', text)
+        
+        # Handle special cases
+        text = re.sub(rf'({sent_endings})\s*([);:,"])*\s*(\n|\s*$)', r'\1\2\n', text)
+        
+        # Restore protected periods and symbols
+        text = text.replace("@POINT@", ".")
+        text = text.replace("@ELLIPSIS@", "...")
+        text = re.sub(r'@EMAIL@([^@]+)@EMAIL@', r'\1', text)
+        text = re.sub(r'@URL@([^@]+)@URL@', r'\1', text)
+        
+        # Split into sentences and clean up
+        sentences = [s.strip() for s in text.split('\n') if s.strip()]
+        
+        # Get token counts for sentences
+        # token_counts = self._get_token_counts(sentences)
+        
+        # # Create Sentence objects
+        # result_sentences = []
+        # current_pos = 0
+        # for sent, token_count in zip(sentences, token_counts):
+        #     # Find the actual position in original text
+        #     start_idx = text.find(sent, current_pos)
+        #     end_idx = start_idx + len(sent)
+        #     current_pos = end_idx
+            
+        #     result_sentences.append(
+        #         Sentence(
+        #             text=sent,
+        #             start_index=start_idx,
+        #             end_index=end_idx,
+        #             token_count=token_count
+        #         )
+        #     )
+        
+        return sentences
 
     def _compute_similarity_threshold(self, all_similarities: List[float]) -> float:
         """Compute similarity threshold based on percentile if specified."""
@@ -406,6 +444,5 @@ class SemanticChunker(BaseChunker):
         return (
             f"SemanticChunker(max_chunk_size={self.max_chunk_size}, "
             f"{threshold_info}, "
-            f"initial_sentences={self.initial_sentences}, "
-            f"sentence_mode='{self.sentence_mode}')"
+            f"initial_sentences={self.initial_sentences})"
         )

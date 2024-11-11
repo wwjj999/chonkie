@@ -34,7 +34,6 @@ def test_semantic_chunker_initialization(tokenizer, embedding_model):
     assert chunker.tokenizer == tokenizer
     assert chunker.max_chunk_size == 512
     assert chunker.similarity_threshold == 0.5
-    assert chunker.sentence_mode == "heuristic"
     assert chunker.initial_sentences == 1
 
 
@@ -51,7 +50,6 @@ def test_semantic_chunker_initialization_sentence_transformer(tokenizer):
     assert chunker.tokenizer == tokenizer
     assert chunker.max_chunk_size == 512
     assert chunker.similarity_threshold == 0.5
-    assert chunker.sentence_mode == "heuristic"
     assert chunker.initial_sentences == 1
 
 
@@ -130,7 +128,7 @@ def test_semantic_chunker_repr(tokenizer, embedding_model):
 
     expected = (
         "SemanticChunker(max_chunk_size=512, similarity_threshold=0.5, "
-        "initial_sentences=1, sentence_mode='heuristic')"
+        "initial_sentences=1)"
     )
     assert repr(chunker) == expected
 
@@ -165,21 +163,6 @@ def test_semantic_chunker_percentile_mode(tokenizer, embedding_model, sample_tex
 
     assert len(chunks) > 0
     assert all([isinstance(chunk, SemanticChunk) for chunk in chunks])
-
-
-def test_semantic_chunker_spacy_mode(tokenizer, embedding_model, sample_text):
-    """Test that the SemanticChunker works with spaCy mode."""
-    chunker = SemanticChunker(
-        tokenizer=tokenizer,
-        embedding_model=embedding_model,
-        max_chunk_size=512,
-        similarity_threshold=0.5,
-        sentence_mode="spacy",
-    )
-    chunks = chunker.chunk(sample_text)
-
-    assert len(chunks) > 0
-    assert chunker.sentence_mode == "spacy"
 
 
 if __name__ == "__main__":
