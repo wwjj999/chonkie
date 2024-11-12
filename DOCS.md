@@ -266,14 +266,12 @@ chunker = SentenceChunker(
 
 The `SemanticChunker` groups content by semantic similarity. The implementation is inspired by the semantic chunking approach described in the [FullStackRetrieval Tutorials](https://github.com/FullStackRetrieval-com/RetrievalTutorials/blob/main/tutorials/LevelsOfTextSplitting/5_Levels_Of_Text_Splitting.ipynb), with modifications and optimizations for better performance and integration with Chonkie's architecture.
 
+This version of `SemanticChunker` has some optimizations that speed it up considerably, but make the assumption that the `tokenizer` you used is the same as the one used for `embedding_model`. This is a valid assumption since most often than not, `chunk_size` and hence, `token_count` is dependent on the `embedding_model` context sizes rather than on the Generative models context length.
+
 ```python
 from chonkie import SemanticChunker
-from autotiktokenizer import AutoTikTokenizer
-
-tokenizer = AutoTikTokenizer.from_pretrained("gpt2")
 
 chunker = SemanticChunker(
-    tokenizer=tokenizer,
     embedding_model="all-minilm-l6-v2",
     max_chunk_size=512,
     similarity_threshold=0.7
@@ -283,6 +281,7 @@ chunker = SemanticChunker(
 **key parameters:**
 
 - `embedding_model`: model for semantic embeddings. This can either be a `str` or a `SentenceTransformer` model. If a `str` is passed, it uses `SentenceTransformer` to load it. 
+- `max_chunk_size`: max size of the chunk received from `SemanticChunker` 
 - `similarity_threshold`: threshold for semantic grouping
 
 ## SDPMChunker
@@ -291,12 +290,8 @@ the `SDPMChunker` groups content via the semantic double-pass merging method, wh
 
 ```python
 from chonkie import SDPMChunker
-from autotiktokenizer import AutoTikTokenizer
-
-tokenizer = AutoTikTokenizer.from_pretrained("gpt2")
 
 chunker = SDPMChunker(
-    tokenizer=tokenizer,
     embedding_model="all-minilm-l6-v2",
     max_chunk_size=512,
     similarity_threshold=0.7, 

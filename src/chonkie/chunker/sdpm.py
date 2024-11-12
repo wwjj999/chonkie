@@ -4,9 +4,23 @@ from .semantic import SemanticChunk, SemanticChunker, Sentence
 
 
 class SDPMChunker(SemanticChunker):
+    """Chunker implementation using the Semantic Document Partitioning Method (SDPM).
+
+    The SDPM approach involves three main steps:
+    1. Grouping sentences by semantic similarity (Same as SemanticChunker)
+    2. Merging similar groups with a skip window
+    3. Splitting the merged groups into size-appropriate chunks
+
+    Args:
+        embedding_model: Sentence embedding model to use
+        similarity_threshold: Minimum similarity score to consider sentences similar
+        similarity_percentile: Minimum similarity percentile to consider sentences similar
+        max_chunk_size: Maximum token count for a chunk
+        initial_sentences: Number of sentences to consider for initial grouping
+        skip_window: Number of chunks to skip when looking for similarities
+    """
     def __init__(
         self,
-        tokenizer: Union[str, Any] = "gpt2",
         embedding_model: Union[str, Any] = "sentence-transformers/all-MiniLM-L6-v2",
         similarity_threshold: float = None,
         similarity_percentile: float = None,
@@ -17,11 +31,14 @@ class SDPMChunker(SemanticChunker):
         """Initialize the SDPMChunker.
 
         Args:
-            Same as SemanticChunker, plus:
+            embedding_model: Sentence embedding model to use
+            similarity_threshold: Minimum similarity score to consider sentences similar
+            similarity_percentile: Minimum similarity percentile to consider sentences similar
+            max_chunk_size: Maximum token count for a chunk
+            initial_sentences: Number of sentences to consider for initial grouping
             skip_window: Number of chunks to skip when looking for similarities
         """
         super().__init__(
-            tokenizer=tokenizer,
             embedding_model=embedding_model,
             max_chunk_size=max_chunk_size,
             similarity_threshold=similarity_threshold,

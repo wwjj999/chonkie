@@ -1,13 +1,7 @@
 import pytest
 from sentence_transformers import SentenceTransformer
-from tokenizers import Tokenizer
 
 from chonkie.chunker.semantic import SemanticChunk, SemanticChunker
-
-
-@pytest.fixture
-def tokenizer():
-    return Tokenizer.from_pretrained("gpt2")
 
 
 @pytest.fixture
@@ -21,42 +15,37 @@ def embedding_model():
     return SentenceTransformer("all-MiniLM-L6-v2")
 
 
-def test_semantic_chunker_initialization(tokenizer, embedding_model):
+def test_semantic_chunker_initialization(embedding_model):
     """Test that the SemanticChunker can be initialized with required parameters."""
     chunker = SemanticChunker(
-        tokenizer=tokenizer,
         embedding_model=embedding_model,
         max_chunk_size=512,
         similarity_threshold=0.5,
     )
 
     assert chunker is not None
-    assert chunker.tokenizer == tokenizer
     assert chunker.max_chunk_size == 512
     assert chunker.similarity_threshold == 0.5
     assert chunker.initial_sentences == 1
 
 
-def test_semantic_chunker_initialization_sentence_transformer(tokenizer):
+def test_semantic_chunker_initialization_sentence_transformer():
     """Test that the SemanticChunker can be initialized with SentenceTransformer model."""
     chunker = SemanticChunker(
-        tokenizer=tokenizer,
         embedding_model="all-MiniLM-L6-v2",
         max_chunk_size=512,
         similarity_threshold=0.5,
     )
 
     assert chunker is not None
-    assert chunker.tokenizer == tokenizer
     assert chunker.max_chunk_size == 512
     assert chunker.similarity_threshold == 0.5
     assert chunker.initial_sentences == 1
 
 
-def test_semantic_chunker_chunking(tokenizer, embedding_model, sample_text):
+def test_semantic_chunker_chunking(embedding_model, sample_text):
     """Test that the SemanticChunker can chunk a sample text."""
     chunker = SemanticChunker(
-        tokenizer=tokenizer,
         embedding_model="all-MiniLM-L6-v2",
         max_chunk_size=512,
         similarity_threshold=0.5,
@@ -73,10 +62,9 @@ def test_semantic_chunker_chunking(tokenizer, embedding_model, sample_text):
     assert all([chunk.sentences is not None for chunk in chunks])
 
 
-def test_semantic_chunker_empty_text(tokenizer, embedding_model):
+def test_semantic_chunker_empty_text(embedding_model):
     """Test that the SemanticChunker can handle empty text input."""
     chunker = SemanticChunker(
-        tokenizer=tokenizer,
         embedding_model=embedding_model,
         max_chunk_size=512,
         similarity_threshold=0.5,
@@ -86,10 +74,9 @@ def test_semantic_chunker_empty_text(tokenizer, embedding_model):
     assert len(chunks) == 0
 
 
-def test_semantic_chunker_single_sentence(tokenizer, embedding_model):
+def test_semantic_chunker_single_sentence(embedding_model):
     """Test that the SemanticChunker can handle text with a single sentence."""
     chunker = SemanticChunker(
-        tokenizer=tokenizer,
         embedding_model=embedding_model,
         max_chunk_size=512,
         similarity_threshold=0.5,
@@ -101,10 +88,9 @@ def test_semantic_chunker_single_sentence(tokenizer, embedding_model):
     assert len(chunks[0].sentences) == 1
 
 
-def test_semantic_chunker_single_chunk_text(tokenizer, embedding_model):
+def test_semantic_chunker_single_chunk_text(embedding_model):
     """Test that the SemanticChunker can handle text that fits in a single chunk."""
     chunker = SemanticChunker(
-        tokenizer=tokenizer,
         embedding_model=embedding_model,
         max_chunk_size=512,
         similarity_threshold=0.5,
@@ -117,10 +103,9 @@ def test_semantic_chunker_single_chunk_text(tokenizer, embedding_model):
     assert len(chunks[0].sentences) == 2
 
 
-def test_semantic_chunker_repr(tokenizer, embedding_model):
+def test_semantic_chunker_repr(embedding_model):
     """Test that the SemanticChunker has a string representation."""
     chunker = SemanticChunker(
-        tokenizer=tokenizer,
         embedding_model=embedding_model,
         max_chunk_size=512,
         similarity_threshold=0.5,
@@ -133,10 +118,9 @@ def test_semantic_chunker_repr(tokenizer, embedding_model):
     assert repr(chunker) == expected
 
 
-def test_semantic_chunker_similarity_threshold(tokenizer, embedding_model):
+def test_semantic_chunker_similarity_threshold(embedding_model):
     """Test that the SemanticChunker respects similarity threshold."""
     chunker = SemanticChunker(
-        tokenizer=tokenizer,
         embedding_model=embedding_model,
         max_chunk_size=512,
         similarity_threshold=0.9,  # High threshold should create more chunks
@@ -151,10 +135,9 @@ def test_semantic_chunker_similarity_threshold(tokenizer, embedding_model):
     assert len(chunks) > 1
 
 
-def test_semantic_chunker_percentile_mode(tokenizer, embedding_model, sample_text):
+def test_semantic_chunker_percentile_mode(embedding_model, sample_text):
     """Test that the SemanticChunker works with percentile-based similarity."""
     chunker = SemanticChunker(
-        tokenizer=tokenizer,
         embedding_model=embedding_model,
         max_chunk_size=512,
         similarity_percentile=50,  # Use median similarity as threshold
