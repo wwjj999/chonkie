@@ -31,7 +31,6 @@ class SemanticChunk(SentenceChunk):
 class SemanticChunker(BaseChunker):
     def __init__(
         self,
-        tokenizer: Union[str, Any] = "gpt2",
         embedding_model: Union[str, Any] = "sentence-transformers/all-MiniLM-L6-v2",
         similarity_threshold: Optional[float] = None,
         similarity_percentile: Optional[float] = None,
@@ -43,7 +42,6 @@ class SemanticChunker(BaseChunker):
         SemanticChunkers split text into semantically coherent chunks using embeddings.
 
         Args:
-            tokenizer: Tokenizer for counting tokens
             embedding_model: Name of the sentence-transformers model to load
             max_chunk_size: Maximum tokens allowed per chunk
             similarity_threshold: Absolute threshold for semantic similarity (0-1)
@@ -54,8 +52,6 @@ class SemanticChunker(BaseChunker):
             ValueError: If parameters are invalid
             ImportError: If required dependencies aren't installed
         """
-        super().__init__(tokenizer)
-
         if max_chunk_size <= 0:
             raise ValueError("max_chunk_size must be positive")
         if similarity_threshold is not None and (
@@ -88,6 +84,11 @@ class SemanticChunker(BaseChunker):
             )
         else:
             self.embedding_model = embedding_model
+        
+        # Keeping the tokenizer the same as the sentence model is important
+        # for the group semantic meaning to be calculated properly
+        tokenizer = self.embedding_model.tokenizer
+        super().__init__(tokenizer)
 
     def _import_sentence_transformers(self) -> Any:
         """Import sentence-transformers library. Imports mentioned inside the class,
@@ -196,27 +197,6 @@ class SemanticChunker(BaseChunker):
         
         # Split into sentences and clean up
         sentences = [s.strip() for s in text.split('\n') if s.strip()]
-        
-        # Get token counts for sentences
-        # token_counts = self._get_token_counts(sentences)
-        
-        # # Create Sentence objects
-        # result_sentences = []
-        # current_pos = 0
-        # for sent, token_count in zip(sentences, token_counts):
-        #     # Find the actual position in original text
-        #     start_idx = text.find(sent, current_pos)
-        #     end_idx = start_idx + len(sent)
-        #     current_pos = end_idx
-            
-        #     result_sentences.append(
-        #         Sentence(
-        #             text=sent,
-        #             start_index=start_idx,
-        #             end_index=end_idx,
-        #             token_count=token_count
-        #         )
-        #     )
         
         return sentences
 
