@@ -190,24 +190,69 @@ we used a lot of optimizations when building each and every chunker inside chonk
 
 The `TokenChunker` splits text into chunks based on token count.
 
+**Key Parameters:**
+
+- `tokenizer` (`Optional[str, tokenizers.Tokenizer, tiktoken.Encoding]`): any tokenizer implementing the encode/decode interface
+- `chunk_size` (`int`): maximum tokens per chunk
+- `chunk_overlap` (`Union[int, float]`): number of overlapping tokens between chunks
+
+**Methods:**
+
+- `chunk`: Chunks a piece of text.
+  - **Parameters:**
+    - `text` (`str`): The input text to be chunked.
+  - **Returns:**
+    - `List[Chunk]`: A list of `Chunk` objects containing the chunked text and metadata.
+
+- `chunk_batch`: Chunks a list of strings.
+  - **Parameters:**
+    - `texts` (`List[str]`): A list of input texts to be chunked.
+  - **Returns:**
+    - `List[List[Chunk]]`: A list of lists of `Chunk` objects, where each sublist corresponds to the chunks of an input text.
+
+- `__call__`: Takes either a string or a list of strings for chunking.
+  - **Parameters:**
+    - `text` (`Union[str, List[str]]`): The input text or list of texts to be chunked.
+  - **Returns:**
+    - `Union[List[Chunk], List[List[Chunk]]]`: A list of `Chunk` objects if a single string is provided, or a list of lists of `Chunk` objects if a list of strings is provided.
+
+**Example Usage:**
+
 ```python
+# Import the TokenChunker
 from chonkie import TokenChunker
 from autotiktokenizer import AutoTikTokenizer
 
+# Initialize the tokenizer
 tokenizer = AutoTikTokenizer.from_pretrained("gpt2")
 
+# Initialize the chunker
 chunker = TokenChunker(
     tokenizer=tokenizer,
     chunk_size=512,  # maximum tokens per chunk
     chunk_overlap=128  # overlap between chunks
 )
+
+# Chunk a single piece of text
+chunks = chunker.chunk("Woah! Chonkie, the chunking library is so cool! I love the tiny hippo hehe.")
+for chunk in chunks:
+    print(f"Chunk: {chunk.text}")
+    print(f"Tokens: {chunk.token_count}")
+
+# Chunk a batch of texts
+texts = ["First text to chunk.", "Second text to chunk."]
+batch_chunks = chunker.chunk_batch(texts)
+for text_chunks in batch_chunks:
+    for chunk in text_chunks:
+        print(f"Chunk: {chunk.text}")
+        print(f"Tokens: {chunk.token_count}")
+
+# Use the chunker as a callable
+chunks = chunker("Another text to chunk using __call__.")
+for chunk in chunks:
+    print(f"Chunk: {chunk.text}")
+    print(f"Tokens: {chunk.token_count}")
 ```
-
-**key parameters:**
-
-- `tokenizer`: any tokenizer implementing the encode/decode interface
-- `chunk_size`: maximum tokens per chunk
-- `chunk_overlap`: number of overlapping tokens between chunks
 
 ## WordChunker
 

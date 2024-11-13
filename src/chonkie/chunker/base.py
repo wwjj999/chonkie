@@ -1,8 +1,10 @@
 import importlib
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List
+from typing import List, Union
 
+from multiprocessing import Pool, cpu_count
+import warnings
 
 @dataclass
 class Chunk:
@@ -145,16 +147,55 @@ class BaseChunker(ABC):
         """
         pass
 
-    def __call__(self, text: str) -> List[Chunk]:
+    def _determine_optimal_workers(self) -> int:
+        """Determine optimal number of workers based on system resources."""
+        try:
+            # Get CPU cores
+            cpu_cores = cpu_count()
+            
+            # Never use more than 75% of available cores
+            max_workers = max(1, int(cpu_cores * 0.75))
+            
+            # Cap at 8 workers
+            return min(max_workers, 8)
+
+        except Exception as e:
+            warnings.warn(f"Error determining optimal workers: {e}. Using single process.")
+            return 1
+    
+    def chunk_batch(self, text: List[str]) -> List[List[Chunk]]:
+        """Split a List of texts into their respective chunks
+        
+        By default, this method uses multiprocessing to parallelize the chunking process.
+
+        Args:
+            text: List of input texts to be chunked
+        
+        Returns:
+            List of lists of Chunk objects containing the chunked text and metadata
+        """
+        workers = self._determine_optimal_workers()
+        if workers > 1:
+          with Pool(workers) as pool:
+              return pool.map(self.chunk, text)
+        else:
+          return [self.chunk(t) for t in text]
+
+    def __call__(self, text: Union[str, List[str]]) -> Union[List[Chunk], List[List[Chunk]]]:
         """Make the chunker callable directly.
 
         Args:
-            text: Input text to be chunked
-
+            text: Input text or list of texts to be chunked
+        
         Returns:
-            List of Chunk objects containing the chunked text and metadata
+            List of Chunk objects or list of lists of Chunk
         """
-        return self.chunk(text)
+        if isinstance(text, str):
+            return self.chunk(text)
+        elif isinstance(text, list):
+            return self.chunk_batch(text)
+        else:
+            raise ValueError("Input must be a string or a list of strings.")
 
     def __repr__(self) -> str:
         """Return string representation of the chunker."""
