@@ -107,7 +107,7 @@ class BaseChunker(ABC):
         if self._tokenizer_backend == "transformers":
             return self.tokenizer.batch_encode_plus(texts)["input_ids"]
         elif self._tokenizer_backend == "tokenizers":
-            return self.tokenizer.encode_batch(texts)
+            return [t.ids for t in self.tokenizer.encode_batch(texts)]
         elif self._tokenizer_backend == "tiktoken":
             return self.tokenizer.encode_batch(texts)
         else:

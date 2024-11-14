@@ -5,6 +5,7 @@ from transformers import AutoTokenizer
 
 from chonkie import Chunk, TokenChunker
 
+from datasets import load_dataset
 
 @pytest.fixture
 def transformers_tokenizer():
@@ -25,6 +26,11 @@ def tokenizer():
 def sample_text():
     text = """The process of text chunking in RAG applications represents a delicate balance between competing requirements. On one side, we have the need for semantic coherence – ensuring that each chunk maintains meaningful context that can be understood and processed independently. On the other, we must optimize for information density, ensuring that each chunk carries sufficient signal without excessive noise that might impede retrieval accuracy. In this post, we explore the challenges of text chunking in RAG applications and propose a novel approach that leverages recent advances in transformer-based language models to achieve a more effective balance between these competing requirements."""
     return text
+
+@pytest.fixture
+def sample_batch():
+    ds = load_dataset("bhavnicksm/fineweb-edu-micro", split="train")
+    return list(ds["text"])
 
 
 def test_token_chunker_initialization_tok(tokenizer):
@@ -147,6 +153,23 @@ def test_token_chunker_single_chunk_text(tokenizer):
     assert len(chunks) == 1
     assert chunks[0].token_count == 6
     assert chunks[0].text == "Hello, how are you?"
+
+
+def test_token_chunker_batch_chunking(tokenizer, sample_batch):
+    """
+    Test that the TokenChunker can chunk a batch of texts into tokens.
+    """
+    chunker = TokenChunker(tokenizer=tokenizer, chunk_size=512, chunk_overlap=128)
+    chunks = chunker.chunk_batch(sample_batch)
+
+    assert len(chunks) > 0
+    assert all([len(chunk) > 0 for chunk in chunks])
+    assert all([type(chunk[0]) is Chunk for chunk in chunks])
+    assert all([all([chunk.token_count <= 512 for chunk in chunks]) for chunks in chunks])
+    assert all([all([chunk.token_count > 0 for chunk in chunks]) for chunks in chunks])
+    assert all([all([chunk.text is not None for chunk in chunks]) for chunks in chunks])
+    assert all([all([chunk.start_index is not None for chunk in chunks]) for chunks in chunks])
+    assert all([all([chunk.end_index is not None for chunk in chunks]) for chunks in chunks])
 
 
 def test_token_chunker_repr(tokenizer):
