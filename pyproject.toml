@@ -42,6 +42,7 @@ Homepage = "https://github.com/bhavnicksm/chonkie"
 semantic = ["sentence-transformers>=2.3.0", "numpy>=1.23.0"]
 all = ["sentence-transformers>=2.3.0", "numpy>=1.23.0"]
 dev = ["pytest>=6.2.0", 
+        "datasets>=1.14.0",
         "transformers>=4.0.0",
         "black>=21.12b0",
         "isort>=5.10.2",
