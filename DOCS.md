@@ -256,7 +256,36 @@ for chunk in chunks:
 
 ## WordChunker
 
-the `WordChunker` maintains word boundaries while chunking.
+The `WordChunker` maintains word boundaries while chunking, ensuring words stay intact.
+
+**Key Parameters:**
+
+- `tokenizer` (`Optional[str, tokenizers.Tokenizer, tiktoken.Encoding]`): Any tokenizer implementing the encode/decode interface
+- `chunk_size` (`int`): Maximum tokens per chunk
+- `chunk_overlap` (`int`): Number of overlapping tokens between chunks
+- `mode` (`str`): Chunking mode, either 'simple' (space-based splitting) or 'advanced' (handles punctuation and special cases)
+
+**Methods:**
+
+- `chunk`: Chunks a piece of text.
+  - **Parameters:**
+    - `text` (`str`): The input text to be chunked.
+  - **Returns:**
+    - `List[Chunk]`: A list of `Chunk` objects containing the chunked text and metadata.
+
+- `chunk_batch`: Chunks a list of strings.
+  - **Parameters:**
+    - `texts` (`List[str]`): A list of input texts to be chunked.
+  - **Returns:**
+    - `List[List[Chunk]]`: A list of lists of `Chunk` objects, where each sublist corresponds to the chunks of an input text.
+
+- `__call__`: Takes either a string or a list of strings for chunking.
+  - **Parameters:**
+    - `text` (`Union[str, List[str]]`): The input text or list of texts to be chunked.
+  - **Returns:**
+    - `Union[List[Chunk], List[List[Chunk]]]`: A list of `Chunk` objects if a single string is provided, or a list of lists of `Chunk` objects if a list of strings is provided.
+
+**Example Usage:**
 
 ```python
 from chonkie import WordChunker
@@ -268,19 +297,48 @@ chunker = WordChunker(
     tokenizer=tokenizer,
     chunk_size=512,
     chunk_overlap=128,
-    mode="advanced"  # 'simple' or 'advanced'
+    mode="advanced"
 )
+
+# Chunk a single piece of text
+chunks = chunker.chunk("Some text to chunk while preserving word boundaries.")
+for chunk in chunks:
+    print(f"Chunk: {chunk.text}")
+    print(f"Tokens: {chunk.token_count}")
 ```
-
-**key parameters:**
-
-- `mode`: chunking mode
-  - `simple`: basic space-based splitting
-  - `advanced`: handles punctuation and special cases
 
 ## SentenceChunker
 
-The `SentenceChunker` preserves sentence boundaries.
+The `SentenceChunker` preserves sentence boundaries while chunking text.
+
+**Key Parameters:**
+
+- `tokenizer` (`Optional[str, tokenizers.Tokenizer, tiktoken.Encoding]`): Any tokenizer implementing the encode/decode interface
+- `chunk_size` (`int`): Maximum tokens per chunk
+- `chunk_overlap` (`int`): Number of overlapping tokens between chunks
+- `min_sentences_per_chunk` (`int`): Minimum number of sentences to include in each chunk
+
+**Methods:**
+
+- `chunk`: Chunks a piece of text.
+  - **Parameters:**
+    - `text` (`str`): The input text to be chunked.
+  - **Returns:**
+    - `List[SentenceChunk]`: A list of `SentenceChunk` objects containing the chunked text and metadata, including individual sentences.
+
+- `chunk_batch`: Chunks a list of strings.
+  - **Parameters:**
+    - `texts` (`List[str]`): A list of input texts to be chunked.
+  - **Returns:**
+    - `List[List[SentenceChunk]]`: A list of lists of `SentenceChunk` objects.
+
+- `__call__`: Takes either a string or a list of strings for chunking.
+  - **Parameters:**
+    - `text` (`Union[str, List[str]]`): The input text or list of texts to be chunked.
+  - **Returns:**
+    - `Union[List[SentenceChunk], List[List[SentenceChunk]]]`: A list of `SentenceChunk` objects or a list of lists of `SentenceChunk` objects.
+
+**Example Usage:**
 
 ```python
 from chonkie import SentenceChunker
@@ -294,24 +352,49 @@ chunker = SentenceChunker(
     chunk_overlap=128,
     min_sentences_per_chunk=1
 )
+
+# Chunk a single piece of text
+chunks = chunker.chunk("First sentence. Second sentence. Third sentence.")
+for chunk in chunks:
+    print(f"Chunk: {chunk.text}")
+    print(f"Number of sentences: {len(chunk.sentences)}")
 ```
-
-**Key Parameters:**
-
-- `tokenizer` :  (Optional) Pass in the tokenizer of your choice, can accept `tiktoken`, `tokenizers` and `transformers` tokenizers, with precidence given to `tiktoken`.
-- `chunk_size` : (Optional) Pass the size of the chunks. Defaults to the maximum size supported by the tokenizer if any, or `512`.
-- `chunk_overlap`: (Optional) Accepts `int or float`. The overlap between consecutive chunks of the text. Defaults to `min(0.25 * chunk_size, 128)`.
-- `min_sentences_per_chunk`: Minimum sentences per chunk
-
-**Returns**
-
-- `List[SentenceChunk]`: Returns a list of `SentenceChunk` each containing `text` containing the text of the chunk as well as the `sentences` which is a `List[Sentence]` so you can reference the individual sentences in the chunk.  
 
 ## SemanticChunker
 
 The `SemanticChunker` groups content by semantic similarity. The implementation is inspired by the semantic chunking approach described in the [FullStackRetrieval Tutorials](https://github.com/FullStackRetrieval-com/RetrievalTutorials/blob/main/tutorials/LevelsOfTextSplitting/5_Levels_Of_Text_Splitting.ipynb), with modifications and optimizations for better performance and integration with Chonkie's architecture.
 
 This version of `SemanticChunker` has some optimizations that speed it up considerably, but make the assumption that the `tokenizer` you used is the same as the one used for `embedding_model`. This is a valid assumption since most often than not, `chunk_size` and hence, `token_count` is dependent on the `embedding_model` context sizes rather than on the Generative models context length.
+
+**Key Parameters:**
+
+- `embedding_model` (`Union[str, SentenceTransformer]`): Model for semantic embeddings, either a model name string or a SentenceTransformer instance
+- `similarity_threshold` (`Optional[float]`): Minimum similarity score to consider sentences similar (0-1)
+- `similarity_percentile` (`Optional[float]`): Minimum similarity percentile to consider sentences similar (0-100)
+- `max_chunk_size` (`Optional[int]`): Maximum tokens allowed per chunk
+- `initial_sentences` (`Optional[int]`): Number of sentences to start each chunk with
+
+**Methods:**
+
+- `chunk`: Chunks a piece of text using semantic similarity.
+  - **Parameters:**
+    - `text` (`str`): The input text to be chunked.
+  - **Returns:**
+    - `List[SemanticChunk]`: A list of `SemanticChunk` objects containing semantically coherent chunks.
+
+- `chunk_batch`: Chunks a list of strings.
+  - **Parameters:**
+    - `texts` (`List[str]`): A list of input texts to be chunked.
+  - **Returns:**
+    - `List[List[SemanticChunk]]`: A list of lists of `SemanticChunk` objects.
+
+- `__call__`: Takes either a string or a list of strings for chunking.
+  - **Parameters:**
+    - `text` (`Union[str, List[str]]`): The input text or list of texts to be chunked.
+  - **Returns:**
+    - `Union[List[SemanticChunk], List[List[SemanticChunk]]]`: A list of `SemanticChunk` objects or a list of lists of `SemanticChunk` objects.
+
+**Example Usage:**
 
 ```python
 from chonkie import SemanticChunker
@@ -321,17 +404,48 @@ chunker = SemanticChunker(
     max_chunk_size=512,
     similarity_threshold=0.7
 )
+
+# Chunk a single piece of text
+chunks = chunker.chunk("Some text with semantic meaning to chunk appropriately.")
+for chunk in chunks:
+    print(f"Chunk: {chunk.text}")
+    print(f"Number of semantic sentences: {len(chunk.sentences)}")
 ```
-
-**key parameters:**
-
-- `embedding_model`: model for semantic embeddings. This can either be a `str` or a `SentenceTransformer` model. If a `str` is passed, it uses `SentenceTransformer` to load it. 
-- `max_chunk_size`: max size of the chunk received from `SemanticChunker` 
-- `similarity_threshold`: threshold for semantic grouping
 
 ## SDPMChunker
 
 the `SDPMChunker` groups content via the semantic double-pass merging method, which groups paragraphs that are semantically similar even if they do not occur consecutively, by making use of a skip-window.
+
+**Key Parameters:**
+
+- `embedding_model` (`Union[str, SentenceTransformer]`): Model for semantic embeddings, either a model name string or a SentenceTransformer instance
+- `similarity_threshold` (`Optional[float]`): Minimum similarity score to consider sentences similar (0-1)
+- `similarity_percentile` (`Optional[float]`): Minimum similarity percentile to consider sentences similar (0-100)
+- `max_chunk_size` (`Optional[int]`): Maximum tokens allowed per chunk
+- `initial_sentences` (`Optional[int]`): Number of sentences to start each chunk with
+- `skip_window` (`Optional[int]`): Number of chunks to skip when looking for similarities
+
+**Methods:**
+
+- `chunk`: Chunks a piece of text using semantic double-pass merging.
+  - **Parameters:**
+    - `text` (`str`): The input text to be chunked.
+  - **Returns:**
+    - `List[SemanticChunk]`: A list of `SemanticChunk` objects containing semantically coherent chunks.
+
+- `chunk_batch`: Chunks a list of strings.
+  - **Parameters:**
+    - `texts` (`List[str]`): A list of input texts to be chunked.
+  - **Returns:**
+    - `List[List[SemanticChunk]]`: A list of lists of `SemanticChunk` objects.
+
+- `__call__`: Takes either a string or a list of strings for chunking.
+  - **Parameters:**
+    - `text` (`Union[str, List[str]]`): The input text or list of texts to be chunked.
+  - **Returns:**
+    - `Union[List[SemanticChunk], List[List[SemanticChunk]]]`: A list of `SemanticChunk` objects or a list of lists of `SemanticChunk` objects.
+
+**Example Usage:**
 
 ```python
 from chonkie import SDPMChunker
@@ -339,14 +453,16 @@ from chonkie import SDPMChunker
 chunker = SDPMChunker(
     embedding_model="all-minilm-l6-v2",
     max_chunk_size=512,
-    similarity_threshold=0.7, 
+    similarity_threshold=0.7,
     skip_window=1
 )
+
+# Chunk a single piece of text
+chunks = chunker.chunk("Some text with related but non-consecutive content to chunk.")
+for chunk in chunks:
+    print(f"Chunk: {chunk.text}")
+    print(f"Number of semantic sentences: {len(chunk.sentences)}")
 ```
-
-**key parameters:**
-
-- `skip_window`: size of the skip-window the chunker should pay attention to. defaults to 1.
 
 # API Reference
 
