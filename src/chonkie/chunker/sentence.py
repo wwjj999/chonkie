@@ -105,59 +105,42 @@ class SentenceChunker(BaseChunker):
         )
         
         # First, protect periods in known abbreviations
-        text_protected = re.sub(rf"({abbrevs})\.", r"\1@POINT@", text, flags=re.IGNORECASE)
+        text = re.sub(rf"({abbrevs})\.", r"\1@POINT@", text, flags=re.IGNORECASE)
 
         # Protect decimal numbers
-        text_protected = re.sub(r"(\d+)\.(\d+)", r"\1@POINT@\2", text_protected)
+        text = re.sub(r"(\d+)\.(\d+)", r"\1@POINT@\2", text)
 
         # Protect ellipsis
-        text_protected = re.sub(r"\.\.\.", "@ELLIPSIS@", text_protected)
+        text = re.sub(r"\.\.\.", "@ELLIPSIS@", text)
 
         # Protect email addresses and websites
-        text_protected = re.sub(r"([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})", r"@EMAIL@\1@EMAIL@", text_protected)
-        text_protected = re.sub(r"(https?://[^\s]+)", r"@URL@\1@URL@", text_protected)
+        text = re.sub(r"([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})", r"@EMAIL@\1@EMAIL@", text)
+        text = re.sub(r"(https?://[^\s]+)", r"@URL@\1@URL@", text)
 
         # Handle parentheses and brackets
-        text_protected = re.sub(r'\([^)]*\.[^)]*\)', lambda m: m.group().replace('.', '@POINT@'), text_protected)
-        text_protected = re.sub(r'\[[^\]]*\.[^\]]*\]', lambda m: m.group().replace('.', '@POINT@'), text_protected)
+        text = re.sub(r'\([^)]*\.[^)]*\)', lambda m: m.group().replace('.', '@POINT@'), text)
+        text = re.sub(r'\[[^\]]*\.[^\]]*\]', lambda m: m.group().replace('.', '@POINT@'), text)
 
         # Handle quotations with sentence endings
-        text_protected = re.sub(rf'({sent_endings})"(\s+[A-Z])', r'\1"\n\2', text_protected)
+        text = re.sub(rf'({sent_endings})"(\s+[A-Z])', r'\1"\n\2', text)
 
         # Handle standard sentence endings
-        text_protected = re.sub(rf'({sent_endings})(\s+[A-Z"]|\s*$)', r'\1\n\2', text_protected)
+        text = re.sub(rf'({sent_endings})(\s+[A-Z"]|\s*$)', r'\1\n\2', text)
 
         # Handle lists and enumerations
-        text_protected = re.sub(r'(\d+\.)(\s+[A-Z])', r'\1\n\2', text_protected)
-        text_protected = re.sub(r'([a-zA-Z]\.)(\s+[A-Z])', r'\1\n\2', text_protected)
+        text = re.sub(r'(\d+\.)(\s+[A-Z])', r'\1\n\2', text)
+        text = re.sub(r'([a-zA-Z]\.)(\s+[A-Z])', r'\1\n\2', text)
 
         # Restore protected periods and symbols
-        text_protected = text_protected.replace("@POINT@", ".")
-        text_protected = text_protected.replace("@ELLIPSIS@", "...")
-        text_protected = re.sub(r'@EMAIL@([^@]+)@EMAIL@', r'\1', text_protected)
-        text_protected = re.sub(r'@URL@([^@]+)@URL@', r'\1', text_protected)
+        text = text.replace("@POINT@", ".")
+        text = text.replace("@ELLIPSIS@", "...")
+        text = re.sub(r'@EMAIL@([^@]+)@EMAIL@', r'\1', text)
+        text = re.sub(r'@URL@([^@]+)@URL@', r'\1', text)
 
         # Split into sentences
-        split_sentences = [s.strip() for s in text_protected.split('\n') if s.strip()]
-
-        # Track exact positions
-        result_sentences = []
-        current_pos = 0
-
-        for sentence in split_sentences:
-            start_idx = current_pos
-            end_idx = start_idx + len(sentence)
-
-            # Update positions
-            result_sentences.append(Sentence(
-                text=sentence,
-                start_index=start_idx,
-                end_index=end_idx,
-                token_count=len(self._encode_batch([sentence])[0])  # Get token count for the sentence
-            ))
-            current_pos = end_idx + 1  # Account for the newline or space separator
-
-        return result_sentences
+        sentences = [s.strip() for s in text.split('\n') if s.strip()]
+        
+        return sentences
 
     def _get_token_counts(self, sentences: List[str]) -> List[int]:
         """Get token counts for a list of sentences in batch.
@@ -171,15 +154,45 @@ class SentenceChunker(BaseChunker):
         # Batch encode all sentences at once
         encoded_sentences = self._encode_batch(sentences)
         return [len(encoded) for encoded in encoded_sentences]
+    
+    def _prepare_sentences(self, text: str) -> List[Sentence]:
+        """Split text into sentences and calculate token counts for each sentence.
 
+        Args:
+            text: Input text to be split into sentences
+
+        Returns:
+            List of Sentence objects
+        """
+        # Split text into sentences, then calculate token counts
+        sentence_texts = self._split_sentences(text)
+        token_counts = self._get_token_counts(sentence_texts)
+
+        # Create Sentence objects
+        sentences = []
+        start_index = 0  # This works because we don't have overlap between sentences
+
+        for sentence, token_count  in zip(sentence_texts, token_counts):
+            end_index = start_index + len(sentence)
+
+            # Update positions
+            sentences.append(Sentence(
+                text=sentence,
+                start_index=start_index,
+                end_index=end_index,
+                token_count=token_count
+            ))
+            start_index = end_index + 1  # Account for the newline or space separator
+        
+        return sentences
+    
     def _create_chunk(
-        self, sentences: List[Sentence], start_idx: int, token_count: int
+        self, sentences: List[Sentence], token_count: int
     ) -> Chunk:
         """Create a chunk from a list of sentences.
 
         Args:
             sentences: List of sentences to create chunk from
-            start_idx: Starting index in original text
             token_count: Total token count for the chunk
 
         Returns:
@@ -206,7 +219,7 @@ class SentenceChunker(BaseChunker):
         if not text.strip():
             return []
 
-        sentences = self._split_sentences(text)
+        sentences = self._prepare_sentences(text)
         token_counts = [sentence.token_count for sentence in sentences]
 
         chunks = []
@@ -233,7 +246,7 @@ class SentenceChunker(BaseChunker):
                 # Sentence would exceed limits, create chunk if we have enough sentences
                 if len(current_sentences) >= self.min_sentences_per_chunk:
                     chunk = self._create_chunk(
-                        current_sentences, last_chunk_end, current_tokens
+                        current_sentences, current_tokens
                     )
                     chunks.append(chunk)
 
@@ -276,7 +289,7 @@ class SentenceChunker(BaseChunker):
         # Handle remaining sentences
         if current_sentences:
             chunk = self._create_chunk(
-                current_sentences, last_chunk_end, current_tokens
+                current_sentences, current_tokens
             )
             chunks.append(chunk)
 
