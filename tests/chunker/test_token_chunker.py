@@ -1,3 +1,4 @@
+from typing import List
 import pytest
 import tiktoken
 from tokenizers import Tokenizer
@@ -196,6 +197,28 @@ def test_token_chunker_call(tokenizer, sample_text):
     assert all([chunk.start_index is not None for chunk in chunks])
     assert all([chunk.end_index is not None for chunk in chunks])
 
+def verify_chunk_indices(chunks: List[Chunk], original_text: str):
+    """Verify that chunk indices correctly map to the original text."""
+    for i, chunk in enumerate(chunks):
+        # Extract text using the indices
+        extracted_text = original_text[chunk.start_index:chunk.end_index]
+        # Remove any leading/trailing whitespace from both texts for comparison
+        chunk_text = chunk.text.strip()
+        extracted_text = extracted_text.strip()
+        
+        assert chunk_text == extracted_text, (
+            f"Chunk {i} text mismatch:\n"
+            f"Chunk text: '{chunk_text}'\n"
+            f"Extracted text: '{extracted_text}'\n"
+            f"Indices: [{chunk.start_index}:{chunk.end_index}]"
+        )
+
+def test_token_chunker_indices(sample_text):
+    """Test that TokenChunker's indices correctly map to original text."""
+    tokenizer = Tokenizer.from_pretrained("gpt2")
+    chunker = TokenChunker(tokenizer=tokenizer, chunk_size=512, chunk_overlap=128)
+    chunks = chunker.chunk(sample_text)
+    verify_chunk_indices(chunks, sample_text)
 
 if __name__ == "__main__":
     pytest.main()
