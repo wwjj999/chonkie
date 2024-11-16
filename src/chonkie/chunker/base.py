@@ -6,8 +6,8 @@ from typing import List, Union
 from multiprocessing import Pool, cpu_count
 import warnings
 
-@dataclass
-class Chunk:
+@dataclass(slots=True)
+class Chunk():
     """Dataclass representing a text chunk with metadata."""
 
     text: str

@@ -5,7 +5,7 @@ from typing import Any, List, Union
 from .base import BaseChunker, Chunk
 
 
-@dataclass
+@dataclass(slots=True)
 class Sentence:
     text: str
     start_index: int
@@ -13,7 +13,7 @@ class Sentence:
     token_count: int
 
 
-@dataclass
+@dataclass(slots=True)
 class SentenceChunk(Chunk):
     text: str
     start_index: int
