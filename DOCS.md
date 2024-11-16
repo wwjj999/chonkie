@@ -70,7 +70,7 @@ What you could infer from the table is that, while it might be of inconvinience 
 
 ```python
 from chonkie import TokenChunker
-from tokenizers import tokenizer
+from tokenizers import Tokenizer
 
 # initialize tokenizer
 tokenizer = tokenizer.from_pretrained("gpt2")
