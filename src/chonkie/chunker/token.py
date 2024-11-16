@@ -49,11 +49,13 @@ class TokenChunker(BaseChunker):
 
         # Encode full text
         text_tokens = self._encode(text)
+        decoded_text = self._decode(text_tokens)
         chunks = []
 
         # Calculate chunk positions
         start_indices = range(0, len(text_tokens), self.chunk_size - self.chunk_overlap)
 
+        current_char_pos = 0
         for start_idx in start_indices:
             # Get token indices for this chunk
             end_idx = min(start_idx + self.chunk_size, len(text_tokens))
@@ -62,11 +64,16 @@ class TokenChunker(BaseChunker):
             chunk_tokens = text_tokens[start_idx:end_idx]
             chunk_text = self._decode(chunk_tokens)
 
+            # Calculate character-based indices
+            chunk_start_char = decoded_text.find(chunk_text, current_char_pos)
+            chunk_end_char = chunk_start_char + len(chunk_text)
+            current_char_pos = chunk_end_char
+
             chunks.append(
                 Chunk(
                     text=chunk_text,
-                    start_index=start_idx,
-                    end_index=end_idx,
+                    start_index=chunk_start_char,
+                    end_index=chunk_end_char,
                     token_count=len(chunk_tokens),
                 )
             )
