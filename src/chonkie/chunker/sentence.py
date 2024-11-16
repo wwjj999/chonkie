@@ -105,66 +105,58 @@ class SentenceChunker(BaseChunker):
         )
         
         # First, protect periods in known abbreviations
-        text = re.sub(rf"({abbrevs})\.", r"\1@POINT@", text, flags=re.IGNORECASE)
-        
+        text_protected = re.sub(rf"({abbrevs})\.", r"\1@POINT@", text, flags=re.IGNORECASE)
+
         # Protect decimal numbers
-        text = re.sub(r"(\d+)\.(\d+)", r"\1@POINT@\2", text)
-        
+        text_protected = re.sub(r"(\d+)\.(\d+)", r"\1@POINT@\2", text_protected)
+
         # Protect ellipsis
-        text = re.sub(r"\.{3}", "@ELLIPSIS@", text)
-        
+        text_protected = re.sub(r"\.\.\.", "@ELLIPSIS@", text_protected)
+
         # Protect email addresses and websites
-        text = re.sub(r"([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})", r"@EMAIL@\1@EMAIL@", text)
-        text = re.sub(r"(https?://[^\s]+)", r"@URL@\1@URL@", text)
-        
+        text_protected = re.sub(r"([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})", r"@EMAIL@\1@EMAIL@", text_protected)
+        text_protected = re.sub(r"(https?://[^\s]+)", r"@URL@\1@URL@", text_protected)
+
         # Handle parentheses and brackets
-        text = re.sub(r'\([^)]*\.[^)]*\)', lambda m: m.group().replace('.', '@POINT@'), text)
-        text = re.sub(r'\[[^\]]*\.[^\]]*\]', lambda m: m.group().replace('.', '@POINT@'), text)
-        
+        text_protected = re.sub(r'\([^)]*\.[^)]*\)', lambda m: m.group().replace('.', '@POINT@'), text_protected)
+        text_protected = re.sub(r'\[[^\]]*\.[^\]]*\]', lambda m: m.group().replace('.', '@POINT@'), text_protected)
+
         # Handle quotations with sentence endings
-        text = re.sub(rf'({sent_endings})"(\s+[A-Z])', r'\1"\n\2', text)
-        
+        text_protected = re.sub(rf'({sent_endings})"(\s+[A-Z])', r'\1"\n\2', text_protected)
+
         # Handle standard sentence endings
-        text = re.sub(rf'({sent_endings})(\s+[A-Z"])', r'\1\n\2', text)
-        text = re.sub(rf'({sent_endings})(\s*$)', r'\1\n', text)
-        
+        text_protected = re.sub(rf'({sent_endings})(\s+[A-Z"]|\s*$)', r'\1\n\2', text_protected)
+
         # Handle lists and enumerations
-        text = re.sub(r'(\d+\.)(\s+[A-Z])', r'\1\n\2', text)
-        text = re.sub(r'([a-zA-Z]\.)(\s+[A-Z])', r'\1\n\2', text)
-        
-        # Handle special cases
-        text = re.sub(rf'({sent_endings})\s*([);:,"])*\s*(\n|\s*$)', r'\1\2\n', text)
-        
+        text_protected = re.sub(r'(\d+\.)(\s+[A-Z])', r'\1\n\2', text_protected)
+        text_protected = re.sub(r'([a-zA-Z]\.)(\s+[A-Z])', r'\1\n\2', text_protected)
+
         # Restore protected periods and symbols
-        text = text.replace("@POINT@", ".")
-        text = text.replace("@ELLIPSIS@", "...")
-        text = re.sub(r'@EMAIL@([^@]+)@EMAIL@', r'\1', text)
-        text = re.sub(r'@URL@([^@]+)@URL@', r'\1', text)
-        
-        # Split into sentences and clean up
-        sentences = [s.strip() for s in text.split('\n') if s.strip()]
-        
-        # Get token counts for sentences
-        token_counts = self._get_token_counts(sentences)
-        
-        # Create Sentence objects
+        text_protected = text_protected.replace("@POINT@", ".")
+        text_protected = text_protected.replace("@ELLIPSIS@", "...")
+        text_protected = re.sub(r'@EMAIL@([^@]+)@EMAIL@', r'\1', text_protected)
+        text_protected = re.sub(r'@URL@([^@]+)@URL@', r'\1', text_protected)
+
+        # Split into sentences
+        split_sentences = [s.strip() for s in text_protected.split('\n') if s.strip()]
+
+        # Track exact positions
         result_sentences = []
         current_pos = 0
-        for sent, token_count in zip(sentences, token_counts):
-            # Find the actual position in original text
-            start_idx = text.find(sent, current_pos)
-            end_idx = start_idx + len(sent)
-            current_pos = end_idx
-            
-            result_sentences.append(
-                Sentence(
-                    text=sent,
-                    start_index=start_idx,
-                    end_index=end_idx,
-                    token_count=token_count
-                )
-            )
-        
+
+        for sentence in split_sentences:
+            start_idx = current_pos
+            end_idx = start_idx + len(sentence)
+
+            # Update positions
+            result_sentences.append(Sentence(
+                text=sentence,
+                start_index=start_idx,
+                end_index=end_idx,
+                token_count=len(self._encode_batch([sentence])[0])  # Get token count for the sentence
+            ))
+            current_pos = end_idx + 1  # Account for the newline or space separator
+
         return result_sentences
 
     def _get_token_counts(self, sentences: List[str]) -> List[int]:
@@ -196,8 +188,8 @@ class SentenceChunker(BaseChunker):
         chunk_text = " ".join([sentence.text for sentence in sentences])
         return SentenceChunk(
             text=chunk_text,
-            start_index=start_idx,
-            end_index=start_idx + token_count,
+            start_index=sentences[0].start_index,
+            end_index=sentences[-1].end_index,
             token_count=token_count,
             sentences=sentences,
         )
