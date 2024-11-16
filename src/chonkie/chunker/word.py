@@ -204,49 +204,72 @@ class WordChunker(BaseChunker):
         lengths = self._get_word_list_token_counts(words)
         chunks = []
 
-        # Saving the current chunk
+        # Track character-based indices
+        word_char_positions = []
+        current_char_pos = 0
+
+        for word in words:
+            start_idx = current_char_pos
+            end_idx = start_idx + len(word)
+            word_char_positions.append((start_idx, end_idx))
+            current_char_pos = end_idx + 1  # Account for space separator
+
         current_chunk = []
-        current_chunk_length = 0
+        current_chunk_token_count = 0
 
-        for i, (word, length) in enumerate(zip(words, lengths)):
-            if current_chunk_length + length <= self.chunk_size:
-                current_chunk.append(word)
-                current_chunk_length += length
+        for i, (word, token_count) in enumerate(zip(words, lengths)):
+            # Add word to the current chunk
+            if current_chunk_token_count + token_count <= self.chunk_size:
+                current_chunk.append(i)
+                current_chunk_token_count += token_count
             else:
-                chunk = self._create_chunk(current_chunk, i - len(current_chunk), i - 1)
-                chunks.append(chunk)
+                # Finalize the current chunk
+                chunk_start_idx = word_char_positions[current_chunk[0]][0]
+                chunk_end_idx = word_char_positions[current_chunk[-1]][1]
+                chunk_text = text[chunk_start_idx:chunk_end_idx]
 
-                # update the current_chunk and previous chunk
-                previous_chunk_length = current_chunk_length
+                chunks.append(
+                    Chunk(
+                        text=chunk_text,
+                        start_index=chunk_start_idx,
+                        end_index=chunk_end_idx,
+                        token_count=current_chunk_token_count,
+                    )
+                )
 
-                current_chunk = []
-                current_chunk_length = 0
-
+                # Handle overlap
                 overlap = []
-                overlap_length = 0
-                # calculate the overlap from the current chunk in reverse
-                for j in range(0, previous_chunk_length):
-                    cwi = i - 1 - j
-                    oword = words[cwi]
-                    olength = lengths[cwi]
-                    if overlap_length + olength <= self.chunk_overlap:
-                        overlap.append(oword)
-                        overlap_length += olength
+                overlap_token_count = 0
+
+                for j in reversed(current_chunk):
+                    if overlap_token_count + lengths[j] <= self.chunk_overlap:
+                        overlap.insert(0, j)
+                        overlap_token_count += lengths[j]
                     else:
                         break
 
-                current_chunk = [w for w in reversed(overlap)]
-                current_chunk_length = overlap_length
+                current_chunk = overlap
+                current_chunk_token_count = overlap_token_count
 
-                current_chunk.append(word)
-                current_chunk_length += length
+                # Add the new word to the chunk
+                current_chunk.append(i)
+                current_chunk_token_count += token_count
 
-        # Add the final chunk if it has any words
+        # Add the final chunk
         if current_chunk:
-            chunk = self._create_chunk(
-                current_chunk, len(words) - len(current_chunk), len(words) - 1
+            chunk_start_idx = word_char_positions[current_chunk[0]][0]
+            chunk_end_idx = word_char_positions[current_chunk[-1]][1]
+            chunk_text = text[chunk_start_idx:chunk_end_idx]
+
+            chunks.append(
+                Chunk(
+                    text=chunk_text,
+                    start_index=chunk_start_idx,
+                    end_index=chunk_end_idx,
+                    token_count=current_chunk_token_count,
+                )
             )
-            chunks.append(chunk)
+
         return chunks
 
     def __repr__(self) -> str:
