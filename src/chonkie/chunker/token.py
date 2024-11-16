@@ -49,39 +49,31 @@ class TokenChunker(BaseChunker):
 
         # Encode full text
         text_tokens = self._encode(text)
-        decoded_text = self._decode(text_tokens)
-        chunks = []
+
+        # We decode the text because the tokenizer might result in a different output than text
+        decoded_text = self._decode(text_tokens) 
 
         # Calculate chunk positions
-        start_indices = range(0, len(text_tokens), self.chunk_size - self.chunk_overlap)
+        token_groups = [text_tokens[start_index: min(start_index + self.chunk_size, len(text_tokens))]
+                          for start_index in range(0, len(text_tokens), self.chunk_size - self.chunk_overlap)]
+        token_counts = [len(toks) for toks in token_groups] # get the token counts; it's prolly chunk_size, but len doesn't take too long
 
-        current_char_pos = 0
-        for start_idx in start_indices:
-            # Get token indices for this chunk
-            end_idx = min(start_idx + self.chunk_size, len(text_tokens))
+        chunk_texts = self._decode_batch(token_groups) # decrease the time by decoding in one go (?)
 
-            # Extract and decode tokens for this chunk
-            chunk_tokens = text_tokens[start_idx:end_idx]
-            chunk_text = self._decode(chunk_tokens)
-
-            # Calculate character-based indices
-            chunk_start_char = decoded_text.find(chunk_text, current_char_pos)
-            chunk_end_char = chunk_start_char + len(chunk_text)
-            current_char_pos = chunk_end_char
-
+        # package everything as Chunk objects and send out the result
+        chunks = []
+        for chunk_text, token_count in zip(chunk_texts, token_counts):
+            start_index = decoded_text.find(chunk_text)  # Find needs to be run every single time because of unknown overlap length
+            end_index = start_index + len(chunk_text)
             chunks.append(
                 Chunk(
-                    text=chunk_text,
-                    start_index=chunk_start_char,
-                    end_index=chunk_end_char,
-                    token_count=len(chunk_tokens),
+                    text=chunk_text, 
+                    start_index=start_index, 
+                    end_index=end_index, 
+                    token_count=token_count
                 )
             )
-
-            # Break if we've reached the end of the text
-            if end_idx == len(text_tokens):
-                break
-
+        
         return chunks
     
     def _chunk_generator(self, tokens: List[int]) -> Generator[Tuple[List[int], int, int], None, None]:
