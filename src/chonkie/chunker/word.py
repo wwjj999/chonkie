@@ -1,18 +1,14 @@
 import re
-from typing import List, Tuple
-
-from tokenizers import Tokenizer
-
+from typing import List, Tuple, Union, Any
 from .base import BaseChunker, Chunk
 
 
 class WordChunker(BaseChunker):
     def __init__(
         self,
-        tokenizer: Tokenizer,
+        tokenizer: Union[str, Any] = "gpt2",
         chunk_size: int = 512,
         chunk_overlap: int = 128,
-        mode: str = "simple",
     ):
         """Initialize the WordChunker with configuration parameters.
 
@@ -31,12 +27,9 @@ class WordChunker(BaseChunker):
             raise ValueError("chunk_size must be positive")
         if chunk_overlap >= chunk_size:
             raise ValueError("chunk_overlap must be less than chunk_size")
-        if mode not in ["simple", "advanced"]:
-            raise ValueError("mode must be either 'heuristic' or 'advanced'")
 
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
-        self.mode = mode
 
     def _split_into_words(self, text: str) -> List[str]:
         """Split text into words based on the selected mode.
@@ -47,112 +40,10 @@ class WordChunker(BaseChunker):
         Returns:
             List of words
         """
-        if self.mode == "simple":
-            # Simple space-based splitting
-            return text.split()
-        elif self.mode == "advanced":
-            # Advanced tokenization handling various cases
-
-            # Replace common abbreviations with placeholders to preserve periods
-            abbreviations = {
-                r"(?i)mr\.": "MR_ABBR",
-                r"(?i)mrs\.": "MRS_ABBR",
-                r"(?i)ms\.": "MS_ABBR",
-                r"(?i)dr\.": "DR_ABBR",
-                r"(?i)prof\.": "PROF_ABBR",
-                r"(?i)sr\.": "SR_ABBR",
-                r"(?i)jr\.": "JR_ABBR",
-                r"(?i)vs\.": "VS_ABBR",
-                r"(?i)etc\.": "ETC_ABBR",
-                r"(?i)i\.e\.": "IE_ABBR",
-                r"(?i)e\.g\.": "EG_ABBR",
-                # Add numbers with decimal points
-                r"(\d+)\.(\d+)": r"\1_DECIMAL_\2",
-            }
-
-            processed_text = text
-            for pattern, replacement in abbreviations.items():
-                processed_text = re.sub(pattern, replacement, processed_text)
-
-            # Split on word boundaries while preserving all punctuation
-            # This regex handles:
-            # - Words (\w+)
-            # - Contractions (word's, don't, etc.)
-            # - Hyphenated words (self-aware)
-            # - Various punctuation marks
-            words = re.findall(
-                r"\b[A-Za-z0-9]+(?:[-'][A-Za-z0-9]+)*\b"  # Words with possible hyphens/apostrophes
-                r"|[.,!?;:\"'(){}[\]]+"  # Punctuation groups
-                r"|\.{3}"  # Ellipsis
-                r"|--+"  # Em/En dashes
-                r"|'[A-Za-z]+"  # Starting contractions like 'tis
-                r"|[A-Za-z]+'"  # Ending contractions like ol'
-                r"|[@#$%&*+=/<>~^]",  # Special characters
-                processed_text,
-            )
-
-            # Process the words
-            final_words = []
-            skip_next = False
-
-            for i, word in enumerate(words):
-                if skip_next:
-                    skip_next = False
-                    continue
-
-                # Restore abbreviations
-                for abbr, placeholder in abbreviations.items():
-                    if placeholder in word:
-                        word = re.sub(r"_ABBR$", ".", word)
-                        word = re.sub(r"_DECIMAL_", ".", word)
-
-                # Handle punctuation
-                if word in ".,!?;:\"'(){}[]":
-                    if final_words:  # Attach punctuation to previous word
-                        # Don't attach if previous word already ends with punctuation
-                        if final_words[-1][-1] not in ".,!?;:\"'(){}[]":
-                            final_words[-1] += word
-                        else:
-                            final_words.append(word)
-                    else:
-                        final_words.append(word)
-
-                # Handle ellipsis
-                elif word == "...":
-                    if final_words:
-                        final_words[-1] += word
-                    else:
-                        final_words.append(word)
-
-                # Handle dashes between words
-                elif word.startswith("-") and i > 0:
-                    if i < len(words) - 1 and re.match(r"\w+", words[i + 1]):
-                        final_words[-1] += word + words[i + 1]
-                        skip_next = True
-                    else:
-                        final_words.append(word)
-
-                # Regular words
-                else:
-                    final_words.append(word)
-
-            return final_words
-        else:
-            raise ValueError("mode must be either 'heuristic' or 'advanced'")
-
-    def _get_token_count(self, text: str) -> int:
-        """Get the number of tokens in a text string.
-
-        Args:
-            text: Input text
-
-        Returns:
-            Number of tokens
-        """
-        return len(self._encode(text))
+        return re.findall(r"\S+", text)
 
     def _create_chunk(
-        self, words: List[str], start_idx: int, end_idx: int
+        self, words: List[str], text:str, token_count: int
     ) -> Tuple[Chunk, int]:
         """Create a chunk from a list of words.
 
@@ -165,12 +56,12 @@ class WordChunker(BaseChunker):
             Tuple of (Chunk object, number of tokens in chunk)
         """
         chunk_text = " ".join(words)
-        token_count = self._get_token_count(chunk_text)
+        start_index = text.find(chunk_text)
         return Chunk(
             text=chunk_text,
-            start_index=start_idx,
-            end_index=end_idx,
-            token_count=token_count,
+            start_index=start_index,
+            end_index=start_index + len(chunk_text),
+            token_count=token_count
         )
 
     def _get_word_list_token_counts(self, words: List[str]) -> List[int]:
@@ -213,7 +104,7 @@ class WordChunker(BaseChunker):
                 current_chunk.append(word)
                 current_chunk_length += length
             else:
-                chunk = self._create_chunk(current_chunk, i - len(current_chunk), i - 1)
+                chunk = self._create_chunk(current_chunk, text, current_chunk_length)
                 chunks.append(chunk)
 
                 # update the current_chunk and previous chunk
@@ -244,7 +135,7 @@ class WordChunker(BaseChunker):
         # Add the final chunk if it has any words
         if current_chunk:
             chunk = self._create_chunk(
-                current_chunk, len(words) - len(current_chunk), len(words) - 1
+                current_chunk, text, current_chunk_length
             )
             chunks.append(chunk)
         return chunks
@@ -252,5 +143,5 @@ class WordChunker(BaseChunker):
     def __repr__(self) -> str:
         return (
             f"WordChunker(chunk_size={self.chunk_size}, "
-            f"chunk_overlap={self.chunk_overlap}, mode='{self.mode}')"
+            f"chunk_overlap={self.chunk_overlap})"
         )

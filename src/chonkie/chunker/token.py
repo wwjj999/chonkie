@@ -1,4 +1,4 @@
-from typing import Any, List, Union
+from typing import Any, List, Union, Generator, Tuple
 
 from .base import BaseChunker, Chunk
 
@@ -49,34 +49,88 @@ class TokenChunker(BaseChunker):
 
         # Encode full text
         text_tokens = self._encode(text)
-        chunks = []
+
+        # We decode the text because the tokenizer might result in a different output than text
+        decoded_text = self._decode(text_tokens) 
 
         # Calculate chunk positions
-        start_indices = range(0, len(text_tokens), self.chunk_size - self.chunk_overlap)
+        token_groups = [text_tokens[start_index: min(start_index + self.chunk_size, len(text_tokens))]
+                          for start_index in range(0, len(text_tokens), self.chunk_size - self.chunk_overlap)]
+        token_counts = [len(toks) for toks in token_groups] # get the token counts; it's prolly chunk_size, but len doesn't take too long
 
-        for start_idx in start_indices:
-            # Get token indices for this chunk
-            end_idx = min(start_idx + self.chunk_size, len(text_tokens))
+        chunk_texts = self._decode_batch(token_groups) # decrease the time by decoding in one go (?)
 
-            # Extract and decode tokens for this chunk
-            chunk_tokens = text_tokens[start_idx:end_idx]
-            chunk_text = self._decode(chunk_tokens)
-
+        # package everything as Chunk objects and send out the result
+        chunks = []
+        for chunk_text, token_count in zip(chunk_texts, token_counts):
+            start_index = decoded_text.find(chunk_text)  # Find needs to be run every single time because of unknown overlap length
+            end_index = start_index + len(chunk_text)
             chunks.append(
                 Chunk(
-                    text=chunk_text,
-                    start_index=start_idx,
-                    end_index=end_idx,
-                    token_count=len(chunk_tokens),
+                    text=chunk_text, 
+                    start_index=start_index, 
+                    end_index=end_index, 
+                    token_count=token_count
                 )
             )
-
-            # Break if we've reached the end of the text
-            if end_idx == len(text_tokens):
+        
+        return chunks
+    
+    def _chunk_generator(self, tokens: List[int]) -> Generator[Tuple[List[int], int, int], None, None]:
+        stride = self.chunk_size - self.chunk_overlap
+        for start in range(0, len(tokens), stride):
+            end = min(start + self.chunk_size, len(tokens))
+            yield tokens[start:end], start, end
+            if end == len(tokens):
                 break
 
-        return chunks
+    def _process_batch(self, chunks: List[Tuple[List[int], int, int]]) -> List[Chunk]:
+        token_lists = [tokens for tokens, _, _ in chunks]
+        texts = self._decode_batch(token_lists)
+        
+        return [
+            Chunk(text=text, start_index=start, end_index=end, token_count=end-start)
+            for text, (_, start, end) in zip(texts, chunks)
+        ]
+    
+    def _process_text_batch(self, texts: List[str]) -> List[List[Chunk]]:
+        tokens_list = self._encode_batch(texts)
+        result = []
+        
+        for tokens in tokens_list:
+            if not tokens:
+                result.append([])
+                continue
 
+            chunks = []
+            chunk_batch = []
+            
+            for chunk_data in self._chunk_generator(tokens):
+                chunk_batch.append(chunk_data)
+            
+            chunks.extend(self._process_batch(chunk_batch))
+            result.append(chunks)
+            
+        return result
+    
+    def chunk_batch(self, texts: List[str], batch_size: int = None) -> List[List[Chunk]]:
+        """Split a batch of texts into their respective chunks.
+
+        Args:
+            texts: List of input texts to be chunked
+
+        Returns:
+            List of lists of Chunk objects containing the chunked text and metadata
+        """
+        if batch_size is not None:
+            chunks = []
+            for i in range(0, len(texts), batch_size):
+                batch_texts = texts[i:min(i+batch_size, len(texts))]
+                chunks.extend(self._process_text_batch(batch_texts))
+            return chunks
+        else:
+            return self._process_text_batch(texts)
+    
     def __repr__(self) -> str:
         return (
             f"TokenChunker(chunk_size={self.chunk_size}, "

@@ -10,7 +10,7 @@ from .base import BaseChunker
 from .sentence import Sentence, SentenceChunk
 
 
-@dataclass
+@dataclass(slots=True)
 class SemanticSentence(Sentence):
     text: str
     start_index: int
@@ -19,7 +19,7 @@ class SemanticSentence(Sentence):
     embedding: Optional[np.ndarray] = None
 
 
-@dataclass
+@dataclass(slots=True)
 class SemanticChunk(SentenceChunk):
     text: str
     start_index: int
