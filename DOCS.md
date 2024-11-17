@@ -70,14 +70,10 @@ What you could infer from the table is that, while it might be of inconvinience 
 
 ```python
 from chonkie import TokenChunker
-from tokenizers import Tokenizer
-
-# initialize tokenizer
-tokenizer = tokenizer.from_pretrained("gpt2")
 
 # create chunker
 chunker = TokenChunker(
-    tokenizer=tokenizer,
+    tokenizer="gpt2", # You can pass your desired tokenizer
     chunk_size=512,
     chunk_overlap=128
 )
