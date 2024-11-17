@@ -3,7 +3,7 @@ from .chunker import (BaseChunker, Chunk, SDPMChunker, SemanticChunk,
                       SentenceChunk, SentenceChunker, TokenChunker,
                       WordChunker)
 
-__version__ = "0.1.3"
+__version__ = "0.2.0"
 __name__ = "chonkie"
 __author__ = "Bhavnick Minhas"
 
