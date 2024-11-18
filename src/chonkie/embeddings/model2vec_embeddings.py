@@ -42,6 +42,12 @@ class Model2VecEmbeddings(BaseEmbeddings):
     def dimension(self) -> int:
         return self.model.get_sentence_embedding_dimension()
 
+    def count_tokens(self, text: str) -> int:
+        return super().count_tokens(text)
+
+    def count_tokens_batch(self, texts: List[str]) -> List[int]:
+        return super().count_tokens_batch(texts)
+
     @classmethod
     def is_available(cls) -> bool:
         """Check if the SentenceTransformer and StaticEmbedding dependencies are available."""
