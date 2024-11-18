@@ -5,22 +5,46 @@ from typing import Any, List, Union
 from .base import BaseChunker, Chunk
 
 
-@dataclass(slots=True)
+@dataclass
 class Sentence:
+    """Dataclass representing a sentence with metadata.
+    
+    All attributes are read-only via slots for performance reasons.
+
+    Attributes:
+        text: The text content of the sentence
+        start_index: The starting index of the sentence in the original text
+        end_index: The ending index of the sentence in the original text
+        token_count: The number of tokens in the sentence
+    """
     text: str
     start_index: int
     end_index: int
     token_count: int
+    __slots__= ["text", "start_index", "end_index", "token_count"]
 
-
-@dataclass(slots=True)
+@dataclass
 class SentenceChunk(Chunk):
-    text: str
-    start_index: int
-    end_index: int
-    token_count: int
-    sentences: List[Sentence] = None
+    """Dataclass representing a sentence chunk with metadata.
 
+    All attributes are read-only via slots for performance reasons.
+
+    Attributes:
+        text: The text content of the chunk
+        start_index: The starting index of the chunk in the original text
+        end_index: The ending index of the chunk in the original text
+        token_count: The number of tokens in the chunk
+        sentences: List of Sentence objects in the chunk
+    """
+    # Don't redeclare inherited fields
+    sentences: List[Sentence]
+    
+    __slots__ = ['sentences']
+
+    def __init__(self, text: str, start_index: int, end_index: int, 
+                 token_count: int, sentences: List[Sentence] = None):
+        super().__init__(text, start_index, end_index, token_count)
+        object.__setattr__(self, 'sentences', sentences if sentences is not None else [])
 
 class SentenceChunker(BaseChunker):
     """

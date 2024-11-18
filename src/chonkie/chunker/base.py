@@ -6,15 +6,24 @@ from typing import List, Union
 from multiprocessing import Pool, cpu_count
 import warnings
 
-@dataclass(slots=True)
+@dataclass
 class Chunk():
-    """Dataclass representing a text chunk with metadata."""
+    """Dataclass representing a text chunk with metadata. 
+    
+    All attributes are read-only via slots for performance reasons.
+    
+    Attributes:
+        text: The text content of the chunk
+        start_index: The starting index of the chunk in the original text
+        end_index: The ending index of the chunk in the original text
+        token_count: The number of tokens in the chunk
+    """
 
     text: str
     start_index: int
     end_index: int
     token_count: int
-
+    __slots__ = ["text", "start_index", "end_index", "token_count"]
 
 class BaseChunker(ABC):
     """Abstract base class for all chunker implementations.
