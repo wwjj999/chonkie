@@ -1,7 +1,7 @@
 import importlib.util
 import re
 import warnings
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, List, Optional, Union
 
 import numpy as np
@@ -10,23 +10,51 @@ from .base import BaseChunker
 from .sentence import Sentence, SentenceChunk
 
 
-@dataclass(slots=True)
+@dataclass
 class SemanticSentence(Sentence):
-    text: str
-    start_index: int
-    end_index: int
-    token_count: int
-    embedding: Optional[np.ndarray] = None
+    """Dataclass representing a semantic sentence with metadata.
 
+    All attributes are read-only via slots for performance reasons.
 
-@dataclass(slots=True)
+    Attributes:
+        text: The text content of the sentence
+        start_index: The starting index of the sentence in the original text
+        end_index: The ending index of the sentence in the original text
+        token_count: The number of tokens in the sentence
+        embedding: The sentence embedding
+    """
+    embedding: Optional[np.ndarray]
+    
+    # Only define new slots, not the ones inherited from Sentence
+    __slots__ = ['embedding',]
+    
+    def __init__(self, text: str, start_index: int, end_index: int, 
+                 token_count: int, embedding: Optional[np.ndarray] = None):
+        super().__init__(text, start_index, end_index, token_count)
+        object.__setattr__(self, 'embedding', embedding if embedding is not None else None)
+
+@dataclass
 class SemanticChunk(SentenceChunk):
-    text: str
-    start_index: int
-    end_index: int
-    token_count: int
-    sentences: List[SemanticSentence] = None
+    """SemanticChunk dataclass representing a semantic chunk with metadata.
 
+    All attributes are read-only via slots for performance reasons.
+
+    Attributes:
+        text: The text content of the chunk
+        start_index: The starting index of the chunk in the original text
+        end_index: The ending index of the chunk in the original text
+        token_count: The number of tokens in the chunk
+        sentences: List of SemanticSentence objects in the chunk
+    """
+    sentences: List[SemanticSentence] = field(default_factory=list)
+    
+    # No new slots needed since we're just overriding the sentences field
+    __slots__ = []
+    
+    def __init__(self, text: str, start_index: int, end_index: int, 
+                 token_count: int, sentences: List[SemanticSentence] = None):
+        super().__init__(text, start_index, end_index, token_count)
+        object.__setattr__(self, 'sentences', sentences if sentences is not None else [])
 
 class SemanticChunker(BaseChunker):
     def __init__(
