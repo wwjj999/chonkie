@@ -49,7 +49,7 @@ class BaseChunker(ABC):
             self.tokenizer = tokenizer
             self._tokenizer_backend = self._get_tokenizer_backend()
             self.token_counter = self._get_tokenizer_counter()
-            
+
     def _get_tokenizer_backend(self):
         """Return the backend tokenizer object."""
         if "transformers" in str(type(self.tokenizer)):
@@ -160,6 +160,14 @@ class BaseChunker(ABC):
             return [self.tokenizer.decode(tokens) for tokens in token_lists]
         else:
             raise ValueError("Tokenizer backend not supported.")
+    
+    def _count_tokens(self, text: str) -> int:
+        """Count tokens in text using the backend tokenizer."""
+        return self.token_counter(text)
+    
+    def _count_tokens_batch(self, texts: List[str]) -> List[int]:
+        """Count tokens in multiple texts using the backend tokenizer."""
+        return [self.token_counter(text) for text in texts]
 
     @abstractmethod
     def chunk(self, text: str) -> List[Chunk]:
