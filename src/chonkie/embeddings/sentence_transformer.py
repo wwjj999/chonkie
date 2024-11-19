@@ -1,5 +1,5 @@
 from typing import List, Union, TYPE_CHECKING
-import importlib
+import importlib.util
 
 from chonkie.embeddings.base import BaseEmbeddings
 
@@ -19,7 +19,7 @@ class SentenceTransformerEmbeddings(BaseEmbeddings):
         model (str): Name of the SentenceTransformer model to load
     """
 
-    def __init__(self, model: Union[str, "SentenceTransformer"] = "all-MiniLM-L6-v2") -> None:
+    def __init__(self, model: Union[str, "SentenceTransformer"] = "all-MiniLM-L6-v2", use_model2vec=False) -> None:
         """Initialize SentenceTransformerEmbeddings with a sentence-transformers model.
         
         Args:
@@ -35,7 +35,19 @@ class SentenceTransformerEmbeddings(BaseEmbeddings):
 
         if isinstance(model, str):
             self.model_name_or_path = model
-            self.model = SentenceTransformer(self.model_name_or_path)
+            if use_model2vec:
+                try:
+                    import model2vec
+                except:
+                    raise ImportError(
+                        "model2vec is not available. Please install it via pip."
+                    )
+                from sentence_transformers.models import StaticEmbedding
+
+                _static_embedding = StaticEmbedding.from_model2vec(model)
+                self.model = SentenceTransformer(modules=[_static_embedding])
+            else:
+                self.model = SentenceTransformer(self.model_name_or_path)
         elif isinstance(model, SentenceTransformer):
             self.model = model
             self.model_name_or_path = self.model.model_card_data.base_model
