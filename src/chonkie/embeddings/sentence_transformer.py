@@ -19,7 +19,7 @@ class SentenceTransformerEmbeddings(BaseEmbeddings):
         model (str): Name of the SentenceTransformer model to load
     """
 
-    def __init__(self, model: Union[str, "SentenceTransformer"] = "all-MiniLM-L6-v2"):
+    def __init__(self, model: Union[str, "SentenceTransformer"] = "all-MiniLM-L6-v2") -> None:
         """Initialize SentenceTransformerEmbeddings with a sentence-transformers model.
         
         Args:
@@ -29,6 +29,9 @@ class SentenceTransformerEmbeddings(BaseEmbeddings):
         
         if not self.is_available():
             raise ImportError("SentenceTransformer is not available. Please install it via pip.")
+        else:
+            global SentenceTransformer
+            from sentence_transformers import SentenceTransformer
 
         if isinstance(model, str):
             self.model_name_or_path = model
@@ -41,11 +44,11 @@ class SentenceTransformerEmbeddings(BaseEmbeddings):
 
         self._dimension = self.model.get_sentence_embedding_dimension()
         
-    def embed(self, text: str) -> np.ndarray:
+    def embed(self, text: str) -> "np.ndarray":
         """Embed a single text using the sentence-transformers model."""
         return self.model.encode(text, convert_to_numpy=True)
     
-    def embed_batch(self, texts: List[str]) -> List[np.ndarray]:
+    def embed_batch(self, texts: List[str]) -> List["np.ndarray"]:
         """Embed multiple texts using the sentence-transformers model."""
         return self.model.encode(texts, convert_to_numpy=True)
     
@@ -58,7 +61,7 @@ class SentenceTransformerEmbeddings(BaseEmbeddings):
         encodings = self.model.tokenizer(texts)
         return [len(enc) for enc in encodings['input_ids']]
     
-    def similarity(self, u: np.ndarray, v: np.ndarray) -> float:
+    def similarity(self, u: "np.ndarray", v: "np.ndarray") -> float:
         """Compute cosine similarity between two embeddings."""
         return self.model.similarity(u, v)
     

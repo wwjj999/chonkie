@@ -1,3 +1,8 @@
 from .base import BaseEmbeddings
+from .sentence_transformer import SentenceTransformerEmbeddings
 
-__all__ = ["BaseEmbeddings"]
+# Add all embeddings classes to __all__
+__all__ = [
+    "BaseEmbeddings",
+    "SentenceTransformerEmbeddings"
+]
