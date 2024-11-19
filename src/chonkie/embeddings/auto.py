@@ -1,3 +1,4 @@
+from typing import Any, Union
 from .base import BaseEmbeddings
 from .registry import EmbeddingsRegistry
 import warnings
@@ -22,7 +23,7 @@ class AutoEmbeddings:
     """
     
     @classmethod
-    def get_embeddings(cls, model_name_or_path: str, **kwargs) -> BaseEmbeddings:
+    def get_embeddings(cls, model: Union[str, BaseEmbeddings, Any], **kwargs) -> BaseEmbeddings:
         """Get embeddings instance based on identifier.
         
         Args:
@@ -47,16 +48,16 @@ class AutoEmbeddings:
         """
         # Try to find matching implementation
         try:
-            embeddings_cls = EmbeddingsRegistry.match(model_name_or_path)
+            embeddings_cls = EmbeddingsRegistry.match(model)
             if embeddings_cls and embeddings_cls.is_available():
                 try:
-                    return embeddings_cls(model_name_or_path, **kwargs)
+                    return embeddings_cls(model, **kwargs)
                 except Exception as e:
                     warnings.warn(f"Failed to load {embeddings_cls.__name__}: {e}")
         except Exception:
             # Fallback to sentence-transformers if no match found
             from .sentence_transformer import SentenceTransformerEmbeddings
             try:
-                return SentenceTransformerEmbeddings(model_name_or_path, **kwargs)
+                return SentenceTransformerEmbeddings(model, **kwargs)
             except Exception as e:
                 raise ValueError(f"Failed to load embeddings: {e}")

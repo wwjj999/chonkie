@@ -1,8 +1,8 @@
 import pytest
-from sentence_transformers import SentenceTransformer
 
 from chonkie.chunker.sdpm import SDPMChunker
 from chonkie.chunker.semantic import SemanticChunk
+from chonkie.embeddings.sentence_transformer import SentenceTransformerEmbeddings
 
 @pytest.fixture
 def sample_text():
@@ -12,7 +12,7 @@ def sample_text():
 
 @pytest.fixture
 def embedding_model():
-    return SentenceTransformer("all-MiniLM-L6-v2")
+    return SentenceTransformerEmbeddings("all-MiniLM-L6-v2")
 
 
 def test_spdm_chunker_initialization(embedding_model):

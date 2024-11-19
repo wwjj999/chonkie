@@ -1,7 +1,7 @@
 import importlib
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List, Union
+from typing import List, Union, Any, Callable
 
 from multiprocessing import Pool, cpu_count
 import warnings
@@ -32,17 +32,23 @@ class BaseChunker(ABC):
     the chunk() method according to their specific chunking strategy.
     """
 
-    def __init__(self, tokenizer):
+    def __init__(self, tokenizer: Union[str, Any, Callable[[str], int]]):
         """Initialize the chunker with a tokenizer.
 
         Args:
-            tokenizer: Tokenizer object to be used for tokenizing text
+            tokenizer_or_token_counter (Union[str, Any]): String, tokenizer object, or token counter object
         """
+        if callable(tokenizer):
+            self.tokenizer = None
+            self._tokenizer_backend = "callable"
+            self.token_counter = tokenizer
         if isinstance(tokenizer, str):
             self.tokenizer = self._load_tokenizer(tokenizer)
+            self.token_counter = self._get_tokenizer_counter()
         else:
             self.tokenizer = tokenizer
             self._tokenizer_backend = self._get_tokenizer_backend()
+            self.token_counter = self._get_tokenizer_counter()
 
     def _get_tokenizer_backend(self):
         """Return the backend tokenizer object."""
@@ -99,6 +105,17 @@ class BaseChunker(ABC):
                             "Tokenizer not found in the following libraries: transformers, tokenizers, autotiktokenizer, tiktoken",
                             "Please install one of these libraries to use the chunker.",
                         )
+    
+    def _get_tokenizer_counter(self) -> Callable[[str], int]:
+        """Get token counter based on tokenizer backend."""
+        if self._tokenizer_backend == "transformers":
+            return lambda x: len(self.tokenizer.encode(x))
+        elif self._tokenizer_backend == "tokenizers":
+            return lambda x: len(self.tokenizer.encode(x).ids)
+        elif self._tokenizer_backend == "tiktoken":
+            return lambda x: len(self.tokenizer.encode(x))
+        else:
+            raise ValueError("Tokenizer backend not supported for token counting")
 
     def _encode(self, text: str):
         """Encode text using the backend tokenizer."""
@@ -143,6 +160,14 @@ class BaseChunker(ABC):
             return [self.tokenizer.decode(tokens) for tokens in token_lists]
         else:
             raise ValueError("Tokenizer backend not supported.")
+    
+    def _count_tokens(self, text: str) -> int:
+        """Count tokens in text using the backend tokenizer."""
+        return self.token_counter(text)
+    
+    def _count_tokens_batch(self, texts: List[str]) -> List[int]:
+        """Count tokens in multiple texts using the backend tokenizer."""
+        return [self.token_counter(text) for text in texts]
 
     @abstractmethod
     def chunk(self, text: str) -> List[Chunk]:

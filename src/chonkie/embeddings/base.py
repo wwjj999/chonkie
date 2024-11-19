@@ -1,4 +1,4 @@
-from typing import List, Union, TYPE_CHECKING
+from typing import List, Union, TYPE_CHECKING, Any, Callable
 from abc import ABC, abstractmethod
 
 # import importlib
@@ -106,7 +106,7 @@ class BaseEmbeddings(ABC):
         Returns:
             float: Similarity score between the two embeddings
         """
-        raise NotImplementedError
+        return np.dot(u, v) / (np.linalg.norm(u) * np.linalg.norm(v)) # cosine similarity
     
     @property
     @abstractmethod
@@ -131,6 +131,24 @@ class BaseEmbeddings(ABC):
             bool: True if the embeddings implementation is available, False otherwise
         """
         return True
+    
+    def get_tokenizer_or_token_counter(self) -> Union[Any, Callable[[str], int]]:
+        """Return the tokenizer or token counter object.
+
+        By default, this method returns the count_tokens() method, which should be
+        implemented for embeddings models that require tokenization before embedding.
+
+        Returns:
+            Union[Any, Callable[[str], int]]: Tokenizer object or token counter function
+
+        Examples:
+            # Get the tokenizer object
+            tokenizer = embeddings.get_tokenizer_or_token_counter()
+
+            # Get the token counter function
+            token_counter = embeddings.get_tokenizer_or_token_counter()
+        """
+        return self.count_tokens
 
     def __repr__(self):
         return self.__class__.__name__ + "()"
