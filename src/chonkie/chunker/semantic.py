@@ -1,14 +1,14 @@
-import importlib.util
+
 import re
-import warnings
 from dataclasses import dataclass, field
-from typing import Any, List, Optional, Union
+from typing import List, Optional, Union
 
 import numpy as np
 
 from .base import BaseChunker
 from .sentence import Sentence, SentenceChunk
 
+from chonkie.embeddings.base import BaseEmbeddings
 
 @dataclass
 class SemanticSentence(Sentence):
@@ -59,7 +59,7 @@ class SemanticChunk(SentenceChunk):
 class SemanticChunker(BaseChunker):
     def __init__(
         self,
-        embedding_model: Union[str, Any] = "sentence-transformers/all-MiniLM-L6-v2",
+        embedding_model: Union[str, BaseEmbeddings] = "sentence-transformers/all-MiniLM-L6-v2",
         similarity_threshold: Optional[float] = None,
         similarity_percentile: Optional[float] = None,
         max_chunk_size: int = 512,
@@ -95,8 +95,9 @@ class SemanticChunker(BaseChunker):
                 "Cannot specify both similarity_threshold and similarity_percentile"
             )
         if similarity_threshold is None and similarity_percentile is None:
-            raise ValueError(
-                "Must specify either similarity_threshold or similarity_percentile"
+            similarity_percentile = 0.8
+            raise Warning(
+                "No similarity threshold specified. Defaulting to 80th percentile."
             )
 
         self.max_chunk_size = max_chunk_size
@@ -104,52 +105,17 @@ class SemanticChunker(BaseChunker):
         self.similarity_percentile = similarity_percentile
         self.initial_sentences = initial_sentences
 
-        # Load sentence-transformers model
-        self._import_sentence_transformers()
-        if isinstance(embedding_model, str):
-            self.embedding_model = self._load_sentence_transformer_model(
-                embedding_model
-            )
-        else:
+        if isinstance(embedding_model, BaseEmbeddings):
             self.embedding_model = embedding_model
+        elif isinstance(embedding_model, str):
+            from chonkie.embeddings.auto import AutoEmbeddings
+            self.embedding_model = AutoEmbeddings.get_embeddings(embedding_model)
+        else:
+            raise ValueError("embedding_model must be a string or BaseEmbeddings instance")        
         
         # Keeping the tokenizer the same as the sentence model is important
         # for the group semantic meaning to be calculated properly
-        tokenizer = self.embedding_model.tokenizer
-        super().__init__(tokenizer)
-
-    def _import_sentence_transformers(self) -> Any:
-        """Import sentence-transformers library. Imports mentioned inside the class,
-        because it takes too long to import the whole library at the beginning of the file.
-        """
-        # Check if sentence-transformers is available
-        SENTENCE_TRANSFORMERS_AVAILABLE = (
-            importlib.util.find_spec("sentence_transformers") is not None
-        )
-        if SENTENCE_TRANSFORMERS_AVAILABLE:
-            try:
-                global SentenceTransformer
-                from sentence_transformers import SentenceTransformer
-            except ImportError:
-                SENTENCE_TRANSFORMERS_AVAILABLE = False
-                warnings.warn(
-                    "Failed to import sentence-transformers despite it being installed. SemanticChunker will not work."
-                )
-        else:
-            warnings.warn(
-                "sentence-transformers is not installed. SemanticChunker will not work."
-            )
-
-    def _load_sentence_transformer_model(self, model_name: str) -> Any:
-        """Load a sentence-transformers model by name."""
-        try:
-            model = SentenceTransformer(model_name)
-        except Exception as e:
-            raise ImportError(
-                f"Failed to load sentence-transformers model '{model_name}'. "
-                f"Make sure it is installed and available."
-            ) from e
-        return model
+        super().__init__(self.embedding_model.get_tokenizer_or_token_counter())
 
     def _split_sentences(self, text: str) -> List[str]:
         """Split text into sentences using enhanced regex patterns.
@@ -260,11 +226,11 @@ class SemanticChunker(BaseChunker):
             current_idx = end_idx
 
         # Batch compute embeddings for all sentences
-        embeddings = self.embedding_model.encode(raw_sentences, convert_to_numpy=True)
+        embeddings = self.embedding_model.embed_batch(raw_sentences)
 
         # Batch compute token counts
-        token_counts = [len(encoding) for encoding in self._encode_batch(raw_sentences)]
-
+        token_counts = self._count_tokens_batch(raw_sentences)
+        
         # Create Sentence objects with all precomputed information
         sentences = [
             SemanticSentence(
