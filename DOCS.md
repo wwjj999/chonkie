@@ -545,6 +545,18 @@ embeddings = SentenceTransformerEmbeddings("paraphrase-MiniLM-L6-v2")
 chunker = SemanticChunker(embedding_model=embeddings)
 ```
 
+Use  [`model2vec`](https://github.com/MinishLab/model2vec) for faster and smaller distilled static embedding models.
+```python
+# set `use_mode2vec` as True
+embeddings = SentenceTransformerEmbeddings(
+    model="minishlab/potion-base-8M", use_model2vec=True
+)
+chunker = SemanticChunker(embedding_model=embeddings)
+```
+Resources for model2vec:
+- Huggingface blog for [Model2Vec](https://huggingface.co/blog/Pringled/model2vec).
+- [Potion models](https://minishlab.github.io/tokenlearn_blogpost/) blog post.
+
 ## OpenAIEmbeddings
 
 Uses OpenAI's API for creating embeddings.
