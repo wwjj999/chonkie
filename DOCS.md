@@ -8,8 +8,10 @@
 - [Table of Contents](#table-of-contents)
 - [Installation](#installation)
   - [Basic installation](#basic-installation)
-  - [Installation options](#installation-options)
-  - [dependency table](#dependency-table)
+  - [Dependency Tables](#dependency-tables)
+    - [Chunker Availability](#chunker-availability)
+    - [Embeddings Availability](#embeddings-availability)
+    - [Required Dependencies](#required-dependencies)
 - [Quick Start](#quick-start)
 - [Design CHONKosophy](#design-chonkosophy)
   - [core chonk principles](#core-chonk-principles)
@@ -27,6 +29,12 @@
   - [SentenceChunker](#sentencechunker)
   - [SemanticChunker](#semanticchunker)
   - [SDPMChunker](#sdpmchunker)
+- [Embeddings](#embeddings)
+  - [BaseEmbeddings](#baseembeddings)
+  - [SentenceTransformerEmbeddings](#sentencetransformerembeddings)
+  - [OpenAIEmbeddings](#openaiembeddings)
+  - [Using AutoEmbeddings](#using-autoembeddings)
+  - [Creating Custom Embeddings](#creating-custom-embeddings)
 - [API Reference](#api-reference)
   - [Chunk object](#chunk-object)
   - [SentenceChunk object](#sentencechunk-object)
@@ -42,29 +50,57 @@
 pip install chonkie
 ```
 
-## Installation options
-
-Chonkie uses optional dependencies to keep the base installation lightweight. Choose the installation that best fits your needs:
-
-| installation command | use case | dependencies added |
-|---------------------|----------|-------------------|
-| `pip install chonkie` | basic token and word chunking | autotiktokenizer |
-| `pip install chonkie[semantic]` | semantic chunking | + sentence-transformers, numpy |
-| `pip install chonkie[all]` | all features | all dependencies |
-
-## dependency table
+## Dependency Tables
 
 As per the details mentioned in the [design](#design-chonkosophy) section, Chonkie is lightweight because it keeps most of the dependencies for each chunker seperate, making it more of an aggregate of multiple repositories and python packages. The optional dependencies feature in python really helps with this. 
 
-| chunker  | default |  'semantic' | 'all' |
-|----------|----------|----------|----------|
-| TokenChunker        |✅|✅|✅|
-| WordChunker         |✅|✅|✅|
-| SentenceChunker     |✅|✅|✅|
-| SemanticChunker     |❌|✅|✅|
-| SDPMChunker         |❌|✅|✅|
+### Chunker Availability
 
-What you could infer from the table is that, while it might be of inconvinience in the short-run to have it split like that, you can do surprisingly a lot with just the defualt dependencies (which btw are super light). Furthermore, even our max dependencies option `all` is lightweight in comparison to some of the other libraries that one might use for such tasks. 
+The following table shows which chunkers are available with different installation options:
+
+| Chunker | Default | 'semantic' | 'openai' | 'all' |
+|---------|---------|-----------|----------|-------|
+| TokenChunker | ✅ | ✅ | ✅ | ✅ |
+| WordChunker | ✅ | ✅ | ✅ | ✅ |
+| SentenceChunker | ✅ | ✅ | ✅ | ✅ |
+| SemanticChunker | ❌ | ✅ | ✅ | ✅ |
+| SDPMChunker | ❌ | ✅ | ✅ | ✅ |
+
+### Embeddings Availability
+
+The following table shows which embedding providers are available with different installation options:
+
+| Embeddings Provider | Default | 'semantic' | 'openai' | 'all' |
+|--------------------|---------|-----------|----------|-------|
+| SentenceTransformerEmbeddings | ❌ | ✅ | ❌ | ✅ |
+| OpenAIEmbeddings | ❌ | ❌ | ✅ | ✅ |
+
+### Required Dependencies
+
+| Installation Option | Additional Dependencies |
+|--------------------|------------------------|
+| Default | autotiktokenizer |
+| 'semantic' | + sentence-transformers, numpy |
+| 'openai' | + openai, tiktoken |
+| 'all' | all above dependencies |
+
+You can install the version you need using:
+
+```bash
+# Basic installation (TokenChunker, WordChunker, SentenceChunker)
+pip install chonkie
+
+# For semantic chunking with sentence transformers
+pip install chonkie[semantic]
+
+# For OpenAI embeddings support
+pip install chonkie[openai]
+
+# For all features
+pip install chonkie[all]
+```
+
+Note: Installing either 'semantic' or 'openai' extras will enable SemanticChunker and SDPMChunker, as these chunkers can work with any embeddings provider. The difference is in which embedding providers are available for use with these chunkers.
 
 # Quick Start
 
@@ -458,6 +494,134 @@ chunks = chunker.chunk("Some text with related but non-consecutive content to ch
 for chunk in chunks:
     print(f"Chunk: {chunk.text}")
     print(f"Number of semantic sentences: {len(chunk.sentences)}")
+```
+
+# Embeddings
+
+Chonkie provides a flexible embeddings system that can be used with various embedding providers. The embeddings system is designed to work seamlessly with the semantic chunking features.
+
+## BaseEmbeddings
+
+All embedding implementations in Chonkie inherit from the `BaseEmbeddings` abstract class, which defines the common interface:
+
+```python
+class BaseEmbeddings:
+    def embed(self, text: str) -> np.ndarray:
+        """Embed a single text into a vector."""
+        pass
+    
+    def embed_batch(self, texts: List[str]) -> List[np.ndarray]:
+        """Embed multiple texts into vectors."""
+        pass
+    
+    def count_tokens(self, text: str) -> int:
+        """Count tokens in a text."""
+        pass
+    
+    def similarity(self, u: np.ndarray, v: np.ndarray) -> float:
+        """Compute similarity between two embeddings."""
+        pass
+    
+    @property
+    def dimension(self) -> int:
+        """Return embedding dimension."""
+        pass
+```
+
+## SentenceTransformerEmbeddings
+
+Uses Sentence Transformers models for creating embeddings.
+
+```python
+from chonkie.embeddings import SentenceTransformerEmbeddings
+
+# Initialize with default model
+embeddings = SentenceTransformerEmbeddings()
+
+# Use specific model
+embeddings = SentenceTransformerEmbeddings("paraphrase-MiniLM-L6-v2")
+
+# Use with semantic chunker
+chunker = SemanticChunker(embedding_model=embeddings)
+```
+
+## OpenAIEmbeddings
+
+Uses OpenAI's API for creating embeddings.
+
+```python
+from chonkie.embeddings import OpenAIEmbeddings
+
+# Initialize with API key
+embeddings = OpenAIEmbeddings(
+    model="text-embedding-3-small",
+    api_key="your-api-key"  # Optional if OPENAI_API_KEY env var is set
+)
+
+# Configure batch size and timeouts
+embeddings = OpenAIEmbeddings(
+    model="text-embedding-3-large",
+    batch_size=32,
+    timeout=30.0
+)
+
+# Use with semantic chunker
+chunker = SemanticChunker(embedding_model=embeddings)
+```
+
+Available OpenAI models:
+
+- `text-embedding-3-small` (1536 dimensions, best performance/cost ratio)
+- `text-embedding-3-large` (3072 dimensions, highest performance)
+- `text-embedding-ada-002` (1536 dimensions, legacy model)
+
+## Using AutoEmbeddings
+
+The `AutoEmbeddings` class provides a convenient way to load embeddings:
+
+```python
+from chonkie.embeddings import AutoEmbeddings
+
+# Load sentence transformers
+embeddings = AutoEmbeddings.get_embeddings("sentence-transformers/all-MiniLM-L6-v2")
+
+# Load OpenAI embeddings
+embeddings = AutoEmbeddings.get_embeddings(
+    "openai://text-embedding-3-small",
+    api_key="your-api-key"
+)
+
+# Use directly with semantic chunker
+chunker = SemanticChunker(
+    embedding_model="openai://text-embedding-3-small",
+    api_key="your-api-key"
+)
+```
+
+## Creating Custom Embeddings
+
+You can create custom embedding implementations by inheriting from `BaseEmbeddings`:
+
+```python
+from chonkie.embeddings import BaseEmbeddings
+
+class CustomEmbeddings(BaseEmbeddings):
+    def embed(self, text: str) -> np.ndarray:
+        # Implement embedding logic
+        pass
+    
+    def count_tokens(self, text: str) -> int:
+        # Implement token counting
+        pass
+    
+    # Implement other required methods...
+
+# Register with the embeddings registry
+EmbeddingsRegistry.register(
+    "custom",
+    CustomEmbeddings,
+    pattern=r"^custom://"
+)
 ```
 
 # API Reference
