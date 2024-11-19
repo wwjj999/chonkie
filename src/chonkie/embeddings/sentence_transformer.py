@@ -36,9 +36,9 @@ class SentenceTransformerEmbeddings(BaseEmbeddings):
         if isinstance(model, str):
             self.model_name_or_path = model
             self.model = SentenceTransformer(self.model_name_or_path)
-        elif isinstance(model, "SentenceTransformer"):
+        elif isinstance(model, SentenceTransformer):
             self.model = model
-            self.model_name_or_path = self.model._model_name
+            self.model_name_or_path = self.model.model_card_data.base_model
         else:
             raise ValueError("model must be a string or SentenceTransformer instance")
 
@@ -63,7 +63,7 @@ class SentenceTransformerEmbeddings(BaseEmbeddings):
     
     def similarity(self, u: "np.ndarray", v: "np.ndarray") -> float:
         """Compute cosine similarity between two embeddings."""
-        return self.model.similarity(u, v)
+        return self.model.similarity(u, v).item()
     
     @property
     def dimension(self) -> int:
@@ -76,4 +76,4 @@ class SentenceTransformerEmbeddings(BaseEmbeddings):
         return importlib.util.find_spec("sentence_transformers") is not None
     
     def __repr__(self):
-        return f"SentenceTransformerEmbeddings(model={self.model._model_name})"
+        return f"SentenceTransformerEmbeddings(model={self.model_name_or_path})"

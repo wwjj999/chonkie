@@ -27,7 +27,7 @@ def test_initialization_with_model_name():
 def test_initialization_with_model_instance():
     model = SentenceTransformer("all-MiniLM-L6-v2")
     embeddings = SentenceTransformerEmbeddings(model)
-    assert embeddings.model_name_or_path == model._model_name
+    assert embeddings.model_name_or_path == model.model_card_data.base_model
     assert embeddings.model is model
 
 def test_embed_single_text(embedding_model, sample_text):
@@ -37,7 +37,7 @@ def test_embed_single_text(embedding_model, sample_text):
 
 def test_embed_batch_texts(embedding_model, sample_texts):
     embeddings = embedding_model.embed_batch(sample_texts)
-    assert isinstance(embeddings, list)
+    assert isinstance(embeddings, np.ndarray)
     assert len(embeddings) == len(sample_texts)
     assert all(isinstance(embedding, np.ndarray) for embedding in embeddings)
     assert all(embedding.shape == (embedding_model.dimension,) for embedding in embeddings)
