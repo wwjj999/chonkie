@@ -38,6 +38,7 @@ Homepage = "https://github.com/bhavnicksm/chonkie"
 
 [project.optional-dependencies]
 semantic = ["sentence-transformers>=2.3.0", "numpy>=1.23.0"]
+openai = ["openai>=1.0.0"]
 all = ["sentence-transformers>=2.3.0", "numpy>=1.23.0"]
 dev = ["pytest>=6.2.0", 
         "datasets>=1.14.0",
