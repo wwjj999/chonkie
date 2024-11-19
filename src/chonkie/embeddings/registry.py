@@ -4,6 +4,7 @@ import re
 
 from .base import BaseEmbeddings
 from .sentence_transformer import SentenceTransformerEmbeddings
+from .openai import OpenAIEmbeddings
 
 @dataclass
 class RegistryEntry:
@@ -101,3 +102,22 @@ class EmbeddingsRegistry:
 EmbeddingsRegistry.register("sentence-transformer",
                             SentenceTransformerEmbeddings, 
                             pattern=r"^sentence-transformers/|^all-MiniLM-|^paraphrase-|^multi-qa-|^msmarco-")
+
+# Register OpenAI embeddings with pattern
+EmbeddingsRegistry.register(
+    "openai",
+    OpenAIEmbeddings,
+    pattern=r"^openai://|^text-embedding-"
+)
+EmbeddingsRegistry.register(
+    "text-embedding-ada-002",
+    OpenAIEmbeddings
+)
+EmbeddingsRegistry.register(
+    "text-embedding-3-small",
+    OpenAIEmbeddings
+)
+EmbeddingsRegistry.register(
+    "text-embedding-3-large",
+    OpenAIEmbeddings
+)

@@ -1,7 +1,8 @@
 import pytest
+import os
 
 from chonkie.chunker.semantic import SemanticChunk, SemanticChunker
-from chonkie.embeddings import SentenceTransformerEmbeddings
+from chonkie.embeddings import SentenceTransformerEmbeddings, OpenAIEmbeddings
 
 @pytest.fixture
 def sample_text():
@@ -13,11 +14,29 @@ def sample_text():
 def embedding_model():
     return SentenceTransformerEmbeddings("all-MiniLM-L6-v2")
 
+@pytest.fixture
+def openai_embedding_model():
+    api_key = os.environ.get("OPENAI_API_KEY")
+    return OpenAIEmbeddings(model="text-embedding-3-small", api_key=api_key)
+
 
 def test_semantic_chunker_initialization(embedding_model):
     """Test that the SemanticChunker can be initialized with required parameters."""
     chunker = SemanticChunker(
         embedding_model=embedding_model,
+        max_chunk_size=512,
+        similarity_threshold=0.5,
+    )
+
+    assert chunker is not None
+    assert chunker.max_chunk_size == 512
+    assert chunker.similarity_threshold == 0.5
+    assert chunker.initial_sentences == 1
+
+def test_semantic_chunker_initialization_openai(openai_embedding_model):
+    """Test that the SemanticChunker can be initialized with required parameters."""
+    chunker = SemanticChunker(
+        embedding_model=openai_embedding_model,
         max_chunk_size=512,
         similarity_threshold=0.5,
     )
