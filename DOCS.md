@@ -575,6 +575,29 @@ Available OpenAI models:
 - `text-embedding-3-large` (3072 dimensions, highest performance)
 - `text-embedding-ada-002` (1536 dimensions, legacy model)
 
+## Model2Vec Embeddings
+
+Uses distilled static embedding models with help of [`model2vec`](https://github.com/MinishLab/model2vec) package.
+```python
+from chonkie.embeddings.model_2_vec import Model2VecEmbeddings
+
+embeddings = Model2VecEmbeddings("minishlab/potion-base-8M")
+
+chunker = SemanticChunker(
+    embedding_model=embeddings,
+    similarity_threshold=0.5,
+)
+```
+
+Available potion models (from/credits: [Minish lab](https://minishlab.github.io/)):
+- [potion-base-8M](https://huggingface.co/minishlab/potion-base-8M)
+- [potion-base-4M](https://huggingface.co/minishlab/potion-base-4M)
+- [potion-base-2M](https://huggingface.co/minishlab/potion-base-2M)
+
+Resources:
+- Model2Vec [blog](https://minishlab.github.io/hf_blogpost/)
+
+
 ## Using AutoEmbeddings
 
 The `AutoEmbeddings` class provides a convenient way to load embeddings:
