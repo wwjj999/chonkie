@@ -5,6 +5,7 @@ import re
 from .base import BaseEmbeddings
 from .sentence_transformer import SentenceTransformerEmbeddings
 from .openai import OpenAIEmbeddings
+from .model_2_vec import Model2VecEmbeddings
 
 @dataclass
 class RegistryEntry:
@@ -120,4 +121,8 @@ EmbeddingsRegistry.register(
 EmbeddingsRegistry.register(
     "text-embedding-3-large",
     OpenAIEmbeddings
+)
+EmbeddingsRegistry.register(
+    "model2vec",
+    Model2VecEmbeddings
 )
