@@ -54,6 +54,9 @@ class Model2VecEmbeddings(BaseEmbeddings):
         """Compute cosine similarity of two embeddings."""
         return float(np.dot(u, v) / (np.linalg.norm(u) * np.linalg.norm(v)))
 
+    def get_tokenizer_or_token_counter(self):
+        return self.model.tokenizer
+
     @classmethod
     def is_available(cls) -> bool:
         return importlib.util.find_spec("model2vec") is not None
