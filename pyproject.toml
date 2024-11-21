@@ -37,6 +37,7 @@ dependencies = [
 Homepage = "https://github.com/bhavnicksm/chonkie"
 
 [project.optional-dependencies]
+model2vec = ["sentence-transformers>=2.3.0", "numpy>=1.23.0", "model2vec"]
 semantic = ["sentence-transformers>=2.3.0", "numpy>=1.23.0"]
 openai = ["openai>=1.0.0", "numpy>=1.23.0"]
 all = ["sentence-transformers>=2.3.0", "numpy>=1.23.0", "openai>=1.0.0"]
