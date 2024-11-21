@@ -140,8 +140,7 @@ class OpenAIEmbeddings(BaseEmbeddings):
 
     def similarity(self, u: np.ndarray, v: np.ndarray) -> float:
         """Compute cosine similarity between two embeddings."""
-        return float(np.dot(u, v) / (np.linalg.norm(u) * np.linalg.norm(v)))
-    
+        return np.divide(np.dot(u, v), np.linalg.norm(u) * np.linalg.norm(v), dtype=float)
     @property
     def dimension(self) -> int:
         """Return the embedding dimension."""
