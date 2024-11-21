@@ -31,6 +31,7 @@
   - [SDPMChunker](#sdpmchunker)
 - [Embeddings](#embeddings)
   - [BaseEmbeddings](#baseembeddings)
+  - [Model2Vec Embeddings](#model2vec-embeddings)
   - [SentenceTransformerEmbeddings](#sentencetransformerembeddings)
   - [OpenAIEmbeddings](#openaiembeddings)
   - [Using AutoEmbeddings](#using-autoembeddings)
@@ -58,31 +59,38 @@ As per the details mentioned in the [design](#design-chonkosophy) section, Chonk
 
 The following table shows which chunkers are available with different installation options:
 
-| Chunker | Default | 'semantic' | 'openai' | 'all' |
-|---------|---------|-----------|----------|-------|
-| TokenChunker | ✅ | ✅ | ✅ | ✅ |
-| WordChunker | ✅ | ✅ | ✅ | ✅ |
-| SentenceChunker | ✅ | ✅ | ✅ | ✅ |
-| SemanticChunker | ❌ | ✅ | ✅ | ✅ |
-| SDPMChunker | ❌ | ✅ | ✅ | ✅ |
+| Chunker | Default | embeddings | 'all' |
+|---------|---------|-----------|----------|
+| TokenChunker | ✅ | ✅ |  ✅ |
+| WordChunker | ✅ | ✅ |  ✅ |
+| SentenceChunker | ✅ |  ✅ | ✅ |
+| SemanticChunker | ❌ |  ✅ | ✅ |
+| SDPMChunker | ❌ | ✅ | ✅ |
+
+Any of the embeddings availability will enable the `SemanticChunker` and `SDPMChunker`. Please check the availability of the embeddings below or you may use the `chonkie[semantic]` install for quick access.  
 
 ### Embeddings Availability
 
 The following table shows which embedding providers are available with different installation options:
 
-| Embeddings Provider | Default | 'semantic' | 'openai' | 'all' |
-|--------------------|---------|-----------|----------|-------|
-| SentenceTransformerEmbeddings | ❌ | ✅ | ❌ | ✅ |
-| OpenAIEmbeddings | ❌ | ❌ | ✅ | ✅ |
+| Embeddings Provider | Default | 'model2vec' | 'st' | 'openai' | 'semantic'| 'all' |
+|--------------------|---------|-----------|----------|-------|--------|---------|
+| Model2VecEmbeddings | ❌| ✅ | ❌ | ❌ | ✅ | ✅ |
+| SentenceTransformerEmbeddings | ❌ | ❌| ✅ | ❌ | ❌ | ✅|
+| OpenAIEmbeddings | ❌ | ❌ | ❌ | ✅ | ❌ | ✅|
 
 ### Required Dependencies
 
 | Installation Option | Additional Dependencies |
 |--------------------|------------------------|
 | Default | autotiktokenizer |
-| 'semantic' | + sentence-transformers, numpy |
+| 'model2vec' | + model2vec, numpy |
+| 'st' | + sentence-transformers, numpy |
 | 'openai' | + openai, tiktoken |
+| 'semantic' | + model2vec, numpy |
 | 'all' | all above dependencies |
+
+NOTE: We have seperate `semantic` and `all` installs pre-packaged that might match other installation options breeding redundancy. This redundancy is so we can provide the user the best experience with the freedom to choose their prefered means. The `semantic` and `all` optional installs would continue to change in future versions, so what you might expect to download today may not be the same for tomorrow.
 
 You can install the version you need using:
 
@@ -90,14 +98,17 @@ You can install the version you need using:
 # Basic installation (TokenChunker, WordChunker, SentenceChunker)
 pip install chonkie
 
-# For semantic chunking with sentence transformers
-pip install chonkie[semantic]
+# For the default semantic provider support
+pip install "chonkie[semantic]"
 
 # For OpenAI embeddings support
-pip install chonkie[openai]
+pip install "chonkie[openai]"
+
+# For installing multiple features together 
+pip install "chonkie[st, model2vec]" 
 
 # For all features
-pip install chonkie[all]
+pip install "chonkie[all]"
 ```
 
 Note: Installing either 'semantic' or 'openai' extras will enable SemanticChunker and SDPMChunker, as these chunkers can work with any embeddings provider. The difference is in which embedding providers are available for use with these chunkers.
@@ -528,6 +539,35 @@ class BaseEmbeddings:
         pass
 ```
 
+## Model2Vec Embeddings
+
+Uses distilled static embedding models with help of [`model2vec`](https://github.com/MinishLab/model2vec) package. These models are 500x faster than standard `SentenceTransformer` models and about 15x smaller with the `potion-base-8M` being just about 30MB. When used in conjuction with `chonkie[model2vec]` the entire package for `SemanticChunker` usage is just about 57MiB, the smallest of all the options and a 10x smaller package size than the other stock options. 
+
+```python
+from chonkie.embeddings import Model2VecEmbeddings, AutoEmbeddings
+
+# Initialise with the Model2VecEmbeddings class
+embeddings = Model2VecEmbeddings("minishlab/potion-base-8M")
+
+# OR initialise with the AutoEmbeddings get_embeddings()
+embeddings = AutoEmbeddings.get_embeddings("minishlab/potion-base-8M")
+
+chunker = SemanticChunker(
+    embedding_model=embeddings,
+    similarity_threshold=0.5,
+)
+```
+
+Available potion models from [Minish lab](https://minishlab.github.io/):
+
+- [potion-base-8M](https://huggingface.co/minishlab/potion-base-8M)
+- [potion-base-4M](https://huggingface.co/minishlab/potion-base-4M)
+- [potion-base-2M](https://huggingface.co/minishlab/potion-base-2M)
+
+Resources:
+
+- Model2Vec [blog](https://minishlab.github.io/hf_blogpost/)
+
 ## SentenceTransformerEmbeddings
 
 Uses Sentence Transformers models for creating embeddings.
@@ -574,29 +614,6 @@ Available OpenAI models:
 - `text-embedding-3-small` (1536 dimensions, best performance/cost ratio)
 - `text-embedding-3-large` (3072 dimensions, highest performance)
 - `text-embedding-ada-002` (1536 dimensions, legacy model)
-
-## Model2Vec Embeddings
-
-Uses distilled static embedding models with help of [`model2vec`](https://github.com/MinishLab/model2vec) package.
-```python
-from chonkie.embeddings.model_2_vec import Model2VecEmbeddings
-
-embeddings = Model2VecEmbeddings("minishlab/potion-base-8M")
-
-chunker = SemanticChunker(
-    embedding_model=embeddings,
-    similarity_threshold=0.5,
-)
-```
-
-Available potion models (from/credits: [Minish lab](https://minishlab.github.io/)):
-- [potion-base-8M](https://huggingface.co/minishlab/potion-base-8M)
-- [potion-base-4M](https://huggingface.co/minishlab/potion-base-4M)
-- [potion-base-2M](https://huggingface.co/minishlab/potion-base-2M)
-
-Resources:
-- Model2Vec [blog](https://minishlab.github.io/hf_blogpost/)
-
 
 ## Using AutoEmbeddings
 

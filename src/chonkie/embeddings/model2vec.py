@@ -8,9 +8,20 @@ if TYPE_CHECKING:
     from model2vec import StaticModel
 
 class Model2VecEmbeddings(BaseEmbeddings):
+    """
+    Class for model2vec embeddings. 
+
+    This class provides an interface for the model2vec library, which provides a variety
+    of pre-trained models for text embeddings.
+
+    Args:
+        model (str or StaticModel): Name of the model2vec model to load or a StaticModel instance
+    """
 
     def __init__(self, model: Union[str, "StaticModel"]) -> None:
-
+        """
+        Initialize Model2VecEmbeddings with a str or StaticModel instance.
+        """
         if not self.is_available():
             raise ImportError("model2vec is not available. Please install it via pip.")
         else:
