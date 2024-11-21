@@ -1,10 +1,11 @@
-from typing import List, Union
+from typing import List, Union, TYPE_CHECKING
 import importlib.util
+import numpy as np
 
 from chonkie.embeddings.base import BaseEmbeddings
 
-import numpy as np
-
+if TYPE_CHECKING:
+    from model2vec import StaticModel
 
 class Model2VecEmbeddings(BaseEmbeddings):
 
@@ -13,6 +14,7 @@ class Model2VecEmbeddings(BaseEmbeddings):
         if not self.is_available():
             raise ImportError("model2vec is not available. Please install it via pip.")
         else:
+            # Initialize model2vec only if it's available
             global StaticModel
             from model2vec import StaticModel
 
@@ -21,6 +23,7 @@ class Model2VecEmbeddings(BaseEmbeddings):
             self.model = StaticModel.from_pretrained(self.model_name_or_path)
         elif isinstance(model, StaticModel):
             self.model = model
+
             # TODO: `base_model_name` is mentioned in here -
             # https://github.com/MinishLab/model2vec/blob/b1358a9c2e777800e8f89c7a5f830fa2176c15b5/model2vec/model.py#L165`
             # but its `None` for potion models

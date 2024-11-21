@@ -2,7 +2,8 @@ from .chunker import (BaseChunker, Chunk, SDPMChunker, SemanticChunk,
                       SemanticChunker, SemanticSentence, Sentence,
                       SentenceChunk, SentenceChunker, TokenChunker,
                       WordChunker)
-from .embeddings import (BaseEmbeddings, SentenceTransformerEmbeddings)
+from .embeddings import (BaseEmbeddings, SentenceTransformerEmbeddings, 
+                         Model2VecEmbeddings, OpenAIEmbeddings, AutoEmbeddings)
 
 __version__ = "0.2.0.post1"
 __name__ = "chonkie"
@@ -37,5 +38,8 @@ __all__ += [
 # Add all embeddings classes to __all__
 __all__ += [
     "BaseEmbeddings",
+    "Model2VecEmbeddings",
     "SentenceTransformerEmbeddings",
+    "OpenAIEmbeddings",
+    "AutoEmbeddings",
 ]
