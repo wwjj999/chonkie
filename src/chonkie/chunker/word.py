@@ -32,15 +32,19 @@ class WordChunker(BaseChunker):
         self.chunk_overlap = chunk_overlap
 
     def _split_into_words(self, text: str) -> List[str]:
-        """Split text into words based on the selected mode.
-
-        Args:
-            text: Input text to be split into words
-
-        Returns:
-            List of words
-        """
-        return re.findall(r"\S+", text)
+        """Split text into words while preserving whitespace."""
+        split_points = [match.end() for match in re.finditer(r'(\s*\S+)', text)]
+        words = []
+        prev = 0
+        
+        for point in split_points:
+            words.append(text[prev:point])
+            prev = point
+            
+        if prev < len(text):
+            words.append(text[prev:])
+            
+        return words
 
     def _create_chunk(
         self, words: List[str], text:str, token_count: int
@@ -55,7 +59,7 @@ class WordChunker(BaseChunker):
         Returns:
             Tuple of (Chunk object, number of tokens in chunk)
         """
-        chunk_text = " ".join(words)
+        chunk_text = "".join(words)
         start_index = text.find(chunk_text)
         return Chunk(
             text=chunk_text,
@@ -74,7 +78,7 @@ class WordChunker(BaseChunker):
             List of token counts for each word
         """
         words = [
-            " " + word.strip() for word in words
+            word for word in words if word != ''
         ]  # Add space in the beginning because tokenizers usually split that differently
         encodings = self._encode_batch(words)
         return [len(encoding) for encoding in encodings]

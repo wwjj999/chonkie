@@ -1,5 +1,3 @@
-
-import re
 from dataclasses import dataclass, field
 from typing import List, Optional, Union
 
@@ -62,7 +60,7 @@ class SemanticChunker(BaseChunker):
         embedding_model: Union[str, BaseEmbeddings] = "minishlab/potion-base-8M",
         similarity_threshold: Optional[float] = None,
         similarity_percentile: Optional[float] = None,
-        max_chunk_size: int = 512,
+        chunk_size: int = 512,
         initial_sentences: int = 1
     ):
         """Initialize the SemanticChunker.
@@ -71,7 +69,7 @@ class SemanticChunker(BaseChunker):
 
         Args:
             embedding_model: Name of the sentence-transformers model to load
-            max_chunk_size: Maximum tokens allowed per chunk
+            chunk_size: Maximum tokens allowed per chunk
             similarity_threshold: Absolute threshold for semantic similarity (0-1)
             similarity_percentile: Percentile threshold for similarity (0-100)
             initial_sentences: Number of sentences to start each chunk with
@@ -80,8 +78,8 @@ class SemanticChunker(BaseChunker):
             ValueError: If parameters are invalid
             ImportError: If required dependencies aren't installed
         """
-        if max_chunk_size <= 0:
-            raise ValueError("max_chunk_size must be positive")
+        if chunk_size <= 0:
+            raise ValueError("chunk_size must be positive")
         if similarity_threshold is not None and (
             similarity_threshold < 0 or similarity_threshold > 1
         ):
@@ -100,7 +98,7 @@ class SemanticChunker(BaseChunker):
                 "No similarity threshold specified. Defaulting to 80th percentile."
             )
 
-        self.max_chunk_size = max_chunk_size
+        self.chunk_size = chunk_size
         self.similarity_threshold = similarity_threshold
         self.similarity_percentile = similarity_percentile
         self.initial_sentences = initial_sentences
@@ -116,83 +114,27 @@ class SemanticChunker(BaseChunker):
         # Keeping the tokenizer the same as the sentence model is important
         # for the group semantic meaning to be calculated properly
         super().__init__(self.embedding_model.get_tokenizer_or_token_counter())
-
-    def _split_sentences(self, text: str) -> List[str]:
-        """Split text into sentences using enhanced regex patterns.
+    
+    def _split_sentences(self,
+                        text: str,
+                        delim: Union[str, List[str]]=['.', '!', '?', '\n'],
+                        sep: str="🦛") -> List[str]:
+        """Fast sentence splitting while maintaining accuracy.
         
-        Handles various cases including:
-        - Standard sentence endings across multiple writing systems
-        - Quotations and parentheses
-        - Common abbreviations
-        - Decimal numbers
-        - Ellipsis
-        - Lists and enumerations
-        - Special punctuation
-        - Common honorifics and titles
+        This method is faster than using regex for sentence splitting and is more accurate than using the spaCy sentence tokenizer.
 
         Args:
             text: Input text to be split into sentences
+            delim: Delimiters to split sentences on
+            sep: Separator to use when splitting sentences
         
         Returns:
             List of sentences
         """
-        # Define sentence ending punctuation marks from various writing systems
-        sent_endings = (
-            r'[!.?։؟۔܀܁܂߹।॥၊။።፧፨᙮᜵᜶᠃᠉᥄᥅᪨᪩᪪᪫᭚᭛᭞᭟᰻᰼᱾᱿'
-            r'‼‽⁇⁈⁉⸮⸼꓿꘎꘏꛳꛷꡶꡷꣎꣏꤯꧈꧉꩝꩞꩟꫰꫱꯫﹒﹖﹗！．？𐩖𐩗'
-            r'𑁇𑁈𑂾𑂿𑃀𑃁𑅁𑅂𑅃𑇅𑇆𑇍𑇞𑇟𑈸𑈹𑈻𑈼𑊩𑑋𑑌𑗂𑗃𑗉𑗊𑗋𑗌𑗍𑗎𑗏𑗐𑗑𑗒'
-            r'𑗓𑗔𑗕𑗖𑗗𑙁𑙂𑜼𑜽𑜾𑩂𑩃𑪛𑪜𑱁𑱂𖩮𖩯𖫵𖬷𖬸𖭄𛲟𝪈｡。]'
-        )
-        
-        # Common abbreviations and titles that don't end sentences
-        abbrevs = (
-            r"(?:Mr|Mrs|Ms|Dr|Prof|Sr|Jr|vs|etc|viz|al|Gen|Col|Fig|Lt|Mt|St"
-            r"|etc|approx|appt|apt|dept|est|min|max|misc|no|ps|seq|temp|etal"
-            r"|e\.g|i\.e|vol|vs|cm|mm|km|kg|lb|ft|pd|hr|sec|min|sq|fx|Feb|Mar"
-            r"|Apr|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)"
-        )
-        
-        # First, protect periods in known abbreviations
-        text = re.sub(rf"({abbrevs})\.", r"\1@POINT@", text, flags=re.IGNORECASE)
-        
-        # Protect decimal numbers
-        text = re.sub(r"(\d+)\.(\d+)", r"\1@POINT@\2", text)
-        
-        # Protect ellipsis
-        text = re.sub(r"\.{3}", "@ELLIPSIS@", text)
-        
-        # Protect email addresses and websites
-        text = re.sub(r"([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})", r"@EMAIL@\1@EMAIL@", text)
-        text = re.sub(r"(https?://[^\s]+)", r"@URL@\1@URL@", text)
-        
-        # Handle parentheses and brackets
-        text = re.sub(r'\([^)]*\.[^)]*\)', lambda m: m.group().replace('.', '@POINT@'), text)
-        text = re.sub(r'\[[^\]]*\.[^\]]*\]', lambda m: m.group().replace('.', '@POINT@'), text)
-        
-        # Handle quotations with sentence endings
-        text = re.sub(rf'({sent_endings})"(\s+[A-Z])', r'\1"\n\2', text)
-        
-        # Handle standard sentence endings
-        text = re.sub(rf'({sent_endings})(\s+[A-Z"])', r'\1\n\2', text)
-        text = re.sub(rf'({sent_endings})(\s*$)', r'\1\n', text)
-        
-        # Handle lists and enumerations
-        text = re.sub(r'(\d+\.)(\s+[A-Z])', r'\1\n\2', text)
-        text = re.sub(r'([a-zA-Z]\.)(\s+[A-Z])', r'\1\n\2', text)
-        
-        # Handle special cases
-        text = re.sub(rf'({sent_endings})\s*([);:,"])*\s*(\n|\s*$)', r'\1\2\n', text)
-        
-        # Restore protected periods and symbols
-        text = text.replace("@POINT@", ".")
-        text = text.replace("@ELLIPSIS@", "...")
-        text = re.sub(r'@EMAIL@([^@]+)@EMAIL@', r'\1', text)
-        text = re.sub(r'@URL@([^@]+)@URL@', r'\1', text)
-        
-        # Split into sentences and clean up
-        sentences = [s.strip() for s in text.split('\n') if s.strip()]
-        
-        return sentences
+        t = text
+        for c in delim:
+            t = t.replace(c, c + sep)
+        return [s for s in t.split(sep) if s != '']
 
     def _compute_similarity_threshold(self, all_similarities: List[float]) -> float:
         """Compute similarity threshold based on percentile if specified."""
@@ -325,7 +267,7 @@ class SemanticChunker(BaseChunker):
             raise ValueError("Cannot create chunk from empty sentence list")
 
         # Compute chunk text and token count from sentences
-        text = " ".join(sent.text for sent in sentences)
+        text = "".join(sent.text for sent in sentences)
         token_count = sum(sent.token_count for sent in sentences) + (
             len(sentences) - 1
         )  # Add spaces
@@ -341,7 +283,7 @@ class SemanticChunker(BaseChunker):
     def _split_chunks(
         self, sentence_groups: List[List[Sentence]]
     ) -> List[SemanticChunk]:
-        """Split sentence groups into chunks that respect max_chunk_size.
+        """Split sentence groups into chunks that respect chunk_size.
 
         Args:
             sentence_groups: List of semantically coherent sentence groups
@@ -362,7 +304,7 @@ class SemanticChunker(BaseChunker):
                     + (1 if current_chunk_sentences else 0)
                 )
 
-                if test_tokens <= self.max_chunk_size:
+                if test_tokens <= self.chunk_size:
                     # Add to current chunk
                     current_chunk_sentences.append(sentence)
                     current_tokens = test_tokens
@@ -385,7 +327,7 @@ class SemanticChunker(BaseChunker):
         """Split text into semantically coherent chunks using two-pass approach.
 
         First groups sentences by semantic similarity, then splits groups to respect
-        max_chunk_size while maintaining sentence boundaries.
+        chunk_size while maintaining sentence boundaries.
 
         Args:
             text: Input text to be chunked
@@ -416,7 +358,7 @@ class SemanticChunker(BaseChunker):
             else f"similarity_percentile={self.similarity_percentile}"
         )
         return (
-            f"SemanticChunker(max_chunk_size={self.max_chunk_size}, "
+            f"SemanticChunker(chunk_size={self.chunk_size}, "
             f"{threshold_info}, "
             f"initial_sentences={self.initial_sentences})"
         )

@@ -33,6 +33,26 @@ def sample_batch():
     ds = load_dataset("bhavnicksm/fineweb-edu-micro", split="train")
     return list(ds["text"])
 
+@pytest.fixture
+def sample_complex_markdown_text():
+    text =  """# Heading 1
+    This is a paragraph with some **bold text** and _italic text_. 
+    ## Heading 2
+    - Bullet point 1
+    - Bullet point 2 with `inline code`
+    ```python
+    # Code block
+    def hello_world():
+        print("Hello, world!")
+    ```
+    Another paragraph with [a link](https://example.com) and an image:
+    ![Alt text](https://example.com/image.jpg)
+    > A blockquote with multiple lines
+    > that spans more than one line.
+    Finally, a paragraph at the end.
+    """
+    return text
+
 
 def test_token_chunker_initialization_tok(tokenizer):
     """
@@ -165,7 +185,6 @@ def test_token_chunker_single_token_text_tik(tiktokenizer):
     assert chunks[0].token_count == 1
     assert chunks[0].text == "Hello"
 
-
 def test_token_chunker_single_chunk_text(tokenizer):
     """
     Test that the TokenChunker can handle text that fits within a single chunk.
@@ -241,6 +260,13 @@ def test_token_chunker_indices(sample_text):
     chunker = TokenChunker(tokenizer=tokenizer, chunk_size=512, chunk_overlap=128)
     chunks = chunker.chunk(sample_text)
     verify_chunk_indices(chunks, sample_text)
+
+def test_token_chunker_indices_complex_md(sample_complex_markdown_text):
+    """Test that TokenChunker's indices correctly map to original text."""
+    tokenizer = Tokenizer.from_pretrained("gpt2")
+    chunker = TokenChunker(tokenizer=tokenizer, chunk_size=512, chunk_overlap=128)
+    chunks = chunker.chunk(sample_complex_markdown_text)
+    verify_chunk_indices(chunks, sample_complex_markdown_text)
 
 if __name__ == "__main__":
     pytest.main()

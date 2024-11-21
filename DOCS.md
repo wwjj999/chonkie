@@ -414,7 +414,7 @@ This version of `SemanticChunker` has some optimizations that speed it up consid
 - `embedding_model` (`Union[str, SentenceTransformer]`): Model for semantic embeddings, either a model name string or a SentenceTransformer instance
 - `similarity_threshold` (`Optional[float]`): Minimum similarity score to consider sentences similar (0-1)
 - `similarity_percentile` (`Optional[float]`): Minimum similarity percentile to consider sentences similar (0-100)
-- `max_chunk_size` (`Optional[int]`): Maximum tokens allowed per chunk
+- `chunk_size` (`Optional[int]`): Maximum tokens allowed per chunk
 - `initial_sentences` (`Optional[int]`): Number of sentences to start each chunk with
 
 **Methods:**
@@ -444,7 +444,7 @@ from chonkie import SemanticChunker
 
 chunker = SemanticChunker(
     embedding_model="all-minilm-l6-v2",
-    max_chunk_size=512,
+    chunk_size=512,
     similarity_threshold=0.7
 )
 
@@ -464,7 +464,7 @@ the `SDPMChunker` groups content via the semantic double-pass merging method, wh
 - `embedding_model` (`Union[str, SentenceTransformer]`): Model for semantic embeddings, either a model name string or a SentenceTransformer instance
 - `similarity_threshold` (`Optional[float]`): Minimum similarity score to consider sentences similar (0-1)
 - `similarity_percentile` (`Optional[float]`): Minimum similarity percentile to consider sentences similar (0-100)
-- `max_chunk_size` (`Optional[int]`): Maximum tokens allowed per chunk
+- `chunk_size` (`Optional[int]`): Maximum tokens allowed per chunk
 - `initial_sentences` (`Optional[int]`): Number of sentences to start each chunk with
 - `skip_window` (`Optional[int]`): Number of chunks to skip when looking for similarities
 
@@ -495,7 +495,7 @@ from chonkie import SDPMChunker
 
 chunker = SDPMChunker(
     embedding_model="all-minilm-l6-v2",
-    max_chunk_size=512,
+    chunk_size=512,
     similarity_threshold=0.7,
     skip_window=1
 )

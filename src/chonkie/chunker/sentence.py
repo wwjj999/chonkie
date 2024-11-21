@@ -93,78 +93,105 @@ class SentenceChunker(BaseChunker):
         self.chunk_overlap = chunk_overlap
         self.min_sentences_per_chunk = min_sentences_per_chunk
     
-    def _split_sentences(self, text: str) -> List[str]:
-        """Split text into sentences using enhanced regex patterns.
+    # TODO: This is a older method of sentence splitting that uses Regex
+    # but since Regex in python via re is super slooooow we use a different method
+    # that is faster and more accurate. We can keep this method for reference
+    # and comparison. And also, we'll need to have a seperate preprocessing
+    # to handle the special cases that this method handles.
+
+    # def _split_sentences(self, text: str) -> List[str]:
+    #     """Split text into sentences using enhanced regex patterns.
         
-        Handles various cases including:
-        - Standard sentence endings across multiple writing systems
-        - Quotations and parentheses
-        - Common abbreviations
-        - Decimal numbers
-        - Ellipsis
-        - Lists and enumerations
-        - Special punctuation
-        - Common honorifics and titles
+    #     Handles various cases including:
+    #     - Standard sentence endings across multiple writing systems
+    #     - Quotations and parentheses
+    #     - Common abbreviations
+    #     - Decimal numbers
+    #     - Ellipsis
+    #     - Lists and enumerations
+    #     - Special punctuation
+    #     - Common honorifics and titles
+
+    #     Args:
+    #         text: Input text to be split into sentences
+        
+    #     Returns:
+    #         List of sentences
+    #     """
+    #     # Define sentence ending punctuation marks from various writing systems
+    #     sent_endings = (
+    #         r'[!.?։؟۔܀܁܂߹।॥၊။።፧፨᙮᜵᜶᠃᠉᥄᥅᪨᪩᪪᪫᭚᭛᭞᭟᰻᰼᱾᱿'
+    #         r'‼‽⁇⁈⁉⸮⸼꓿꘎꘏꛳꛷꡶꡷꣎꣏꤯꧈꧉꩝꩞꩟꫰꫱꯫﹒﹖﹗！．？𐩖𐩗'
+    #         r'𑁇𑁈𑂾𑂿𑃀𑃁𑅁𑅂𑅃𑇅𑇆𑇍𑇞𑇟𑈸𑈹𑈻𑈼𑊩𑑋𑑌𑗂𑗃𑗉𑗊𑗋𑗌𑗍𑗎𑗏𑗐𑗑𑗒'
+    #         r'𑗓𑗔𑗕𑗖𑗗𑙁𑙂𑜼𑜽𑜾𑩂𑩃𑪛𑪜𑱁𑱂𖩮𖩯𖫵𖬷𖬸𖭄𛲟𝪈｡。]'
+    #     )
+        
+    #     # Common abbreviations and titles that don't end sentences
+    #     abbrevs = (
+    #         r"(?:Mr|Mrs|Ms|Dr|Prof|Sr|Jr|vs|etc|viz|al|Gen|Col|Fig|Lt|Mt|St"
+    #         r"|etc|approx|appt|apt|dept|est|min|max|misc|no|ps|seq|temp|etal"
+    #         r"|e\.g|i\.e|vol|vs|cm|mm|km|kg|lb|ft|pd|hr|sec|min|sq|fx|Feb|Mar"
+    #         r"|Apr|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)"
+    #     )
+        
+    #     # First, protect periods in known abbreviations
+    #     text = re.sub(rf"({abbrevs})\.", r"\1@POINT@", text, flags=re.IGNORECASE)
+
+    #     # Protect decimal numbers
+    #     text = re.sub(r"(\d+)\.(\d+)", r"\1@POINT@\2", text)
+
+    #     # Protect ellipsis
+    #     text = re.sub(r"\.\.\.", "@ELLIPSIS@", text)
+
+    #     # Protect email addresses and websites
+    #     text = re.sub(r"([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})", r"@EMAIL@\1@EMAIL@", text)
+    #     text = re.sub(r"(https?://[^\s]+)", r"@URL@\1@URL@", text)
+
+    #     # Handle parentheses and brackets
+    #     text = re.sub(r'\([^)]*\.[^)]*\)', lambda m: m.group().replace('.', '@POINT@'), text)
+    #     text = re.sub(r'\[[^\]]*\.[^\]]*\]', lambda m: m.group().replace('.', '@POINT@'), text)
+
+    #     # Handle quotations with sentence endings
+    #     text = re.sub(rf'({sent_endings})"(\s+[A-Z])', r'\1"\n\2', text)
+
+    #     # Handle standard sentence endings
+    #     text = re.sub(rf'({sent_endings})(\s+[A-Z"]|\s*$)', r'\1\n\2', text)
+
+    #     # Handle lists and enumerations
+    #     text = re.sub(r'(\d+\.)(\s+[A-Z])', r'\1\n\2', text)
+    #     text = re.sub(r'([a-zA-Z]\.)(\s+[A-Z])', r'\1\n\2', text)
+
+    #     # Restore protected periods and symbols
+    #     text = text.replace("@POINT@", ".")
+    #     text = text.replace("@ELLIPSIS@", "...")
+    #     text = re.sub(r'@EMAIL@([^@]+)@EMAIL@', r'\1', text)
+    #     text = re.sub(r'@URL@([^@]+)@URL@', r'\1', text)
+
+    #     # Split into sentences
+    #     sentences = [s.strip() for s in text.split('\n') if s.strip()]
+        
+    #     return sentences
+    
+    def _split_sentences(self,
+                        text: str,
+                        delim: Union[str, List[str]]=['.', '!', '?', '\n'],
+                        sep: str="🦛") -> List[str]:
+        """Fast sentence splitting while maintaining accuracy.
+        
+        This method is faster than using regex for sentence splitting and is more accurate than using the spaCy sentence tokenizer.
 
         Args:
             text: Input text to be split into sentences
+            delim: Delimiters to split sentences on
+            sep: Separator to use when splitting sentences
         
         Returns:
             List of sentences
         """
-        # Define sentence ending punctuation marks from various writing systems
-        sent_endings = (
-            r'[!.?։؟۔܀܁܂߹।॥၊။።፧፨᙮᜵᜶᠃᠉᥄᥅᪨᪩᪪᪫᭚᭛᭞᭟᰻᰼᱾᱿'
-            r'‼‽⁇⁈⁉⸮⸼꓿꘎꘏꛳꛷꡶꡷꣎꣏꤯꧈꧉꩝꩞꩟꫰꫱꯫﹒﹖﹗！．？𐩖𐩗'
-            r'𑁇𑁈𑂾𑂿𑃀𑃁𑅁𑅂𑅃𑇅𑇆𑇍𑇞𑇟𑈸𑈹𑈻𑈼𑊩𑑋𑑌𑗂𑗃𑗉𑗊𑗋𑗌𑗍𑗎𑗏𑗐𑗑𑗒'
-            r'𑗓𑗔𑗕𑗖𑗗𑙁𑙂𑜼𑜽𑜾𑩂𑩃𑪛𑪜𑱁𑱂𖩮𖩯𖫵𖬷𖬸𖭄𛲟𝪈｡。]'
-        )
-        
-        # Common abbreviations and titles that don't end sentences
-        abbrevs = (
-            r"(?:Mr|Mrs|Ms|Dr|Prof|Sr|Jr|vs|etc|viz|al|Gen|Col|Fig|Lt|Mt|St"
-            r"|etc|approx|appt|apt|dept|est|min|max|misc|no|ps|seq|temp|etal"
-            r"|e\.g|i\.e|vol|vs|cm|mm|km|kg|lb|ft|pd|hr|sec|min|sq|fx|Feb|Mar"
-            r"|Apr|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)"
-        )
-        
-        # First, protect periods in known abbreviations
-        text = re.sub(rf"({abbrevs})\.", r"\1@POINT@", text, flags=re.IGNORECASE)
-
-        # Protect decimal numbers
-        text = re.sub(r"(\d+)\.(\d+)", r"\1@POINT@\2", text)
-
-        # Protect ellipsis
-        text = re.sub(r"\.\.\.", "@ELLIPSIS@", text)
-
-        # Protect email addresses and websites
-        text = re.sub(r"([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})", r"@EMAIL@\1@EMAIL@", text)
-        text = re.sub(r"(https?://[^\s]+)", r"@URL@\1@URL@", text)
-
-        # Handle parentheses and brackets
-        text = re.sub(r'\([^)]*\.[^)]*\)', lambda m: m.group().replace('.', '@POINT@'), text)
-        text = re.sub(r'\[[^\]]*\.[^\]]*\]', lambda m: m.group().replace('.', '@POINT@'), text)
-
-        # Handle quotations with sentence endings
-        text = re.sub(rf'({sent_endings})"(\s+[A-Z])', r'\1"\n\2', text)
-
-        # Handle standard sentence endings
-        text = re.sub(rf'({sent_endings})(\s+[A-Z"]|\s*$)', r'\1\n\2', text)
-
-        # Handle lists and enumerations
-        text = re.sub(r'(\d+\.)(\s+[A-Z])', r'\1\n\2', text)
-        text = re.sub(r'([a-zA-Z]\.)(\s+[A-Z])', r'\1\n\2', text)
-
-        # Restore protected periods and symbols
-        text = text.replace("@POINT@", ".")
-        text = text.replace("@ELLIPSIS@", "...")
-        text = re.sub(r'@EMAIL@([^@]+)@EMAIL@', r'\1', text)
-        text = re.sub(r'@URL@([^@]+)@URL@', r'\1', text)
-
-        # Split into sentences
-        sentences = [s.strip() for s in text.split('\n') if s.strip()]
-        
-        return sentences
+        t = text
+        for c in delim:
+            t = t.replace(c, c + sep)
+        return [s for s in t.split(sep) if s != '']
 
     def _get_token_counts(self, sentences: List[str]) -> List[int]:
         """Get token counts for a list of sentences in batch.
@@ -222,7 +249,7 @@ class SentenceChunker(BaseChunker):
         Returns:
             Chunk object
         """
-        chunk_text = " ".join([sentence.text for sentence in sentences])
+        chunk_text = "".join([sentence.text for sentence in sentences])
         return SentenceChunk(
             text=chunk_text,
             start_index=sentences[0].start_index,
