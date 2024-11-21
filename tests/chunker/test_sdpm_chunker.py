@@ -14,6 +14,26 @@ def sample_text():
 def embedding_model():
     return SentenceTransformerEmbeddings("all-MiniLM-L6-v2")
 
+@pytest.fixture
+def sample_complex_markdown_text():
+    text =  """# Heading 1
+    This is a paragraph with some **bold text** and _italic text_. 
+    ## Heading 2
+    - Bullet point 1
+    - Bullet point 2 with `inline code`
+    ```python
+    # Code block
+    def hello_world():
+        print("Hello, world!")
+    ```
+    Another paragraph with [a link](https://example.com) and an image:
+    ![Alt text](https://example.com/image.jpg)
+    > A blockquote with multiple lines
+    > that spans more than one line.
+    Finally, a paragraph at the end.
+    """
+    return text
+
 
 def test_spdm_chunker_initialization(embedding_model):
     """Test that the SPDMChunker can be initialized with required parameters."""
