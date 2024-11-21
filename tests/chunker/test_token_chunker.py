@@ -143,6 +143,28 @@ def test_token_chunker_single_token_text(tokenizer):
     assert chunks[0].token_count == 1
     assert chunks[0].text == "Hello"
 
+def test_token_chunker_single_token_text_hf(transformers_tokenizer):
+    """
+    Test that the TokenChunker can handle text with a single token.
+    """
+    chunker = TokenChunker(tokenizer=transformers_tokenizer, chunk_size=512, chunk_overlap=128)
+    chunks = chunker.chunk("Hello")
+
+    assert len(chunks) == 1
+    assert chunks[0].token_count == 1
+    assert chunks[0].text == "Hello"
+
+def test_token_chunker_single_token_text_tik(tiktokenizer):
+    """
+    Test that the TokenChunker can handle text with a single token.
+    """
+    chunker = TokenChunker(tokenizer=tiktokenizer, chunk_size=512, chunk_overlap=128)
+    chunks = chunker.chunk("Hello")
+
+    assert len(chunks) == 1
+    assert chunks[0].token_count == 1
+    assert chunks[0].text == "Hello"
+
 
 def test_token_chunker_single_chunk_text(tokenizer):
     """
