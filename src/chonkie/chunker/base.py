@@ -109,9 +109,9 @@ class BaseChunker(ABC):
     def _get_tokenizer_counter(self) -> Callable[[str], int]:
         """Get token counter based on tokenizer backend."""
         if self._tokenizer_backend == "transformers":
-            return lambda x: len(self.tokenizer.encode(x))
+            return lambda x: len(self.tokenizer.encode(x, add_special_tokens=False))
         elif self._tokenizer_backend == "tokenizers":
-            return lambda x: len(self.tokenizer.encode(x).ids)
+            return lambda x: len(self.tokenizer.encode(x, add_special_tokens=False).ids)
         elif self._tokenizer_backend == "tiktoken":
             return lambda x: len(self.tokenizer.encode(x))
         else:
@@ -120,9 +120,9 @@ class BaseChunker(ABC):
     def _encode(self, text: str):
         """Encode text using the backend tokenizer."""
         if self._tokenizer_backend == "transformers":
-            return self.tokenizer.encode(text)
+            return self.tokenizer.encode(text, add_special_tokens=False)
         elif self._tokenizer_backend == "tokenizers":
-            return self.tokenizer.encode(text).ids
+            return self.tokenizer.encode(text, add_special_tokens=False).ids
         elif self._tokenizer_backend == "tiktoken":
             return self.tokenizer.encode(text)
         else:
@@ -131,9 +131,9 @@ class BaseChunker(ABC):
     def _encode_batch(self, texts: List[str]):
         """Encode a batch of texts using the backend tokenizer."""
         if self._tokenizer_backend == "transformers":
-            return self.tokenizer.batch_encode_plus(texts)["input_ids"]
+            return self.tokenizer.batch_encode_plus(texts, add_special_tokens=False)["input_ids"]
         elif self._tokenizer_backend == "tokenizers":
-            return [t.ids for t in self.tokenizer.encode_batch(texts)]
+            return [t.ids for t in self.tokenizer.encode_batch(texts, add_special_tokens=False)]
         elif self._tokenizer_backend == "tiktoken":
             return self.tokenizer.encode_batch(texts)
         else:
