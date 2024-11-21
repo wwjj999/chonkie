@@ -39,13 +39,13 @@ def test_spdm_chunker_initialization(embedding_model):
     """Test that the SPDMChunker can be initialized with required parameters."""
     chunker = SDPMChunker(
         embedding_model=embedding_model,
-        max_chunk_size=512,
+        chunk_size=512,
         similarity_threshold=0.5,
         skip_window=2,
     )
 
     assert chunker is not None
-    assert chunker.max_chunk_size == 512
+    assert chunker.chunk_size == 512
     assert chunker.similarity_threshold == 0.5
     assert chunker.initial_sentences == 1
     assert chunker.skip_window == 2
@@ -55,7 +55,7 @@ def test_spdm_chunker_chunking(embedding_model, sample_text):
     """Test that the SPDMChunker can chunk a sample text."""
     chunker = SDPMChunker(
         embedding_model=embedding_model,
-        max_chunk_size=512,
+        chunk_size=512,
         similarity_threshold=0.5,
     )
     chunks = chunker.chunk(sample_text)
@@ -74,7 +74,7 @@ def test_spdm_chunker_empty_text(embedding_model):
     """Test that the SPDMChunker can handle empty text input."""
     chunker = SDPMChunker(
         embedding_model=embedding_model,
-        max_chunk_size=512,
+        chunk_size=512,
         similarity_threshold=0.5,
     )
     chunks = chunker.chunk("")
@@ -86,7 +86,7 @@ def test_spdm_chunker_single_sentence(embedding_model):
     """Test that the SPDMChunker can handle text with a single sentence."""
     chunker = SDPMChunker(
         embedding_model=embedding_model,
-        max_chunk_size=512,
+        chunk_size=512,
         similarity_threshold=0.5,
     )
     chunks = chunker.chunk("This is a single sentence.")
@@ -100,13 +100,13 @@ def test_spdm_chunker_repr(embedding_model):
     """Test that the SPDMChunker has a string representation."""
     chunker = SDPMChunker(
         embedding_model=embedding_model,
-        max_chunk_size=512,
+        chunk_size=512,
         similarity_threshold=0.5,
         skip_window=2,
     )
 
     expected = (
-        "SPDMChunker(max_chunk_size=512, similarity_threshold=0.5, "
+        "SPDMChunker(chunk_size=512, similarity_threshold=0.5, "
         "initial_sentences=1, skip_window=2)"
     )
     assert repr(chunker) == expected
