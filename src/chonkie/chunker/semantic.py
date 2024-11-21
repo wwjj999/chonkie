@@ -59,7 +59,7 @@ class SemanticChunk(SentenceChunk):
 class SemanticChunker(BaseChunker):
     def __init__(
         self,
-        embedding_model: Union[str, BaseEmbeddings] = "sentence-transformers/all-MiniLM-L6-v2",
+        embedding_model: Union[str, BaseEmbeddings] = "minishlab/potion-base-8M",
         similarity_threshold: Optional[float] = None,
         similarity_percentile: Optional[float] = None,
         max_chunk_size: int = 512,

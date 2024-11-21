@@ -5,6 +5,7 @@ import re
 from .base import BaseEmbeddings
 from .sentence_transformer import SentenceTransformerEmbeddings
 from .openai import OpenAIEmbeddings
+from .model2vec import Model2VecEmbeddings
 
 @dataclass
 class RegistryEntry:
@@ -99,15 +100,21 @@ class EmbeddingsRegistry:
             if entry.embeddings_cls.is_available()
         ]
 
-EmbeddingsRegistry.register("sentence-transformer",
-                            SentenceTransformerEmbeddings, 
-                            pattern=r"^sentence-transformers/|^all-MiniLM-|^paraphrase-|^multi-qa-|^msmarco-")
+# Register all the available embeddings in the EmbeddingsRegistry! 
+# This is essential for the `AutoEmbeddings` to work properly.
+
+# Register SentenceTransformer embeddings with pattern
+EmbeddingsRegistry.register(
+    "sentence-transformer",
+    SentenceTransformerEmbeddings, 
+    pattern=r"^sentence-transformers/|^all-MiniLM-|^paraphrase-|^multi-qa-|^msmarco-"
+)
 
 # Register OpenAI embeddings with pattern
 EmbeddingsRegistry.register(
     "openai",
     OpenAIEmbeddings,
-    pattern=r"^openai://|^text-embedding-"
+    pattern=r"^openai|^text-embedding-"
 )
 EmbeddingsRegistry.register(
     "text-embedding-ada-002",
@@ -120,4 +127,11 @@ EmbeddingsRegistry.register(
 EmbeddingsRegistry.register(
     "text-embedding-3-large",
     OpenAIEmbeddings
+)
+
+# Register model2vec embeddings
+EmbeddingsRegistry.register(
+    "model2vec",
+    Model2VecEmbeddings, 
+    pattern=r"^minishlab/|^minishlab/potion-base-|^minishlab/potion-|^potion-|"
 )

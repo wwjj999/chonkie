@@ -21,7 +21,7 @@ class SDPMChunker(SemanticChunker):
     """
     def __init__(
         self,
-        embedding_model: Union[str, Any] = "sentence-transformers/all-MiniLM-L6-v2",
+        embedding_model: Union[str, Any] = "minishlab/potion-base-8M",
         similarity_threshold: float = None,
         similarity_percentile: float = None,
         max_chunk_size: int = 512,
