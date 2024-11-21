@@ -18,7 +18,8 @@ class Model2VecEmbeddings(BaseEmbeddings):
         model (str or StaticModel): Name of the model2vec model to load or a StaticModel instance
     """
 
-    def __init__(self, model: Union[str, "StaticModel"]) -> None:
+    def __init__(self,
+                 model: Union[str, "StaticModel"] = "minishlab/potion-base-8M") -> None:
         """
         Initialize Model2VecEmbeddings with a str or StaticModel instance.
         """
@@ -74,3 +75,6 @@ class Model2VecEmbeddings(BaseEmbeddings):
     @classmethod
     def is_available(cls) -> bool:
         return importlib.util.find_spec("model2vec") is not None
+
+    def __repr__(self) -> str:
+        return f"Model2VecEmbeddings(model_name_or_path={self.model_name_or_path})"
