@@ -108,7 +108,7 @@ EmbeddingsRegistry.register("sentence-transformer",
 EmbeddingsRegistry.register(
     "openai",
     OpenAIEmbeddings,
-    pattern=r"^openai://|^text-embedding-"
+    pattern=r"^openai|^text-embedding-"
 )
 EmbeddingsRegistry.register(
     "text-embedding-ada-002",

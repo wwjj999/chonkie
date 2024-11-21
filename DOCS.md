@@ -610,13 +610,13 @@ embeddings = AutoEmbeddings.get_embeddings("sentence-transformers/all-MiniLM-L6-
 
 # Load OpenAI embeddings
 embeddings = AutoEmbeddings.get_embeddings(
-    "openai://text-embedding-3-small",
+    "openai/text-embedding-3-small",
     api_key="your-api-key"
 )
 
 # Use directly with semantic chunker
 chunker = SemanticChunker(
-    embedding_model="openai://text-embedding-3-small",
+    embedding_model="openai/text-embedding-3-small",
     api_key="your-api-key"
 )
 ```
@@ -643,7 +643,7 @@ class CustomEmbeddings(BaseEmbeddings):
 EmbeddingsRegistry.register(
     "custom",
     CustomEmbeddings,
-    pattern=r"^custom://"
+    pattern=r"^custom/|^model-name"
 )
 ```
 
