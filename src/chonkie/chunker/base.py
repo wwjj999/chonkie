@@ -7,7 +7,7 @@ from multiprocessing import Pool, cpu_count
 import warnings
 
 @dataclass
-class Chunk():
+class Chunk:
     """Dataclass representing a text chunk with metadata. 
     
     All attributes are read-only via slots for performance reasons.

@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Type, Union, Pattern
+from typing import Dict, List, Optional, Type, Union, Pattern, Any
 from dataclasses import dataclass
 import re
 
@@ -12,6 +12,7 @@ class RegistryEntry:
     """Registry entry containing the embeddings class and optional pattern."""
     embeddings_cls: Type[BaseEmbeddings]
     pattern: Optional[Pattern] = None
+    supported_types: Optional[List[str]] = None
 
 class EmbeddingsRegistry:
     """Registry for embedding implementations with pattern matching support."""
@@ -24,6 +25,7 @@ class EmbeddingsRegistry:
         name: str,
         embedding_cls: Type[BaseEmbeddings],
         pattern: Optional[Union[str, Pattern]] = None,
+        supported_types: Optional[List[str]] = None
     ):
         """Register a new embeddings implementation.
         
@@ -52,7 +54,8 @@ class EmbeddingsRegistry:
             
         cls._registry[name] = RegistryEntry(
             embeddings_cls=embedding_cls,
-            pattern=pattern
+            pattern=pattern, 
+            supported_types=supported_types
         )
     
     @classmethod
@@ -90,7 +93,37 @@ class EmbeddingsRegistry:
             if entry.pattern and entry.pattern.match(identifier):
                 return entry.embeddings_cls
         
-        return None
+        # if no match is found, raise ValueError
+        raise ValueError(f"No matching embeddings implementation found for {identifier}")
+
+    @classmethod
+    def wrap(cls,
+             object: Any,
+             **kwargs) -> BaseEmbeddings:
+        """Wrap an object in the appropriate embeddings class.
+        
+        The objects that are handled here could be either a Model or Client object.
+
+        Args:
+            object: Name of the embeddings implementation
+            **kwargs: Additional arguments passed to the embeddings constructor
+        
+        Returns:
+            Initialized embeddings instance
+        """
+        # Check the object type and wrap it in the appropriate embeddings class
+        if isinstance(object, BaseEmbeddings):
+            return object
+        elif isinstance(object, str):
+            embeddings_cls = cls.match(object)
+            return embeddings_cls(object, **kwargs)
+        else:
+            # Loop through all the registered embeddings and check if the object is an instance of any of them
+            for entry in cls._registry.values():
+                if entry.supported_types and any(t in str(type(object)) for t in entry.supported_types):
+                        return entry.embeddings_cls(object, **kwargs)
+
+            raise ValueError(f"Unsupported object type for embeddings: {object}")        
     
     @classmethod
     def list_available(cls) -> List[str]:
@@ -107,7 +140,8 @@ class EmbeddingsRegistry:
 EmbeddingsRegistry.register(
     "sentence-transformer",
     SentenceTransformerEmbeddings, 
-    pattern=r"^sentence-transformers/|^all-MiniLM-|^paraphrase-|^multi-qa-|^msmarco-"
+    pattern=r"^sentence-transformers/|^all-minilm-|^paraphrase-|^multi-qa-|^msmarco-", 
+    supported_types=["SentenceTransformer"]
 )
 
 # Register OpenAI embeddings with pattern
@@ -133,5 +167,6 @@ EmbeddingsRegistry.register(
 EmbeddingsRegistry.register(
     "model2vec",
     Model2VecEmbeddings, 
-    pattern=r"^minishlab/|^minishlab/potion-base-|^minishlab/potion-|^potion-|"
+    pattern=r"^minishlab/|^minishlab/potion-base-|^minishlab/potion-|^potion-", 
+    supported_types=["Model2Vec", "model2vec"]
 )

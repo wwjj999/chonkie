@@ -21,6 +21,8 @@ class AutoEmbeddings:
         # Get Anthropic embeddings
         embeddings = AutoEmbeddings.get_embeddings("anthropic://claude-v1", api_key="...")
     """
+    def __init__(self, model: Union[str, BaseEmbeddings, Any], **kwargs) -> BaseEmbeddings:
+        return self.get_embeddings(model, **kwargs)
     
     @classmethod
     def get_embeddings(cls, model: Union[str, BaseEmbeddings, Any], **kwargs) -> BaseEmbeddings:
@@ -46,18 +48,30 @@ class AutoEmbeddings:
             # Get Anthropic embeddings
             embeddings = AutoEmbeddings.get_embeddings("anthropic://claude-v1", api_key="...")
         """
-        # Try to find matching implementation
-        try:
-            embeddings_cls = EmbeddingsRegistry.match(model)
-            if embeddings_cls and embeddings_cls.is_available():
-                try:
-                    return embeddings_cls(model, **kwargs)
-                except Exception as e:
-                    warnings.warn(f"Failed to load {embeddings_cls.__name__}: {e}")
-        except Exception:
-            # Fallback to sentence-transformers if no match found
-            from .sentence_transformer import SentenceTransformerEmbeddings
+        # Load embeddings instance if already provided
+        if isinstance(model, BaseEmbeddings):
+            return model
+        elif isinstance(model, str):
+            # Try to find matching implementation via registry
             try:
-                return SentenceTransformerEmbeddings(model, **kwargs)
+                embeddings_cls = EmbeddingsRegistry.match(model)
+                if embeddings_cls and embeddings_cls.is_available():
+                    try:
+                        return embeddings_cls(model, **kwargs)
+                    except Exception as e:
+                        warnings.warn(f"Failed to load {embeddings_cls.__name__}: {e}")
+            except Exception:
+                # Fall back to SentenceTransformerEmbeddings if no matching implementation is found
+                from .sentence_transformer import SentenceTransformerEmbeddings
+                try:
+                    return SentenceTransformerEmbeddings(model, **kwargs)
+                except Exception as e:
+                    raise ValueError(f"Failed to load embeddings via SentenceTransformerEmbeddings: {e}")
+        else:
+            # get the wrapped embeddings instance
+            try:
+                return EmbeddingsRegistry.wrap(model, **kwargs)
             except Exception as e:
-                raise ValueError(f"Failed to load embeddings: {e}")
+                raise ValueError(f"Failed to wrap embeddings instance: {e}")
+    def __call__(self, model: Union[str, BaseEmbeddings, Any], **kwargs) -> BaseEmbeddings:
+        return self.get_embeddings(model, **kwargs)
