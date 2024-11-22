@@ -21,9 +21,6 @@ class AutoEmbeddings:
         # Get Anthropic embeddings
         embeddings = AutoEmbeddings.get_embeddings("anthropic://claude-v1", api_key="...")
     """
-    def __init__(self, model: Union[str, BaseEmbeddings, Any], **kwargs) -> BaseEmbeddings:
-        return self.get_embeddings(model, **kwargs)
-    
     @classmethod
     def get_embeddings(cls, model: Union[str, BaseEmbeddings, Any], **kwargs) -> BaseEmbeddings:
         """Get embeddings instance based on identifier.
@@ -73,5 +70,5 @@ class AutoEmbeddings:
                 return EmbeddingsRegistry.wrap(model, **kwargs)
             except Exception as e:
                 raise ValueError(f"Failed to wrap embeddings instance: {e}")
-    def __call__(self, model: Union[str, BaseEmbeddings, Any], **kwargs) -> BaseEmbeddings:
-        return self.get_embeddings(model, **kwargs)
+
+        
