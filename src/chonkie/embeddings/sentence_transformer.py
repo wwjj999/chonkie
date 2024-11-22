@@ -19,7 +19,9 @@ class SentenceTransformerEmbeddings(BaseEmbeddings):
         model (str): Name of the SentenceTransformer model to load
     """
 
-    def __init__(self, model: Union[str, "SentenceTransformer"] = "all-MiniLM-L6-v2") -> None:
+    def __init__(self,
+                 model: Union[str, "SentenceTransformer"] = "all-MiniLM-L6-v2",
+                 **kwargs) -> None:
         """Initialize SentenceTransformerEmbeddings with a sentence-transformers model.
         
         Args:
@@ -35,7 +37,7 @@ class SentenceTransformerEmbeddings(BaseEmbeddings):
 
         if isinstance(model, str):
             self.model_name_or_path = model
-            self.model = SentenceTransformer(self.model_name_or_path)
+            self.model = SentenceTransformer(self.model_name_or_path, **kwargs)
         elif isinstance(model, SentenceTransformer):
             self.model = model
             self.model_name_or_path = self.model.model_card_data.base_model
