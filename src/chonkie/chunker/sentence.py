@@ -175,7 +175,8 @@ class SentenceChunker(BaseChunker):
     def _split_sentences(self,
                         text: str,
                         delim: Union[str, List[str]]=['.', '!', '?', '\n'],
-                        sep: str="🦛") -> List[str]:
+                        sep: str="🦛", 
+                        min_length: int = 10) -> List[str]:
         """Fast sentence splitting while maintaining accuracy.
         
         This method is faster than using regex for sentence splitting and is more accurate than using the spaCy sentence tokenizer.
@@ -191,7 +192,27 @@ class SentenceChunker(BaseChunker):
         t = text
         for c in delim:
             t = t.replace(c, c + sep)
-        return [s for s in t.split(sep) if s != '']
+        
+        # Initial split
+        splits = [s for s in t.split(sep) if s != '']
+        # print(splits)
+        
+        # Combine short splits with previous sentence
+        sentences = []
+        current = ""
+        
+        for s in splits:
+            if len(s.strip()) < min_length:
+                current += s
+            else:
+                if current:
+                    sentences.append(current)
+                current = s
+        
+        if current:
+            sentences.append(current)
+            
+        return sentences
 
     def _get_token_counts(self, sentences: List[str]) -> List[int]:
         """Get token counts for a list of sentences in batch.
