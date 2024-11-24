@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "chonkie"
-version = "0.2.1"
+version = "0.2.1.post1"
 description = "🦛 CHONK your texts with Chonkie ✨ - The no-nonsense RAG chunking library"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = {file = "LICENSE"}
 keywords = ["chunking", "rag", "nlp", "text-processing"]
 authors = [
