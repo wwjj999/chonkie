@@ -5,7 +5,7 @@ from .chunker import (BaseChunker, Chunk, SDPMChunker, SemanticChunk,
 from .embeddings import (BaseEmbeddings, SentenceTransformerEmbeddings, 
                          Model2VecEmbeddings, OpenAIEmbeddings, AutoEmbeddings)
 
-__version__ = "0.2.1"
+__version__ = "0.2.1.post1"
 __name__ = "chonkie"
 __author__ = "Bhavnick Minhas"
 
