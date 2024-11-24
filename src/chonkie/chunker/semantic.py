@@ -61,7 +61,8 @@ class SemanticChunker(BaseChunker):
         similarity_threshold: Optional[float] = None,
         similarity_percentile: Optional[float] = None,
         chunk_size: int = 512,
-        initial_sentences: int = 1
+        initial_sentences: int = 1, 
+        min_chunk_size: int = 2
     ):
         """Initialize the SemanticChunker.
 
@@ -96,12 +97,15 @@ class SemanticChunker(BaseChunker):
             similarity_percentile = 0.8
             raise Warning(
                 "No similarity threshold specified. Defaulting to 80th percentile."
-            )
+            ) #TODO: Change this to be a non-blocking warning
+        if min_chunk_size < 1:
+            raise ValueError("min_chunk_size must be at least 1")
 
         self.chunk_size = chunk_size
         self.similarity_threshold = similarity_threshold
         self.similarity_percentile = similarity_percentile
         self.initial_sentences = initial_sentences
+        self.min_chunk_size = min_chunk_size
 
         if isinstance(embedding_model, BaseEmbeddings):
             self.embedding_model = embedding_model
@@ -118,8 +122,7 @@ class SemanticChunker(BaseChunker):
     def _split_sentences(self,
                         text: str,
                         delim: Union[str, List[str]]=['.', '!', '?', '\n'],
-                        sep: str="🦛", 
-                        min_length: int=10) -> List[str]:
+                        sep: str="🦛") -> List[str]:
         """Fast sentence splitting while maintaining accuracy.
         
         This method is faster than using regex for sentence splitting and is more accurate than using the spaCy sentence tokenizer.
@@ -145,7 +148,7 @@ class SemanticChunker(BaseChunker):
         current = ""
         
         for s in splits:
-            if len(s.strip()) < min_length:
+            if len(s.strip()) < (self.min_chunk_size * 5):
                 current += s
             else:
                 if current:

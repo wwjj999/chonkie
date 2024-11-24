@@ -65,7 +65,8 @@ class SentenceChunker(BaseChunker):
         tokenizer: Union[str, Any] = "gpt2",
         chunk_size: int = 512,
         chunk_overlap: int = 128,
-        min_sentences_per_chunk: int = 1
+        min_sentences_per_chunk: int = 1, 
+        min_chunk_size: int = 2
     ):
         """Initialize the SentenceChunker with configuration parameters.
 
@@ -88,10 +89,13 @@ class SentenceChunker(BaseChunker):
             raise ValueError("chunk_overlap must be less than chunk_size")
         if min_sentences_per_chunk < 1:
             raise ValueError("min_sentences_per_chunk must be at least 1")
+        if min_chunk_size < 1:
+            raise ValueError("min_chunk_size must be at least 1")
 
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
         self.min_sentences_per_chunk = min_sentences_per_chunk
+        self.min_chunk_size = min_chunk_size
     
     # TODO: This is a older method of sentence splitting that uses Regex
     # but since Regex in python via re is super slooooow we use a different method
@@ -175,8 +179,7 @@ class SentenceChunker(BaseChunker):
     def _split_sentences(self,
                         text: str,
                         delim: Union[str, List[str]]=['.', '!', '?', '\n'],
-                        sep: str="🦛", 
-                        min_length: int = 10) -> List[str]:
+                        sep: str="🦛") -> List[str]:
         """Fast sentence splitting while maintaining accuracy.
         
         This method is faster than using regex for sentence splitting and is more accurate than using the spaCy sentence tokenizer.
@@ -202,7 +205,7 @@ class SentenceChunker(BaseChunker):
         current = ""
         
         for s in splits:
-            if len(s.strip()) < min_length:
+            if len(s.strip()) < (self.min_chunk_size * 6):
                 current += s
             else:
                 if current:
