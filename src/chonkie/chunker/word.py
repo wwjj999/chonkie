@@ -1,5 +1,6 @@
 import re
-from typing import List, Tuple, Union, Any
+from typing import Any, List, Tuple, Union
+
 from .base import BaseChunker, Chunk
 
 
@@ -20,6 +21,7 @@ class WordChunker(BaseChunker):
 
         Raises:
             ValueError: If chunk_size <= 0 or chunk_overlap >= chunk_size or invalid mode
+
         """
         super().__init__(tokenizer)
 
@@ -33,21 +35,21 @@ class WordChunker(BaseChunker):
 
     def _split_into_words(self, text: str) -> List[str]:
         """Split text into words while preserving whitespace."""
-        split_points = [match.end() for match in re.finditer(r'(\s*\S+)', text)]
+        split_points = [match.end() for match in re.finditer(r"(\s*\S+)", text)]
         words = []
         prev = 0
-        
+
         for point in split_points:
             words.append(text[prev:point])
             prev = point
-            
+
         if prev < len(text):
             words.append(text[prev:])
-            
+
         return words
 
     def _create_chunk(
-        self, words: List[str], text:str, token_count: int
+        self, words: List[str], text: str, token_count: int
     ) -> Tuple[Chunk, int]:
         """Create a chunk from a list of words.
 
@@ -58,6 +60,7 @@ class WordChunker(BaseChunker):
 
         Returns:
             Tuple of (Chunk object, number of tokens in chunk)
+
         """
         chunk_text = "".join(words)
         start_index = text.find(chunk_text)
@@ -65,7 +68,7 @@ class WordChunker(BaseChunker):
             text=chunk_text,
             start_index=start_index,
             end_index=start_index + len(chunk_text),
-            token_count=token_count
+            token_count=token_count,
         )
 
     def _get_word_list_token_counts(self, words: List[str]) -> List[int]:
@@ -76,9 +79,10 @@ class WordChunker(BaseChunker):
 
         Returns:
             List of token counts for each word
+
         """
         words = [
-            word for word in words if word != ''
+            word for word in words if word != ""
         ]  # Add space in the beginning because tokenizers usually split that differently
         encodings = self._encode_batch(words)
         return [len(encoding) for encoding in encodings]
@@ -91,6 +95,7 @@ class WordChunker(BaseChunker):
 
         Returns:
             List of Chunk objects containing the chunked text and metadata
+
         """
         if not text.strip():
             return []
@@ -138,9 +143,7 @@ class WordChunker(BaseChunker):
 
         # Add the final chunk if it has any words
         if current_chunk:
-            chunk = self._create_chunk(
-                current_chunk, text, current_chunk_length
-            )
+            chunk = self._create_chunk(current_chunk, text, current_chunk_length)
             chunks.append(chunk)
         return chunks
 

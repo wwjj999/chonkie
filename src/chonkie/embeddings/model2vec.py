@@ -1,5 +1,6 @@
-from typing import List, Union, TYPE_CHECKING
 import importlib.util
+from typing import TYPE_CHECKING, List, Union
+
 import numpy as np
 
 from chonkie.embeddings.base import BaseEmbeddings
@@ -7,22 +8,22 @@ from chonkie.embeddings.base import BaseEmbeddings
 if TYPE_CHECKING:
     from model2vec import StaticModel
 
+
 class Model2VecEmbeddings(BaseEmbeddings):
-    """
-    Class for model2vec embeddings. 
+    """Class for model2vec embeddings.
 
     This class provides an interface for the model2vec library, which provides a variety
     of pre-trained models for text embeddings.
 
     Args:
         model (str or StaticModel): Name of the model2vec model to load or a StaticModel instance
+
     """
 
-    def __init__(self,
-                 model: Union[str, "StaticModel"] = "minishlab/potion-base-8M") -> None:
-        """
-        Initialize Model2VecEmbeddings with a str or StaticModel instance.
-        """
+    def __init__(
+        self, model: Union[str, "StaticModel"] = "minishlab/potion-base-8M"
+    ) -> None:
+        """Initialize Model2VecEmbeddings with a str or StaticModel instance."""
         if not self.is_available():
             raise ImportError("model2vec is not available. Please install it via pip.")
         else:
@@ -46,6 +47,7 @@ class Model2VecEmbeddings(BaseEmbeddings):
 
     @property
     def dimension(self) -> int:
+        """Dimension of the embedding vectors."""
         return self._dimension
 
     def embed(self, text: str) -> "np.ndarray":
@@ -67,14 +69,19 @@ class Model2VecEmbeddings(BaseEmbeddings):
 
     def similarity(self, u: "np.ndarray", v: "np.ndarray") -> float:
         """Compute cosine similarity of two embeddings."""
-        return np.divide(np.dot(u, v), np.linalg.norm(u) * np.linalg.norm(v), dtype=float)
+        return np.divide(
+            np.dot(u, v), np.linalg.norm(u) * np.linalg.norm(v), dtype=float
+        )
 
     def get_tokenizer_or_token_counter(self):
+        """Get the tokenizer or token counter for the model."""
         return self.model.tokenizer
 
     @classmethod
     def is_available(cls) -> bool:
+        """Check if model2vec is available."""
         return importlib.util.find_spec("model2vec") is not None
 
     def __repr__(self) -> str:
+        """Representation of the Model2VecEmbeddings instance."""
         return f"Model2VecEmbeddings(model_name_or_path={self.model_name_or_path})"

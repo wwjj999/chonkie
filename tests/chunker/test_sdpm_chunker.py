@@ -1,22 +1,51 @@
+"""Tests for the SDPM (Semantic Density Peak Mapping) Chunker.
+
+This module contains test cases for the SDPMChunker class, which implements
+a chunking strategy based on semantic density and peak mapping. The tests verify:
+
+- Basic chunking functionality with simple text
+- Handling of complex markdown formatted text
+- Proper semantic chunk generation
+- Integration with embedding models
+- Edge cases and boundary conditions
+
+"""
+
 import pytest
 
 from chonkie.chunker.sdpm import SDPMChunker
 from chonkie.chunker.semantic import SemanticChunk
 from chonkie.embeddings.sentence_transformer import SentenceTransformerEmbeddings
 
+
 @pytest.fixture
 def sample_text():
+    """Sample text for testing the SDPMChunker."""
     text = """The process of text chunking in RAG applications represents a delicate balance between competing requirements. On one side, we have the need for semantic coherence – ensuring that each chunk maintains meaningful context that can be understood and processed independently. On the other, we must optimize for information density, ensuring that each chunk carries sufficient signal without excessive noise that might impede retrieval accuracy. In this post, we explore the challenges of text chunking in RAG applications and propose a novel approach that leverages recent advances in transformer-based language models to achieve a more effective balance between these competing requirements."""
     return text
 
 
 @pytest.fixture
 def embedding_model():
+    """Fixture that returns a SentenceTransformer embedding model for testing.
+
+    Returns:
+        SentenceTransformerEmbeddings: A sentence transformer model initialized with 'all-MiniLM-L6-v2'
+
+    """
     return SentenceTransformerEmbeddings("all-MiniLM-L6-v2")
+
 
 @pytest.fixture
 def sample_complex_markdown_text():
-    text =  """# Heading 1
+    """Fixture that returns a sample markdown text with complex formatting.
+
+    Returns:
+        str: A markdown text containing various formatting elements like headings,
+            lists, code blocks, links, images and blockquotes.
+
+    """
+    text = """# Heading 1
     This is a paragraph with some **bold text** and _italic text_. 
     ## Heading 2
     - Bullet point 1
