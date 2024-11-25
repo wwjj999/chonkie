@@ -42,18 +42,6 @@ class BaseChunker(ABC):
             tokenizer_or_token_counter (Union[str, Any]): String, tokenizer object, or token counter object
 
         """
-        # if callable(tokenizer_or_token_counter):
-        #     self.tokenizer = None
-        #     self._tokenizer_backend = "callable"
-        #     self.token_counter = tokenizer_or_token_counter
-        # elif isinstance(tokenizer_or_token_counter, str):
-        #     self.tokenizer = self._load_tokenizer(tokenizer_or_token_counter)
-        #     self.token_counter = self._get_tokenizer_counter()
-        # else:
-        #     self.tokenizer = tokenizer_or_token_counter
-        #     self._tokenizer_backend = self._get_tokenizer_backend()
-        #     self.token_counter = self._get_tokenizer_counter()
-
         # First check if the tokenizer_or_token_counter is a string
         if isinstance(tokenizer_or_token_counter, str):
             self.tokenizer = self._load_tokenizer(tokenizer_or_token_counter)
