@@ -119,23 +119,6 @@ And of course, special thanks to [Moto Moto](https://www.youtube.com/watch?v=I0z
 >                                         ~ Moto Moto
 
 
-# Development
-
-You can make changes and contribute to this project by:
-
-```
-# clone repo
-git clone https://github.com/bhavnicksm/chonkie
-cd chonkie
-
-# setup venv and install dependencies
-uv vevn
-uv pip install -r pyproject.toml --all-extras
-
-# run tests
-pytest
-```
-
 # Citation
 
 If you use Chonkie in your research, please cite it as follows:
