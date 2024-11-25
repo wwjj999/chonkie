@@ -34,22 +34,22 @@ class BaseChunker(ABC):
     the chunk() method according to their specific chunking strategy.
     """
 
-    def __init__(self, tokenizer: Union[str, Any, Callable[[str], int]]):
+    def __init__(self, tokenizer_or_token_counter: Union[str, Any, Callable[[str], int]]):
         """Initialize the chunker with a tokenizer.
 
         Args:
             tokenizer_or_token_counter (Union[str, Any]): String, tokenizer object, or token counter object
 
         """
-        if callable(tokenizer):
+        if callable(tokenizer_or_token_counter):
             self.tokenizer = None
             self._tokenizer_backend = "callable"
-            self.token_counter = tokenizer
-        if isinstance(tokenizer, str):
-            self.tokenizer = self._load_tokenizer(tokenizer)
+            self.token_counter = tokenizer_or_token_counter
+        elif isinstance(tokenizer_or_token_counter, str):
+            self.tokenizer = self._load_tokenizer(tokenizer_or_token_counter)
             self.token_counter = self._get_tokenizer_counter()
         else:
-            self.tokenizer = tokenizer
+            self.tokenizer = tokenizer_or_token_counter
             self._tokenizer_backend = self._get_tokenizer_backend()
             self.token_counter = self._get_tokenizer_counter()
 
