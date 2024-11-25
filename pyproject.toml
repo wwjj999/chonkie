@@ -59,4 +59,4 @@ packages = ["chonkie",
             "chonkie.embeddings"]
 
 [tool.ruff]
-select = ["I", "D"]
+select = ["F", "I", "D", "DOC"]
