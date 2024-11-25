@@ -1,4 +1,18 @@
+"""Tests for the WordChunker class.
+
+The WordChunker class is responsible for splitting text into chunks based on word boundaries
+while respecting a maximum token length. These tests verify that the chunker:
+
+- Initializes correctly with a tokenizer and chunk parameters
+- Splits text into appropriate sized chunks
+- Maintains word boundaries when chunking
+- Handles overlap between chunks correctly
+- Processes various text formats including markdown
+
+"""
+
 from typing import List
+
 import pytest
 from tokenizers import Tokenizer
 
@@ -8,17 +22,21 @@ from chonkie.chunker.word import WordChunker
 
 @pytest.fixture
 def tokenizer():
+    """Fixture that returns a GPT-2 tokenizer from the tokenizers library."""
     return Tokenizer.from_pretrained("gpt2")
 
 
 @pytest.fixture
 def sample_text():
+    """Fixture that returns a sample text for testing the WordChunker."""
     text = """The process of text chunking in RAG applications represents a delicate balance between competing requirements. On one side, we have the need for semantic coherence – ensuring that each chunk maintains meaningful context that can be understood and processed independently. On the other, we must optimize for information density, ensuring that each chunk carries sufficient signal without excessive noise that might impede retrieval accuracy. In this post, we explore the challenges of text chunking in RAG applications and propose a novel approach that leverages recent advances in transformer-based language models to achieve a more effective balance between these competing requirements."""
     return text
 
+
 @pytest.fixture
 def sample_complex_markdown_text():
-    text =  """# Heading 1
+    """Fixture that returns a sample markdown text with complex formatting."""
+    text = """# Heading 1
     This is a paragraph with some **bold text** and _italic text_. 
     ## Heading 2
     - Bullet point 1
@@ -36,13 +54,10 @@ def sample_complex_markdown_text():
     """
     return text
 
+
 def test_word_chunker_initialization(tokenizer):
-    """
-    Test that the WordChunker can be initialized with a tokenizer.
-    """
-    chunker = WordChunker(
-        tokenizer=tokenizer, chunk_size=512, chunk_overlap=128
-    )
+    """Test that the WordChunker can be initialized with a tokenizer."""
+    chunker = WordChunker(tokenizer=tokenizer, chunk_size=512, chunk_overlap=128)
 
     assert chunker is not None
     assert chunker.tokenizer == tokenizer
@@ -51,12 +66,8 @@ def test_word_chunker_initialization(tokenizer):
 
 
 def test_word_chunker_chunking(tokenizer, sample_text):
-    """
-    Test that the WordChunker can chunk a sample text into words.
-    """
-    chunker = WordChunker(
-        tokenizer=tokenizer, chunk_size=512, chunk_overlap=128
-    )
+    """Test that the WordChunker can chunk a sample text into words."""
+    chunker = WordChunker(tokenizer=tokenizer, chunk_size=512, chunk_overlap=128)
     chunks = chunker.chunk(sample_text)
 
     assert len(chunks) > 0, print(f"Chunks: {chunks}")
@@ -69,24 +80,16 @@ def test_word_chunker_chunking(tokenizer, sample_text):
 
 
 def test_word_chunker_empty_text(tokenizer):
-    """
-    Test that the WordChunker can handle empty text input.
-    """
-    chunker = WordChunker(
-        tokenizer=tokenizer, chunk_size=512, chunk_overlap=128
-    )
+    """Test that the WordChunker can handle empty text input."""
+    chunker = WordChunker(tokenizer=tokenizer, chunk_size=512, chunk_overlap=128)
     chunks = chunker.chunk("")
 
     assert len(chunks) == 0
 
 
 def test_word_chunker_single_word_text(tokenizer):
-    """
-    Test that the WordChunker can handle text with a single word.
-    """
-    chunker = WordChunker(
-        tokenizer=tokenizer, chunk_size=512, chunk_overlap=128
-    )
+    """Test that the WordChunker can handle text with a single word."""
+    chunker = WordChunker(tokenizer=tokenizer, chunk_size=512, chunk_overlap=128)
     chunks = chunker.chunk("Hello")
 
     assert len(chunks) == 1
@@ -95,12 +98,8 @@ def test_word_chunker_single_word_text(tokenizer):
 
 
 def test_word_chunker_single_chunk_text(tokenizer):
-    """
-    Test that the WordChunker can handle text that fits within a single chunk.
-    """
-    chunker = WordChunker(
-        tokenizer=tokenizer, chunk_size=512, chunk_overlap=128
-    )
+    """Test that the WordChunker can handle text that fits within a single chunk."""
+    chunker = WordChunker(tokenizer=tokenizer, chunk_size=512, chunk_overlap=128)
     chunks = chunker.chunk("Hello, how are you?")
 
     assert len(chunks) == 1, print(f"Chunks: {chunks}")
@@ -109,25 +108,15 @@ def test_word_chunker_single_chunk_text(tokenizer):
 
 
 def test_word_chunker_repr(tokenizer):
-    """
-    Test that the WordChunker has a string representation.
-    """
-    chunker = WordChunker(
-        tokenizer=tokenizer, chunk_size=512, chunk_overlap=128
-    )
+    """Test that the WordChunker has a string representation."""
+    chunker = WordChunker(tokenizer=tokenizer, chunk_size=512, chunk_overlap=128)
 
-    assert (
-        repr(chunker) == "WordChunker(chunk_size=512, chunk_overlap=128)"
-    )
+    assert repr(chunker) == "WordChunker(chunk_size=512, chunk_overlap=128)"
 
 
 def test_word_chunker_call(tokenizer, sample_text):
-    """
-    Test that the WordChunker can be called directly.
-    """
-    chunker = WordChunker(
-        tokenizer=tokenizer, chunk_size=512, chunk_overlap=128
-    )
+    """Test that the WordChunker can be called directly."""
+    chunker = WordChunker(tokenizer=tokenizer, chunk_size=512, chunk_overlap=128)
     chunks = chunker(sample_text)
 
     assert len(chunks) > 0
@@ -140,32 +129,30 @@ def test_word_chunker_call(tokenizer, sample_text):
 
 
 def test_word_chunker_overlap(tokenizer, sample_text):
-    """
-    Test that the WordChunker creates overlapping chunks correctly.
-    """
-    chunker = WordChunker(
-        tokenizer=tokenizer, chunk_size=512, chunk_overlap=128
-    )
+    """Test that the WordChunker creates overlapping chunks correctly."""
+    chunker = WordChunker(tokenizer=tokenizer, chunk_size=512, chunk_overlap=128)
     chunks = chunker.chunk(sample_text)
 
     for i in range(1, len(chunks)):
         assert chunks[i].start_index < chunks[i - 1].end_index
 
+
 def verify_chunk_indices(chunks: List[Chunk], original_text: str):
     """Verify that chunk indices correctly map to the original text."""
     for i, chunk in enumerate(chunks):
         # Extract text using the indices
-        extracted_text = original_text[chunk.start_index:chunk.end_index]
+        extracted_text = original_text[chunk.start_index : chunk.end_index]
         # Remove any leading/trailing whitespace from both texts for comparison
         chunk_text = chunk.text.strip()
         extracted_text = extracted_text.strip()
-        
+
         assert chunk_text == extracted_text, (
             f"Chunk {i} text mismatch:\n"
             f"Chunk text: '{chunk_text}'\n"
             f"Extracted text: '{extracted_text}'\n"
             f"Indices: [{chunk.start_index}:{chunk.end_index}]"
         )
+
 
 def test_word_chunker_indices(sample_text):
     """Test that WordChunker's indices correctly map to original text."""
@@ -174,11 +161,13 @@ def test_word_chunker_indices(sample_text):
     chunks = chunker.chunk(sample_text)
     verify_chunk_indices(chunks, sample_text)
 
+
 def test_word_chunker_indices_complex_markdown(sample_complex_markdown_text):
     """Test that WordChunker's indices correctly map to original text."""
     chunker = WordChunker(chunk_size=512, chunk_overlap=128)
     chunks = chunker.chunk(sample_complex_markdown_text)
     verify_chunk_indices(chunks, sample_complex_markdown_text)
+
 
 if __name__ == "__main__":
     pytest.main()
