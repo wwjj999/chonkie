@@ -17,6 +17,7 @@ class Chunk:
         start_index: The starting index of the chunk in the original text
         end_index: The ending index of the chunk in the original text
         token_count: The number of tokens in the chunk
+
     """
 
     text: str
@@ -38,6 +39,7 @@ class BaseChunker(ABC):
 
         Args:
             tokenizer_or_token_counter (Union[str, Any]): String, tokenizer object, or token counter object
+
         """
         if callable(tokenizer):
             self.tokenizer = None
