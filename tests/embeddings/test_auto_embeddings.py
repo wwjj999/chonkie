@@ -1,8 +1,9 @@
 import pytest
+
 from chonkie.embeddings.auto import AutoEmbeddings
 from chonkie.embeddings.model2vec import Model2VecEmbeddings
-from chonkie.embeddings.sentence_transformer import SentenceTransformerEmbeddings
 from chonkie.embeddings.openai import OpenAIEmbeddings
+from chonkie.embeddings.sentence_transformer import SentenceTransformerEmbeddings
 
 
 @pytest.fixture

@@ -1,5 +1,6 @@
 import re
-from typing import List, Tuple, Union, Any
+from typing import Any, List, Tuple, Union
+
 from .base import BaseChunker, Chunk
 
 

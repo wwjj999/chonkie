@@ -1,5 +1,6 @@
-from typing import List, Union, TYPE_CHECKING
 import importlib.util
+from typing import TYPE_CHECKING, List, Union
+
 import numpy as np
 
 from chonkie.embeddings.base import BaseEmbeddings

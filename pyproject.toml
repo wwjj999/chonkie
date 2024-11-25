@@ -57,3 +57,6 @@ package-dir = {"" = "src"}
 packages = ["chonkie", 
             "chonkie.chunker",
             "chonkie.embeddings"]
+
+[tool.ruff]
+select = ["I"]

@@ -1,6 +1,7 @@
-import pytest
 import numpy as np
+import pytest
 from sentence_transformers import SentenceTransformer
+
 from chonkie.embeddings.sentence_transformer import SentenceTransformerEmbeddings
 
 

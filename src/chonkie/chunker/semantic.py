@@ -3,10 +3,10 @@ from typing import List, Optional, Union
 
 import numpy as np
 
+from chonkie.embeddings.base import BaseEmbeddings
+
 from .base import BaseChunker
 from .sentence import Sentence, SentenceChunk
-
-from chonkie.embeddings.base import BaseEmbeddings
 
 
 @dataclass

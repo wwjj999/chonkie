@@ -1,4 +1,4 @@
-from typing import Any, List, Union, Generator, Tuple
+from typing import Any, Generator, List, Tuple, Union
 
 from .base import BaseChunker, Chunk
 

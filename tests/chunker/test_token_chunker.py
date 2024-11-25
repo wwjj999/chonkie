@@ -1,12 +1,12 @@
 from typing import List
+
 import pytest
 import tiktoken
+from datasets import load_dataset
 from tokenizers import Tokenizer
 from transformers import AutoTokenizer
 
 from chonkie import Chunk, TokenChunker
-
-from datasets import load_dataset
 
 
 @pytest.fixture

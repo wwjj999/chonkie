@@ -1,5 +1,5 @@
-from typing import List, Union, TYPE_CHECKING
 import importlib
+from typing import TYPE_CHECKING, List, Union
 
 from chonkie.embeddings.base import BaseEmbeddings
 

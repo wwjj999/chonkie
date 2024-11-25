@@ -12,11 +12,11 @@ from .chunker import (
     WordChunker,
 )
 from .embeddings import (
+    AutoEmbeddings,
     BaseEmbeddings,
-    SentenceTransformerEmbeddings,
     Model2VecEmbeddings,
     OpenAIEmbeddings,
-    AutoEmbeddings,
+    SentenceTransformerEmbeddings,
 )
 
 __version__ = "0.2.1.post1"
