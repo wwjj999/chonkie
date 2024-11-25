@@ -85,6 +85,10 @@ def test_semantic_chunker_initialization(embedding_model):
     assert chunker.initial_sentences == 1
 
 
+@pytest.mark.skipif(
+    "OPENAI_API_KEY" not in os.environ,
+    reason="Skipping test because OPENAI_API_KEY is not defined",
+)
 def test_semantic_chunker_initialization_openai(openai_embedding_model):
     """Test that the SemanticChunker can be initialized with required parameters."""
     chunker = SemanticChunker(
