@@ -18,7 +18,9 @@ class SDPMChunker(SemanticChunker):
         chunk_size: Maximum token count for a chunk
         initial_sentences: Number of sentences to consider for initial grouping
         skip_window: Number of chunks to skip when looking for similarities
+        min_chunk_size: Minimum number of tokens per sentence
     """
+
     def __init__(
         self,
         embedding_model: Union[str, Any] = "minishlab/potion-base-8M",
@@ -27,6 +29,7 @@ class SDPMChunker(SemanticChunker):
         chunk_size: int = 512,
         initial_sentences: int = 1,
         skip_window: int = 1,  # How many chunks to skip when looking for similarities
+        min_chunk_size: int = 2,  # Minimum number of tokens per sentence
     ):
         """Initialize the SDPMChunker.
 
@@ -37,6 +40,7 @@ class SDPMChunker(SemanticChunker):
             chunk_size: Maximum token count for a chunk
             initial_sentences: Number of sentences to consider for initial grouping
             skip_window: Number of chunks to skip when looking for similarities
+            min_chunk_size: Minimum number of tokens per sentence
         """
         super().__init__(
             embedding_model=embedding_model,
@@ -44,6 +48,7 @@ class SDPMChunker(SemanticChunker):
             similarity_threshold=similarity_threshold,
             similarity_percentile=similarity_percentile,
             initial_sentences=initial_sentences,
+            min_chunk_size=min_chunk_size,
         )
         self.skip_window = skip_window
 

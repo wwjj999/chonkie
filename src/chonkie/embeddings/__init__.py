@@ -8,8 +8,8 @@ from .auto import AutoEmbeddings
 # Add all embeddings classes to __all__
 __all__ = [
     "BaseEmbeddings",
-    "Model2VecEmbeddings", 
-    "SentenceTransformerEmbeddings", 
+    "Model2VecEmbeddings",
+    "SentenceTransformerEmbeddings",
     "OpenAIEmbeddings",
     "AutoEmbeddings",
 ]

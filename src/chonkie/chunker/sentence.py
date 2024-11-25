@@ -1,4 +1,3 @@
-import re
 from dataclasses import dataclass
 from typing import Any, List, Union
 
@@ -8,7 +7,7 @@ from .base import BaseChunker, Chunk
 @dataclass
 class Sentence:
     """Dataclass representing a sentence with metadata.
-    
+
     All attributes are read-only via slots for performance reasons.
 
     Attributes:
@@ -17,10 +16,13 @@ class Sentence:
         end_index: The ending index of the sentence in the original text
         token_count: The number of tokens in the sentence
     """
+
     text: str
     start_index: int
     end_index: int
     token_count: int
+    __slots__ = ["text", "start_index", "end_index", "token_count"]
+
 
 @dataclass
 class SentenceChunk(Chunk):
@@ -35,8 +37,25 @@ class SentenceChunk(Chunk):
         token_count: The number of tokens in the chunk
         sentences: List of Sentence objects in the chunk
     """
+
     # Don't redeclare inherited fields
     sentences: List[Sentence]
+
+    __slots__ = ["sentences"]
+
+    def __init__(
+        self,
+        text: str,
+        start_index: int,
+        end_index: int,
+        token_count: int,
+        sentences: List[Sentence] = None,
+    ):
+        super().__init__(text, start_index, end_index, token_count)
+        object.__setattr__(
+            self, "sentences", sentences if sentences is not None else []
+        )
+
 
 class SentenceChunker(BaseChunker):
     """
@@ -47,7 +66,8 @@ class SentenceChunker(BaseChunker):
         chunk_size: Maximum number of tokens per chunk
         chunk_overlap: Number of tokens to overlap between chunks
         min_sentences_per_chunk: Minimum number of sentences per chunk (defaults to 1)
-    
+        min_chunk_size: Minimum number of tokens per sentence (defaults to 2)
+
     Raises:
         ValueError: If parameters are invalid
     """
@@ -57,8 +77,8 @@ class SentenceChunker(BaseChunker):
         tokenizer: Union[str, Any] = "gpt2",
         chunk_size: int = 512,
         chunk_overlap: int = 128,
-        min_sentences_per_chunk: int = 1, 
-        min_chunk_size: int = 2
+        min_sentences_per_chunk: int = 1,
+        min_chunk_size: int = 2,
     ):
         """Initialize the SentenceChunker with configuration parameters.
 
@@ -69,7 +89,7 @@ class SentenceChunker(BaseChunker):
             chunk_size: Maximum number of tokens per chunk
             chunk_overlap: Number of tokens to overlap between chunks
             min_sentences_per_chunk: Minimum number of sentences per chunk (defaults to 1)
-
+            min_chunk_size: Minimum number of tokens per sentence (defaults to 2)
         Raises:
             ValueError: If parameters are invalid
         """
@@ -88,7 +108,7 @@ class SentenceChunker(BaseChunker):
         self.chunk_overlap = chunk_overlap
         self.min_sentences_per_chunk = min_sentences_per_chunk
         self.min_chunk_size = min_chunk_size
-    
+
     # TODO: This is a older method of sentence splitting that uses Regex
     # but since Regex in python via re is super slooooow we use a different method
     # that is faster and more accurate. We can keep this method for reference
@@ -97,7 +117,7 @@ class SentenceChunker(BaseChunker):
 
     # def _split_sentences(self, text: str) -> List[str]:
     #     """Split text into sentences using enhanced regex patterns.
-        
+
     #     Handles various cases including:
     #     - Standard sentence endings across multiple writing systems
     #     - Quotations and parentheses
@@ -110,7 +130,7 @@ class SentenceChunker(BaseChunker):
 
     #     Args:
     #         text: Input text to be split into sentences
-        
+
     #     Returns:
     #         List of sentences
     #     """
@@ -121,7 +141,7 @@ class SentenceChunker(BaseChunker):
     #         r'𑁇𑁈𑂾𑂿𑃀𑃁𑅁𑅂𑅃𑇅𑇆𑇍𑇞𑇟𑈸𑈹𑈻𑈼𑊩𑑋𑑌𑗂𑗃𑗉𑗊𑗋𑗌𑗍𑗎𑗏𑗐𑗑𑗒'
     #         r'𑗓𑗔𑗕𑗖𑗗𑙁𑙂𑜼𑜽𑜾𑩂𑩃𑪛𑪜𑱁𑱂𖩮𖩯𖫵𖬷𖬸𖭄𛲟𝪈｡。]'
     #     )
-        
+
     #     # Common abbreviations and titles that don't end sentences
     #     abbrevs = (
     #         r"(?:Mr|Mrs|Ms|Dr|Prof|Sr|Jr|vs|etc|viz|al|Gen|Col|Fig|Lt|Mt|St"
@@ -129,7 +149,7 @@ class SentenceChunker(BaseChunker):
     #         r"|e\.g|i\.e|vol|vs|cm|mm|km|kg|lb|ft|pd|hr|sec|min|sq|fx|Feb|Mar"
     #         r"|Apr|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)"
     #     )
-        
+
     #     # First, protect periods in known abbreviations
     #     text = re.sub(rf"({abbrevs})\.", r"\1@POINT@", text, flags=re.IGNORECASE)
 
@@ -165,37 +185,39 @@ class SentenceChunker(BaseChunker):
 
     #     # Split into sentences
     #     sentences = [s.strip() for s in text.split('\n') if s.strip()]
-        
+
     #     return sentences
-    
-    def _split_sentences(self,
-                        text: str,
-                        delim: Union[str, List[str]]=['.', '!', '?', '\n'],
-                        sep: str="🦛") -> List[str]:
+
+    def _split_sentences(
+        self,
+        text: str,
+        delim: Union[str, List[str]] = [".", "!", "?", "\n"],
+        sep: str = "🦛",
+    ) -> List[str]:
         """Fast sentence splitting while maintaining accuracy.
-        
+
         This method is faster than using regex for sentence splitting and is more accurate than using the spaCy sentence tokenizer.
 
         Args:
             text: Input text to be split into sentences
             delim: Delimiters to split sentences on
             sep: Separator to use when splitting sentences
-        
+
         Returns:
             List of sentences
         """
         t = text
         for c in delim:
             t = t.replace(c, c + sep)
-        
+
         # Initial split
-        splits = [s for s in t.split(sep) if s != '']
+        splits = [s for s in t.split(sep) if s != ""]
         # print(splits)
-        
+
         # Combine short splits with previous sentence
         sentences = []
         current = ""
-        
+
         for s in splits:
             if len(s.strip()) < (self.min_chunk_size * 6):
                 current += s
@@ -203,10 +225,10 @@ class SentenceChunker(BaseChunker):
                 if current:
                     sentences.append(current)
                 current = s
-        
+
         if current:
             sentences.append(current)
-            
+
         return sentences
 
     def _get_token_counts(self, sentences: List[str]) -> List[int]:
@@ -221,7 +243,7 @@ class SentenceChunker(BaseChunker):
         # Batch encode all sentences at once
         encoded_sentences = self._encode_batch(sentences)
         return [len(encoded) for encoded in encoded_sentences]
-    
+
     def _prepare_sentences(self, text: str) -> List[Sentence]:
         """Split text into sentences and calculate token counts for each sentence.
 
@@ -239,23 +261,23 @@ class SentenceChunker(BaseChunker):
         sentences = []
         start_index = 0  # This works because we don't have overlap between sentences
 
-        for sentence, token_count  in zip(sentence_texts, token_counts):
+        for sentence, token_count in zip(sentence_texts, token_counts):
             end_index = start_index + len(sentence)
 
             # Update positions
-            sentences.append(Sentence(
-                text=sentence,
-                start_index=start_index,
-                end_index=end_index,
-                token_count=token_count
-            ))
+            sentences.append(
+                Sentence(
+                    text=sentence,
+                    start_index=start_index,
+                    end_index=end_index,
+                    token_count=token_count,
+                )
+            )
             start_index = end_index + 1  # Account for the newline or space separator
-        
+
         return sentences
-    
-    def _create_chunk(
-        self, sentences: List[Sentence], token_count: int
-    ) -> Chunk:
+
+    def _create_chunk(self, sentences: List[Sentence], token_count: int) -> Chunk:
         """Create a chunk from a list of sentences.
 
         Args:
@@ -312,9 +334,7 @@ class SentenceChunker(BaseChunker):
             else:
                 # Sentence would exceed limits, create chunk if we have enough sentences
                 if len(current_sentences) >= self.min_sentences_per_chunk:
-                    chunk = self._create_chunk(
-                        current_sentences, current_tokens
-                    )
+                    chunk = self._create_chunk(current_sentences, current_tokens)
                     chunks.append(chunk)
 
                     # Calculate overlap for next chunk
@@ -355,9 +375,7 @@ class SentenceChunker(BaseChunker):
 
         # Handle remaining sentences
         if current_sentences:
-            chunk = self._create_chunk(
-                current_sentences, current_tokens
-            )
+            chunk = self._create_chunk(current_sentences, current_tokens)
             chunks.append(chunk)
 
         return chunks

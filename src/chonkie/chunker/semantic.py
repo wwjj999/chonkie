@@ -8,6 +8,7 @@ from .sentence import Sentence, SentenceChunk
 
 from chonkie.embeddings.base import BaseEmbeddings
 
+
 @dataclass
 class SemanticSentence(Sentence):
     """Dataclass representing a semantic sentence with metadata.
@@ -21,8 +22,28 @@ class SemanticSentence(Sentence):
         token_count: The number of tokens in the sentence
         embedding: The sentence embedding
     """
+
     embedding: Optional[np.ndarray]
-    
+
+    # Only define new slots, not the ones inherited from Sentence
+    __slots__ = [
+        "embedding",
+    ]
+
+    def __init__(
+        self,
+        text: str,
+        start_index: int,
+        end_index: int,
+        token_count: int,
+        embedding: Optional[np.ndarray] = None,
+    ):
+        super().__init__(text, start_index, end_index, token_count)
+        object.__setattr__(
+            self, "embedding", embedding if embedding is not None else None
+        )
+
+
 @dataclass
 class SemanticChunk(SentenceChunk):
     """SemanticChunk dataclass representing a semantic chunk with metadata.
@@ -36,25 +57,50 @@ class SemanticChunk(SentenceChunk):
         token_count: The number of tokens in the chunk
         sentences: List of SemanticSentence objects in the chunk
     """
+
     sentences: List[SemanticSentence] = field(default_factory=list)
-    
+
     # No new slots needed since we're just overriding the sentences field
     __slots__ = []
-    
-    def __init__(self, text: str, start_index: int, end_index: int, 
-                 token_count: int, sentences: List[SemanticSentence] = None):
+
+    def __init__(
+        self,
+        text: str,
+        start_index: int,
+        end_index: int,
+        token_count: int,
+        sentences: List[SemanticSentence] = None,
+    ):
         super().__init__(text, start_index, end_index, token_count)
-        object.__setattr__(self, 'sentences', sentences if sentences is not None else [])
+        object.__setattr__(
+            self, "sentences", sentences if sentences is not None else []
+        )
+
 
 class SemanticChunker(BaseChunker):
+    """Chunker that splits text into semantically coherent chunks using embeddings.
+
+    Args:
+        embedding_model: Embedding model to use for semantic chunking
+        similarity_threshold: Absolute threshold for semantic similarity (0-1)
+        similarity_percentile: Percentile threshold for similarity (0-100)
+        chunk_size: Maximum tokens allowed per chunk
+        initial_sentences: Number of sentences to start each chunk with
+        min_chunk_size: Minimum number of tokens per sentence (defaults to 2)
+
+    Raises:
+        ValueError: If parameters are invalid
+        ImportError: If required dependencies aren't installed
+    """
+
     def __init__(
         self,
         embedding_model: Union[str, BaseEmbeddings] = "minishlab/potion-base-8M",
         similarity_threshold: Optional[float] = None,
         similarity_percentile: Optional[float] = None,
         chunk_size: int = 512,
-        initial_sentences: int = 1, 
-        min_chunk_size: int = 2
+        initial_sentences: int = 1,
+        min_chunk_size: int = 2,
     ):
         """Initialize the SemanticChunker.
 
@@ -89,7 +135,7 @@ class SemanticChunker(BaseChunker):
             similarity_percentile = 0.8
             raise Warning(
                 "No similarity threshold specified. Defaulting to 80th percentile."
-            ) #TODO: Change this to be a non-blocking warning
+            )  # TODO: Change this to be a non-blocking warning
         if min_chunk_size < 1:
             raise ValueError("min_chunk_size must be at least 1")
 
@@ -103,42 +149,47 @@ class SemanticChunker(BaseChunker):
             self.embedding_model = embedding_model
         elif isinstance(embedding_model, str):
             from chonkie.embeddings.auto import AutoEmbeddings
+
             self.embedding_model = AutoEmbeddings.get_embeddings(embedding_model)
         else:
-            raise ValueError("embedding_model must be a string or BaseEmbeddings instance")        
-        
+            raise ValueError(
+                "embedding_model must be a string or BaseEmbeddings instance"
+            )
+
         # Keeping the tokenizer the same as the sentence model is important
         # for the group semantic meaning to be calculated properly
         super().__init__(self.embedding_model.get_tokenizer_or_token_counter())
-    
-    def _split_sentences(self,
-                        text: str,
-                        delim: Union[str, List[str]]=['.', '!', '?', '\n'],
-                        sep: str="🦛") -> List[str]:
+
+    def _split_sentences(
+        self,
+        text: str,
+        delim: Union[str, List[str]] = [".", "!", "?", "\n"],
+        sep: str = "🦛",
+    ) -> List[str]:
         """Fast sentence splitting while maintaining accuracy.
-        
+
         This method is faster than using regex for sentence splitting and is more accurate than using the spaCy sentence tokenizer.
 
         Args:
             text: Input text to be split into sentences
             delim: Delimiters to split sentences on
             sep: Separator to use when splitting sentences
-        
+
         Returns:
             List of sentences
         """
         t = text
         for c in delim:
             t = t.replace(c, c + sep)
-        
+
         # Initial split
-        splits = [s for s in t.split(sep) if s != '']
+        splits = [s for s in t.split(sep) if s != ""]
         # print(splits)
-        
+
         # Combine short splits with previous sentence
         sentences = []
         current = ""
-        
+
         for s in splits:
             if len(s.strip()) < (self.min_chunk_size * 5):
                 current += s
@@ -146,10 +197,10 @@ class SemanticChunker(BaseChunker):
                 if current:
                     sentences.append(current)
                 current = s
-        
+
         if current:
             sentences.append(current)
-            
+
         return sentences
 
     def _compute_similarity_threshold(self, all_similarities: List[float]) -> float:
@@ -188,7 +239,7 @@ class SemanticChunker(BaseChunker):
 
         # Batch compute token counts
         token_counts = self._count_tokens_batch(raw_sentences)
-        
+
         # Create Sentence objects with all precomputed information
         sentences = [
             SemanticSentence(
