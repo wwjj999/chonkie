@@ -26,18 +26,30 @@ def sample_texts():
     ]
 
 
+@pytest.mark.skipif(
+    "OPENAI_API_KEY" not in os.environ,
+    reason="Skipping test because OPENAI_API_KEY is not defined",
+)
 def test_initialization_with_model_name():
     embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
     assert embeddings.model == "text-embedding-3-small"
     assert embeddings.client is not None
 
 
+@pytest.mark.skipif(
+    "OPENAI_API_KEY" not in os.environ,
+    reason="Skipping test because OPENAI_API_KEY is not defined",
+)
 def test_embed_single_text(embedding_model, sample_text):
     embedding = embedding_model.embed(sample_text)
     assert isinstance(embedding, np.ndarray)
     assert embedding.shape == (embedding_model.dimension,)
 
 
+@pytest.mark.skipif(
+    "OPENAI_API_KEY" not in os.environ,
+    reason="Skipping test because OPENAI_API_KEY is not defined",
+)
 def test_embed_batch_texts(embedding_model, sample_texts):
     embeddings = embedding_model.embed_batch(sample_texts)
     assert isinstance(embeddings, list)
@@ -48,12 +60,20 @@ def test_embed_batch_texts(embedding_model, sample_texts):
     )
 
 
+@pytest.mark.skipif(
+    "OPENAI_API_KEY" not in os.environ,
+    reason="Skipping test because OPENAI_API_KEY is not defined",
+)
 def test_count_tokens_single_text(embedding_model, sample_text):
     token_count = embedding_model.count_tokens(sample_text)
     assert isinstance(token_count, int)
     assert token_count > 0
 
 
+@pytest.mark.skipif(
+    "OPENAI_API_KEY" not in os.environ,
+    reason="Skipping test because OPENAI_API_KEY is not defined",
+)
 def test_count_tokens_batch_texts(embedding_model, sample_texts):
     token_counts = embedding_model.count_tokens_batch(sample_texts)
     assert isinstance(token_counts, list)
@@ -62,6 +82,10 @@ def test_count_tokens_batch_texts(embedding_model, sample_texts):
     assert all(count > 0 for count in token_counts)
 
 
+@pytest.mark.skipif(
+    "OPENAI_API_KEY" not in os.environ,
+    reason="Skipping test because OPENAI_API_KEY is not defined",
+)
 def test_similarity(embedding_model, sample_texts):
     embeddings = embedding_model.embed_batch(sample_texts)
     similarity_score = embedding_model.similarity(embeddings[0], embeddings[1])
@@ -69,6 +93,10 @@ def test_similarity(embedding_model, sample_texts):
     assert 0.0 <= similarity_score <= 1.0
 
 
+@pytest.mark.skipif(
+    "OPENAI_API_KEY" not in os.environ,
+    reason="Skipping test because OPENAI_API_KEY is not defined",
+)
 def test_dimension_property(embedding_model):
     assert isinstance(embedding_model.dimension, int)
     assert embedding_model.dimension > 0
@@ -78,6 +106,10 @@ def test_is_available():
     assert OpenAIEmbeddings.is_available() is True
 
 
+@pytest.mark.skipif(
+    "OPENAI_API_KEY" not in os.environ,
+    reason="Skipping test because OPENAI_API_KEY is not defined",
+)
 def test_repr(embedding_model):
     repr_str = repr(embedding_model)
     assert isinstance(repr_str, str)
