@@ -5,6 +5,8 @@ from dataclasses import dataclass
 from multiprocessing import Pool, cpu_count
 from typing import Any, Callable, List, Union
 
+import inspect
+
 
 @dataclass
 class Chunk:
@@ -40,13 +42,28 @@ class BaseChunker(ABC):
             tokenizer_or_token_counter (Union[str, Any]): String, tokenizer object, or token counter object
 
         """
-        if callable(tokenizer_or_token_counter):
+        # if callable(tokenizer_or_token_counter):
+        #     self.tokenizer = None
+        #     self._tokenizer_backend = "callable"
+        #     self.token_counter = tokenizer_or_token_counter
+        # elif isinstance(tokenizer_or_token_counter, str):
+        #     self.tokenizer = self._load_tokenizer(tokenizer_or_token_counter)
+        #     self.token_counter = self._get_tokenizer_counter()
+        # else:
+        #     self.tokenizer = tokenizer_or_token_counter
+        #     self._tokenizer_backend = self._get_tokenizer_backend()
+        #     self.token_counter = self._get_tokenizer_counter()
+
+        # First check if the tokenizer_or_token_counter is a string
+        if isinstance(tokenizer_or_token_counter, str):
+            self.tokenizer = self._load_tokenizer(tokenizer_or_token_counter)
+            self.token_counter = self._get_tokenizer_counter()
+        # Then check if the tokenizer_or_token_counter is a function via inspect
+        elif inspect.isfunction(tokenizer_or_token_counter):
             self.tokenizer = None
             self._tokenizer_backend = "callable"
             self.token_counter = tokenizer_or_token_counter
-        elif isinstance(tokenizer_or_token_counter, str):
-            self.tokenizer = self._load_tokenizer(tokenizer_or_token_counter)
-            self.token_counter = self._get_tokenizer_counter()
+        # If not function or string, then assume it's a tokenizer object
         else:
             self.tokenizer = tokenizer_or_token_counter
             self._tokenizer_backend = self._get_tokenizer_backend()
@@ -61,7 +78,7 @@ class BaseChunker(ABC):
         elif "tiktoken" in str(type(self.tokenizer)):
             return "tiktoken"
         else:
-            raise ValueError("Tokenizer backend not supported")
+            raise ValueError(f"Tokenizer backend {str(type(self.tokenizer))} not supported")
 
     def _load_tokenizer(self, tokenizer_name: str):
         """Load a tokenizer based on the backend."""
@@ -128,7 +145,7 @@ class BaseChunker(ABC):
         elif self._tokenizer_backend == "tiktoken":
             return self.tokenizer.encode(text)
         else:
-            raise ValueError("Tokenizer backend not supported.")
+            raise ValueError(f"Tokenizer backend {self._tokenizer_backend} not supported.")
 
     def _encode_batch(self, texts: List[str]):
         """Encode a batch of texts using the backend tokenizer."""
@@ -144,7 +161,7 @@ class BaseChunker(ABC):
         elif self._tokenizer_backend == "tiktoken":
             return self.tokenizer.encode_batch(texts)
         else:
-            raise ValueError("Tokenizer backend not supported.")
+            raise ValueError(f"Tokenizer backend {self._tokenizer_backend} not supported.")
 
     def _decode(self, tokens) -> str:
         """Decode tokens using the backend tokenizer."""
@@ -155,7 +172,7 @@ class BaseChunker(ABC):
         elif self._tokenizer_backend == "tiktoken":
             return self.tokenizer.decode(tokens)
         else:
-            raise ValueError("Tokenizer backend not supported.")
+            raise ValueError(f"Tokenizer backend {self._tokenizer_backend} not supported.")
 
     def _decode_batch(self, token_lists: List[List[int]]) -> List[str]:
         """Decode a batch of token lists using the backend tokenizer."""
@@ -166,7 +183,7 @@ class BaseChunker(ABC):
         elif self._tokenizer_backend == "tiktoken":
             return [self.tokenizer.decode(tokens) for tokens in token_lists]
         else:
-            raise ValueError("Tokenizer backend not supported.")
+            raise ValueError(f"Tokenizer backend {self._tokenizer_backend} not supported.")
 
     def _count_tokens(self, text: str) -> int:
         """Count tokens in text using the backend tokenizer."""
