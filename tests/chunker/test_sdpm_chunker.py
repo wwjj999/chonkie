@@ -10,6 +10,7 @@ a chunking strategy based on semantic density and peak mapping. The tests verify
 - Edge cases and boundary conditions
 
 """
+
 import pytest
 
 from chonkie.chunker.sdpm import SDPMChunker

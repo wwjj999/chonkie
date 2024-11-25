@@ -18,6 +18,7 @@ Fixtures:
 - sample_complex_markdown_text: A markdown text with various formatting elements
 
 """
+
 from typing import List
 
 import pytest
@@ -89,6 +90,7 @@ def sample_batch():
     """
     ds = load_dataset("bhavnicksm/fineweb-edu-micro", split="train")
     return list(ds["text"])
+
 
 @pytest.fixture
 def sample_complex_markdown_text():

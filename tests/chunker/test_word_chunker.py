@@ -10,6 +10,7 @@ while respecting a maximum token length. These tests verify that the chunker:
 - Processes various text formats including markdown
 
 """
+
 from typing import List
 
 import pytest
