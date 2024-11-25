@@ -49,6 +49,9 @@ dev = [
     "ruff>=0.0.265"
 ]
 
+[tool.pytest.ini_options]
+pythonpath = "src"
+
 [tool.setuptools]
 package-dir = {"" = "src"}
 packages = ["chonkie", 
@@ -56,4 +59,4 @@ packages = ["chonkie",
             "chonkie.embeddings"]
 
 [tool.ruff]
-select = ["I", "D"]
+select = ["F", "I", "D", "DOC"]
