@@ -39,6 +39,7 @@ class OpenAIEmbeddings(BaseEmbeddings):
             timeout: Timeout in seconds for API requests
             batch_size: Maximum number of texts to embed in one API call
             show_warnings: Whether to show warnings about token usage
+
         """
         super().__init__()
         if not self.is_available():

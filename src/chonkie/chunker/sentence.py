@@ -15,6 +15,7 @@ class Sentence:
         start_index: The starting index of the sentence in the original text
         end_index: The ending index of the sentence in the original text
         token_count: The number of tokens in the sentence
+
     """
 
     text: str
@@ -36,6 +37,7 @@ class SentenceChunk(Chunk):
         end_index: The ending index of the chunk in the original text
         token_count: The number of tokens in the chunk
         sentences: List of Sentence objects in the chunk
+
     """
 
     # Don't redeclare inherited fields
@@ -58,8 +60,7 @@ class SentenceChunk(Chunk):
 
 
 class SentenceChunker(BaseChunker):
-    """
-    SentenceChunker splits the sentences in a text based on token limits and sentence boundaries.
+    """SentenceChunker splits the sentences in a text based on token limits and sentence boundaries.
 
     Args:
         tokenizer: The tokenizer instance to use for encoding/decoding
@@ -70,6 +71,7 @@ class SentenceChunker(BaseChunker):
 
     Raises:
         ValueError: If parameters are invalid
+
     """
 
     def __init__(
@@ -90,8 +92,10 @@ class SentenceChunker(BaseChunker):
             chunk_overlap: Number of tokens to overlap between chunks
             min_sentences_per_chunk: Minimum number of sentences per chunk (defaults to 1)
             min_chunk_size: Minimum number of tokens per sentence (defaults to 2)
+
         Raises:
             ValueError: If parameters are invalid
+
         """
         super().__init__(tokenizer)
 
@@ -205,6 +209,7 @@ class SentenceChunker(BaseChunker):
 
         Returns:
             List of sentences
+
         """
         t = text
         for c in delim:
@@ -239,6 +244,7 @@ class SentenceChunker(BaseChunker):
 
         Returns:
             List of token counts for each sentence
+
         """
         # Batch encode all sentences at once
         encoded_sentences = self._encode_batch(sentences)
@@ -252,6 +258,7 @@ class SentenceChunker(BaseChunker):
 
         Returns:
             List of Sentence objects
+
         """
         # Split text into sentences, then calculate token counts
         sentence_texts = self._split_sentences(text)
@@ -286,6 +293,7 @@ class SentenceChunker(BaseChunker):
 
         Returns:
             Chunk object
+
         """
         chunk_text = "".join([sentence.text for sentence in sentences])
         return SentenceChunk(
@@ -304,6 +312,7 @@ class SentenceChunker(BaseChunker):
 
         Returns:
             List of Chunk objects containing the chunked text and metadata
+
         """
         if not text.strip():
             return []

@@ -19,6 +19,7 @@ class SDPMChunker(SemanticChunker):
         initial_sentences: Number of sentences to consider for initial grouping
         skip_window: Number of chunks to skip when looking for similarities
         min_chunk_size: Minimum number of tokens per sentence
+
     """
 
     def __init__(
@@ -41,6 +42,7 @@ class SDPMChunker(SemanticChunker):
             initial_sentences: Number of sentences to consider for initial grouping
             skip_window: Number of chunks to skip when looking for similarities
             min_chunk_size: Minimum number of tokens per sentence
+
         """
         super().__init__(
             embedding_model=embedding_model,
@@ -109,6 +111,7 @@ class SDPMChunker(SemanticChunker):
 
         Returns:
             List of SemanticChunk objects
+
         """
         if not text.strip():
             return []

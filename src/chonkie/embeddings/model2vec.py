@@ -10,22 +10,20 @@ if TYPE_CHECKING:
 
 
 class Model2VecEmbeddings(BaseEmbeddings):
-    """
-    Class for model2vec embeddings.
+    """Class for model2vec embeddings.
 
     This class provides an interface for the model2vec library, which provides a variety
     of pre-trained models for text embeddings.
 
     Args:
         model (str or StaticModel): Name of the model2vec model to load or a StaticModel instance
+
     """
 
     def __init__(
         self, model: Union[str, "StaticModel"] = "minishlab/potion-base-8M"
     ) -> None:
-        """
-        Initialize Model2VecEmbeddings with a str or StaticModel instance.
-        """
+        """Initialize Model2VecEmbeddings with a str or StaticModel instance."""
         if not self.is_available():
             raise ImportError("model2vec is not available. Please install it via pip.")
         else:
@@ -49,6 +47,7 @@ class Model2VecEmbeddings(BaseEmbeddings):
 
     @property
     def dimension(self) -> int:
+        """Dimension of the embedding vectors."""
         return self._dimension
 
     def embed(self, text: str) -> "np.ndarray":
@@ -75,11 +74,14 @@ class Model2VecEmbeddings(BaseEmbeddings):
         )
 
     def get_tokenizer_or_token_counter(self):
+        """Get the tokenizer or token counter for the model."""
         return self.model.tokenizer
 
     @classmethod
     def is_available(cls) -> bool:
+        """Check if model2vec is available."""
         return importlib.util.find_spec("model2vec") is not None
 
     def __repr__(self) -> str:
+        """Representation of the Model2VecEmbeddings instance."""
         return f"Model2VecEmbeddings(model_name_or_path={self.model_name_or_path})"
