@@ -9,23 +9,49 @@ from chonkie.embeddings import Model2VecEmbeddings, OpenAIEmbeddings
 
 @pytest.fixture
 def sample_text():
+    """Sample text for testing the SemanticChunker.
+
+    Returns:
+        str: A paragraph of text about text chunking in RAG applications.
+
+    """
     text = """The process of text chunking in RAG applications represents a delicate balance between competing requirements. On one side, we have the need for semantic coherence – ensuring that each chunk maintains meaningful context that can be understood and processed independently. On the other, we must optimize for information density, ensuring that each chunk carries sufficient signal without excessive noise that might impede retrieval accuracy. In this post, we explore the challenges of text chunking in RAG applications and propose a novel approach that leverages recent advances in transformer-based language models to achieve a more effective balance between these competing requirements."""
     return text
 
 
 @pytest.fixture
 def embedding_model():
+    """Fixture that returns a Model2Vec embedding model for testing.
+
+    Returns:
+        Model2VecEmbeddings: A Model2Vec model initialized with 'minishlab/potion-base-8M'
+
+    """
     return Model2VecEmbeddings("minishlab/potion-base-8M")
 
 
 @pytest.fixture
 def openai_embedding_model():
+    """Fixture that returns an OpenAI embedding model for testing.
+
+    Returns:
+        OpenAIEmbeddings: An OpenAI model initialized with 'text-embedding-3-small'
+            and the API key from environment variables.
+
+    """
     api_key = os.environ.get("OPENAI_API_KEY")
     return OpenAIEmbeddings(model="text-embedding-3-small", api_key=api_key)
 
 
 @pytest.fixture
 def sample_complex_markdown_text():
+    """Fixture that returns a sample markdown text with complex formatting.
+
+    Returns:
+        str: A markdown text containing various formatting elements like headings,
+            lists, code blocks, links, images and blockquotes.
+
+    """
     text = """# Heading 1
     This is a paragraph with some **bold text** and _italic text_. 
     ## Heading 2

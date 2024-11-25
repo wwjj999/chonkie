@@ -1,3 +1,23 @@
+"""Tests for the TokenChunker class.
+
+This module contains test cases for the TokenChunker class, which implements
+a token-based chunking strategy. The tests verify:
+
+- Initialization with different tokenizer types
+- Basic chunking functionality with simple and complex texts
+- Batch processing capabilities
+- Proper chunk generation and properties
+- Handling of edge cases and different text formats
+
+Fixtures:
+- transformers_tokenizer: A GPT-2 tokenizer from the transformers library
+- tiktokenizer: A GPT-2 tokenizer from the tiktoken library
+- tokenizer: A GPT-2 tokenizer from the tokenizers library
+- sample_text: A sample text for testing chunking
+- sample_batch: A batch of texts from a dataset for testing batch processing
+- sample_complex_markdown_text: A markdown text with various formatting elements
+
+"""
 from typing import List
 
 import pytest
@@ -11,33 +31,74 @@ from chonkie import Chunk, TokenChunker
 
 @pytest.fixture
 def transformers_tokenizer():
+    """Fixture that returns a GPT-2 tokenizer from the transformers library.
+
+    Returns:
+        AutoTokenizer: A GPT-2 tokenizer initialized from the 'gpt2' model
+
+    """
     return AutoTokenizer.from_pretrained("gpt2")
 
 
 @pytest.fixture
 def tiktokenizer():
+    """Fixture that returns a GPT-2 tokenizer from the tiktoken library.
+
+    Returns:
+        tiktoken.Encoding: A GPT-2 tokenizer initialized from the 'gpt2' encoding
+
+    """
     return tiktoken.get_encoding("gpt2")
 
 
 @pytest.fixture
 def tokenizer():
+    """Fixture that returns a GPT-2 tokenizer from the tokenizers library.
+
+    Returns:
+        Tokenizer: A GPT-2 tokenizer initialized from the 'gpt2' model
+
+    """
     return Tokenizer.from_pretrained("gpt2")
 
 
 @pytest.fixture
 def sample_text():
+    """Fixture that returns a sample text for testing the TokenChunker.
+
+    Returns:
+        str: A sample text containing multiple sentences discussing text chunking
+            in RAG applications.
+
+    """
     text = """The process of text chunking in RAG applications represents a delicate balance between competing requirements. On one side, we have the need for semantic coherence – ensuring that each chunk maintains meaningful context that can be understood and processed independently. On the other, we must optimize for information density, ensuring that each chunk carries sufficient signal without excessive noise that might impede retrieval accuracy. In this post, we explore the challenges of text chunking in RAG applications and propose a novel approach that leverages recent advances in transformer-based language models to achieve a more effective balance between these competing requirements."""
     return text
 
 
 @pytest.fixture
 def sample_batch():
+    """Fixture that returns a sample batch of texts for testing the TokenChunker.
+
+    This fixture loads a small dataset of educational texts from the Hugging Face
+    datasets library. It's useful for testing batch processing capabilities and
+    performance with real-world data.
+
+    Returns:
+        List[str]: A list of text samples from the dataset.
+
+    """
     ds = load_dataset("bhavnicksm/fineweb-edu-micro", split="train")
     return list(ds["text"])
 
-
 @pytest.fixture
 def sample_complex_markdown_text():
+    """Fixture that returns a sample markdown text with complex formatting.
+
+    Returns:
+        str: A markdown text containing various formatting elements like headings,
+            lists, code blocks, links, images and blockquotes.
+
+    """
     text = """# Heading 1
     This is a paragraph with some **bold text** and _italic text_. 
     ## Heading 2
@@ -58,8 +119,7 @@ def sample_complex_markdown_text():
 
 
 def test_token_chunker_initialization_tok(tokenizer):
-    """Test that the TokenChunker can be initialized with a tokenizer.
-    """
+    """Test that the TokenChunker can be initialized with a tokenizer."""
     chunker = TokenChunker(tokenizer=tokenizer, chunk_size=512, chunk_overlap=128)
 
     assert chunker is not None
@@ -69,8 +129,7 @@ def test_token_chunker_initialization_tok(tokenizer):
 
 
 def test_token_chunker_initialization_hftok(transformers_tokenizer):
-    """Test that the TokenChunker can be initialized with a tokenizer.
-    """
+    """Test that the TokenChunker can be initialized with a tokenizer."""
     chunker = TokenChunker(
         tokenizer=transformers_tokenizer, chunk_size=512, chunk_overlap=128
     )
@@ -82,8 +141,7 @@ def test_token_chunker_initialization_hftok(transformers_tokenizer):
 
 
 def test_token_chunker_initialization_tik(tiktokenizer):
-    """Test that the TokenChunker can be initialized with a tokenizer.
-    """
+    """Test that the TokenChunker can be initialized with a tokenizer."""
     chunker = TokenChunker(tokenizer=tiktokenizer, chunk_size=512, chunk_overlap=128)
 
     assert chunker is not None
@@ -93,8 +151,7 @@ def test_token_chunker_initialization_tik(tiktokenizer):
 
 
 def test_token_chunker_chunking(tokenizer, sample_text):
-    """Test that the TokenChunker can chunk a sample text into tokens.
-    """
+    """Test that the TokenChunker can chunk a sample text into tokens."""
     chunker = TokenChunker(tokenizer=tokenizer, chunk_size=512, chunk_overlap=128)
     chunks = chunker.chunk(sample_text)
 
@@ -108,8 +165,7 @@ def test_token_chunker_chunking(tokenizer, sample_text):
 
 
 def test_token_chunker_chunking_hf(transformers_tokenizer, sample_text):
-    """Test that the TokenChunker can chunk a sample text into tokens.
-    """
+    """Test that the TokenChunker can chunk a sample text into tokens."""
     chunker = TokenChunker(
         tokenizer=transformers_tokenizer, chunk_size=512, chunk_overlap=128
     )
@@ -125,8 +181,7 @@ def test_token_chunker_chunking_hf(transformers_tokenizer, sample_text):
 
 
 def test_token_chunker_chunking_tik(tiktokenizer, sample_text):
-    """Test that the TokenChunker can chunk a sample text into tokens.
-    """
+    """Test that the TokenChunker can chunk a sample text into tokens."""
     chunker = TokenChunker(tokenizer=tiktokenizer, chunk_size=512, chunk_overlap=128)
     chunks = chunker.chunk(sample_text)
 
@@ -140,8 +195,7 @@ def test_token_chunker_chunking_tik(tiktokenizer, sample_text):
 
 
 def test_token_chunker_empty_text(tokenizer):
-    """Test that the TokenChunker can handle empty text input.
-    """
+    """Test that the TokenChunker can handle empty text input."""
     chunker = TokenChunker(tokenizer=tokenizer, chunk_size=512, chunk_overlap=128)
     chunks = chunker.chunk("")
 
@@ -149,8 +203,7 @@ def test_token_chunker_empty_text(tokenizer):
 
 
 def test_token_chunker_single_token_text(tokenizer):
-    """Test that the TokenChunker can handle text with a single token.
-    """
+    """Test that the TokenChunker can handle text with a single token."""
     chunker = TokenChunker(tokenizer=tokenizer, chunk_size=512, chunk_overlap=128)
     chunks = chunker.chunk("Hello")
 
@@ -160,8 +213,7 @@ def test_token_chunker_single_token_text(tokenizer):
 
 
 def test_token_chunker_single_token_text_hf(transformers_tokenizer):
-    """Test that the TokenChunker can handle text with a single token.
-    """
+    """Test that the TokenChunker can handle text with a single token."""
     chunker = TokenChunker(
         tokenizer=transformers_tokenizer, chunk_size=512, chunk_overlap=128
     )
@@ -173,8 +225,7 @@ def test_token_chunker_single_token_text_hf(transformers_tokenizer):
 
 
 def test_token_chunker_single_token_text_tik(tiktokenizer):
-    """Test that the TokenChunker can handle text with a single token.
-    """
+    """Test that the TokenChunker can handle text with a single token."""
     chunker = TokenChunker(tokenizer=tiktokenizer, chunk_size=512, chunk_overlap=128)
     chunks = chunker.chunk("Hello")
 
@@ -184,8 +235,7 @@ def test_token_chunker_single_token_text_tik(tiktokenizer):
 
 
 def test_token_chunker_single_chunk_text(tokenizer):
-    """Test that the TokenChunker can handle text that fits within a single chunk.
-    """
+    """Test that the TokenChunker can handle text that fits within a single chunk."""
     chunker = TokenChunker(tokenizer=tokenizer, chunk_size=512, chunk_overlap=128)
     chunks = chunker.chunk("Hello, how are you?")
 
@@ -195,8 +245,7 @@ def test_token_chunker_single_chunk_text(tokenizer):
 
 
 def test_token_chunker_batch_chunking(tokenizer, sample_batch):
-    """Test that the TokenChunker can chunk a batch of texts into tokens.
-    """
+    """Test that the TokenChunker can chunk a batch of texts into tokens."""
     chunker = TokenChunker(tokenizer=tokenizer, chunk_size=512, chunk_overlap=128)
     chunks = chunker.chunk_batch(sample_batch)
 
@@ -217,16 +266,14 @@ def test_token_chunker_batch_chunking(tokenizer, sample_batch):
 
 
 def test_token_chunker_repr(tokenizer):
-    """Test that the TokenChunker has a string representation.
-    """
+    """Test that the TokenChunker has a string representation."""
     chunker = TokenChunker(tokenizer=tokenizer, chunk_size=512, chunk_overlap=128)
 
     assert repr(chunker) == "TokenChunker(chunk_size=512, chunk_overlap=128)"
 
 
 def test_token_chunker_call(tokenizer, sample_text):
-    """Test that the TokenChunker can be called directly.
-    """
+    """Test that the TokenChunker can be called directly."""
     chunker = TokenChunker(tokenizer=tokenizer, chunk_size=512, chunk_overlap=128)
     chunks = chunker(sample_text)
 
