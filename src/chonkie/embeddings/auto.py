@@ -22,6 +22,7 @@ class AutoEmbeddings:
 
         # Get Anthropic embeddings
         embeddings = AutoEmbeddings.get_embeddings("anthropic://claude-v1", api_key="...")
+
     """
 
     @classmethod
@@ -31,7 +32,7 @@ class AutoEmbeddings:
         """Get embeddings instance based on identifier.
 
         Args:
-            identifier: Identifier for the embeddings (name, path, URL, etc.)
+            model: Identifier for the embeddings (name, path, URL, etc.)
             **kwargs: Additional arguments passed to the embeddings constructor
 
         Returns:
@@ -49,6 +50,7 @@ class AutoEmbeddings:
 
             # Get Anthropic embeddings
             embeddings = AutoEmbeddings.get_embeddings("anthropic://claude-v1", api_key="...")
+
         """
         # Load embeddings instance if already provided
         if isinstance(model, BaseEmbeddings):

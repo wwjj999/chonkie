@@ -19,6 +19,7 @@ class TokenChunker(BaseChunker):
 
         Raises:
             ValueError: If chunk_size <= 0 or chunk_overlap >= chunk_size
+
         """
         super().__init__(tokenizer)
         if chunk_size <= 0:
@@ -43,6 +44,7 @@ class TokenChunker(BaseChunker):
 
         Returns:
             List of Chunk objects containing the chunked text and metadata
+
         """
         if not text.strip():
             return []
@@ -137,6 +139,7 @@ class TokenChunker(BaseChunker):
 
         Returns:
             List of lists of Chunk objects containing the chunked text and metadata
+
         """
         if batch_size is not None:
             chunks = []

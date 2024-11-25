@@ -21,6 +21,7 @@ class SemanticSentence(Sentence):
         end_index: The ending index of the sentence in the original text
         token_count: The number of tokens in the sentence
         embedding: The sentence embedding
+
     """
 
     embedding: Optional[np.ndarray]
@@ -56,6 +57,7 @@ class SemanticChunk(SentenceChunk):
         end_index: The ending index of the chunk in the original text
         token_count: The number of tokens in the chunk
         sentences: List of SemanticSentence objects in the chunk
+
     """
 
     sentences: List[SemanticSentence] = field(default_factory=list)
@@ -91,6 +93,7 @@ class SemanticChunker(BaseChunker):
     Raises:
         ValueError: If parameters are invalid
         ImportError: If required dependencies aren't installed
+
     """
 
     def __init__(
@@ -116,6 +119,7 @@ class SemanticChunker(BaseChunker):
         Raises:
             ValueError: If parameters are invalid
             ImportError: If required dependencies aren't installed
+
         """
         if chunk_size <= 0:
             raise ValueError("chunk_size must be positive")
@@ -177,6 +181,7 @@ class SemanticChunker(BaseChunker):
 
         Returns:
             List of sentences
+
         """
         t = text
         for c in delim:
@@ -218,6 +223,7 @@ class SemanticChunker(BaseChunker):
 
         Returns:
             List of Sentence objects with precomputed token counts and embeddings
+
         """
         if not text.strip():
             return []
@@ -279,6 +285,7 @@ class SemanticChunker(BaseChunker):
 
         Returns:
             List of sentence groups, where each group is semantically coherent
+
         """
         if len(sentences) <= self.initial_sentences:
             return [sentences]
@@ -357,6 +364,7 @@ class SemanticChunker(BaseChunker):
 
         Returns:
             List of SemanticChunk objects
+
         """
         chunks = []
 
@@ -401,6 +409,7 @@ class SemanticChunker(BaseChunker):
 
         Returns:
             List of SemanticChunk objects containing the chunked text and metadata
+
         """
         if not text.strip():
             return []

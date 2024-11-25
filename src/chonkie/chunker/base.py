@@ -184,6 +184,7 @@ class BaseChunker(ABC):
 
         Returns:
             List of Chunk objects containing the chunked text and metadata
+
         """
         pass
 
@@ -206,15 +207,16 @@ class BaseChunker(ABC):
             return 1
 
     def chunk_batch(self, text: List[str]) -> List[List[Chunk]]:
-        """Split a List of texts into their respective chunks
+        """Split a List of texts into their respective chunks.
 
         By default, this method uses multiprocessing to parallelize the chunking process.
 
         Args:
-            text: List of input texts to be chunked
+            text: List of input texts to be chunked.
 
         Returns:
             List of lists of Chunk objects containing the chunked text and metadata
+
         """
         workers = self._determine_optimal_workers()
         if workers > 1:
@@ -233,6 +235,7 @@ class BaseChunker(ABC):
 
         Returns:
             List of Chunk objects or list of lists of Chunk
+
         """
         if isinstance(text, str):
             return self.chunk(text)

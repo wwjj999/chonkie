@@ -21,6 +21,7 @@ class WordChunker(BaseChunker):
 
         Raises:
             ValueError: If chunk_size <= 0 or chunk_overlap >= chunk_size or invalid mode
+
         """
         super().__init__(tokenizer)
 
@@ -59,6 +60,7 @@ class WordChunker(BaseChunker):
 
         Returns:
             Tuple of (Chunk object, number of tokens in chunk)
+
         """
         chunk_text = "".join(words)
         start_index = text.find(chunk_text)
@@ -77,6 +79,7 @@ class WordChunker(BaseChunker):
 
         Returns:
             List of token counts for each word
+
         """
         words = [
             word for word in words if word != ""
@@ -92,6 +95,7 @@ class WordChunker(BaseChunker):
 
         Returns:
             List of Chunk objects containing the chunked text and metadata
+
         """
         if not text.strip():
             return []

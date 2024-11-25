@@ -9,8 +9,7 @@ if TYPE_CHECKING:
 
 
 class SentenceTransformerEmbeddings(BaseEmbeddings):
-    """
-    Class for SentenceTransformer embeddings.
+    """Class for SentenceTransformer embeddings.
 
     This class provides an interface for the SentenceTransformer library, which
     provides a variety of pre-trained models for sentence embeddings. This is also
@@ -18,6 +17,7 @@ class SentenceTransformerEmbeddings(BaseEmbeddings):
 
     Args:
         model (str): Name of the SentenceTransformer model to load
+
     """
 
     def __init__(
@@ -26,7 +26,13 @@ class SentenceTransformerEmbeddings(BaseEmbeddings):
         """Initialize SentenceTransformerEmbeddings with a sentence-transformers model.
 
         Args:
-            model_name_or_path: Name or path of the sentence-transformers model
+            model (str): Name of the SentenceTransformer model to load
+            **kwargs: Additional keyword arguments to pass to the SentenceTransformer constructor
+
+        Raises:
+            ImportError: If sentence-transformers is not available
+            ValueError: If the model is not a string or SentenceTransformer instance
+        
         """
         super().__init__()
 
@@ -85,4 +91,5 @@ class SentenceTransformerEmbeddings(BaseEmbeddings):
         return importlib.util.find_spec("sentence_transformers") is not None
 
     def __repr__(self):
+        """Representation of the SentenceTransformerEmbeddings instance."""
         return f"SentenceTransformerEmbeddings(model={self.model_name_or_path})"

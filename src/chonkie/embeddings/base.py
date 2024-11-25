@@ -31,6 +31,7 @@ class BaseEmbeddings(ABC):
 
         Raises:
             NotImplementedError: If any of the abstract methods are not implemented
+
         """
         pass
 
@@ -45,6 +46,7 @@ class BaseEmbeddings(ABC):
 
         Returns:
             np.ndarray: Embedding vector for the text string
+
         """
         raise NotImplementedError
 
@@ -61,6 +63,7 @@ class BaseEmbeddings(ABC):
 
         Returns:
             List[np.ndarray]: List of embedding vectors for each text in the list
+
         """
         return [self.embed(text) for text in texts]
 
@@ -76,6 +79,7 @@ class BaseEmbeddings(ABC):
 
         Returns:
             int: Number of tokens in the text string
+
         """
         raise NotImplementedError
 
@@ -88,6 +92,7 @@ class BaseEmbeddings(ABC):
 
         Returns:
             List[int]: List of token counts for each text in the list
+
         """
         return [self.count_tokens(text) for text in texts]
 
@@ -106,6 +111,7 @@ class BaseEmbeddings(ABC):
 
         Returns:
             float: Similarity score between the two embeddings
+
         """
         return np.dot(u, v) / (
             np.linalg.norm(u) * np.linalg.norm(v)
@@ -121,17 +127,19 @@ class BaseEmbeddings(ABC):
 
         Returns:
             int: Dimension of the embedding vectors
+
         """
         raise NotImplementedError
 
     @classmethod
     def is_available(cls) -> bool:
-        """
-        Check if this embeddings implementation is available (dependencies installed).
+        """Check if this embeddings implementation is available (dependencies installed).
+
         Override this method to add custom dependency checks.
 
         Returns:
             bool: True if the embeddings implementation is available, False otherwise
+
         """
         return True
 
@@ -150,10 +158,12 @@ class BaseEmbeddings(ABC):
 
             # Get the token counter function
             token_counter = embeddings.get_tokenizer_or_token_counter()
+
         """
         return self.count_tokens
 
     def __repr__(self):
+        """Representation of the BaseEmbeddings instance."""
         return self.__class__.__name__ + "()"
 
     def __call__(
@@ -170,6 +180,7 @@ class BaseEmbeddings(ABC):
 
         Returns:
             Union[np.ndarray, List[np.ndarray]]: Single or list of embedding vectors
+
         """
         if isinstance(text, str):
             return self.embed(text)

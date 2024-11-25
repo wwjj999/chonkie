@@ -47,6 +47,7 @@ class EmbeddingsRegistry:
                 OpenAIEmbeddings,
                 pattern=r"^openai://.+|^text-embedding-ada-\d+$"
             )
+
         """
         if not issubclass(embedding_cls, BaseEmbeddings):
             raise ValueError(f"{embedding_cls} must be a subclass of BaseEmbeddings")
@@ -86,6 +87,7 @@ class EmbeddingsRegistry:
 
             # Match model name pattern
             cls.match("text-embedding-ada-002") -> OpenAIEmbeddings
+
         """
         # First try exact match
         if identifier in cls._registry:
@@ -113,6 +115,7 @@ class EmbeddingsRegistry:
 
         Returns:
             Initialized embeddings instance
+
         """
         # Check the object type and wrap it in the appropriate embeddings class
         if isinstance(object, BaseEmbeddings):
