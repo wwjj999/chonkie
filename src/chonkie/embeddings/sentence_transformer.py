@@ -32,7 +32,7 @@ class SentenceTransformerEmbeddings(BaseEmbeddings):
         Raises:
             ImportError: If sentence-transformers is not available
             ValueError: If the model is not a string or SentenceTransformer instance
-        
+
         """
         super().__init__()
 
