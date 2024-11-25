@@ -1,11 +1,11 @@
-from typing import Dict, List, Optional, Type, Union, Pattern, Any
-from dataclasses import dataclass
 import re
+from dataclasses import dataclass
+from typing import Any, Dict, List, Optional, Pattern, Type, Union
 
 from .base import BaseEmbeddings
-from .sentence_transformer import SentenceTransformerEmbeddings
-from .openai import OpenAIEmbeddings
 from .model2vec import Model2VecEmbeddings
+from .openai import OpenAIEmbeddings
+from .sentence_transformer import SentenceTransformerEmbeddings
 
 
 @dataclass

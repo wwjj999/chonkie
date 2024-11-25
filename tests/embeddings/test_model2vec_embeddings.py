@@ -1,7 +1,8 @@
-import pytest
 import numpy as np
-from chonkie import Model2VecEmbeddings
+import pytest
 from model2vec import StaticModel
+
+from chonkie import Model2VecEmbeddings
 
 
 @pytest.fixture

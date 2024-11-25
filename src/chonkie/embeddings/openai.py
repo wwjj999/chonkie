@@ -1,7 +1,7 @@
-import os
-from typing import List, Optional
-import warnings
 import importlib
+import os
+import warnings
+from typing import List, Optional
 
 import numpy as np
 
@@ -47,8 +47,8 @@ class OpenAIEmbeddings(BaseEmbeddings):
             )
         else:
             global OpenAI
-            from openai import OpenAI
             import tiktoken
+            from openai import OpenAI
 
         if model not in self.AVAILABLE_MODELS:
             raise ValueError(

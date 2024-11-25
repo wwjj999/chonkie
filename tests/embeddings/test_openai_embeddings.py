@@ -1,6 +1,8 @@
-import pytest
 import os
+
 import numpy as np
+import pytest
+
 from chonkie.embeddings.openai import OpenAIEmbeddings
 
 

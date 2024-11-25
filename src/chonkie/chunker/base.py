@@ -1,10 +1,9 @@
 import importlib
+import warnings
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List, Union, Any, Callable
-
 from multiprocessing import Pool, cpu_count
-import warnings
+from typing import Any, Callable, List, Union
 
 
 @dataclass

@@ -1,7 +1,8 @@
+import warnings
 from typing import Any, Union
+
 from .base import BaseEmbeddings
 from .registry import EmbeddingsRegistry
-import warnings
 
 
 class AutoEmbeddings:
