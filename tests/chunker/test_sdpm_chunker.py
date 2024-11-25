@@ -4,6 +4,7 @@ from chonkie.chunker.sdpm import SDPMChunker
 from chonkie.chunker.semantic import SemanticChunk
 from chonkie.embeddings.sentence_transformer import SentenceTransformerEmbeddings
 
+
 @pytest.fixture
 def sample_text():
     text = """The process of text chunking in RAG applications represents a delicate balance between competing requirements. On one side, we have the need for semantic coherence – ensuring that each chunk maintains meaningful context that can be understood and processed independently. On the other, we must optimize for information density, ensuring that each chunk carries sufficient signal without excessive noise that might impede retrieval accuracy. In this post, we explore the challenges of text chunking in RAG applications and propose a novel approach that leverages recent advances in transformer-based language models to achieve a more effective balance between these competing requirements."""
@@ -14,9 +15,10 @@ def sample_text():
 def embedding_model():
     return SentenceTransformerEmbeddings("all-MiniLM-L6-v2")
 
+
 @pytest.fixture
 def sample_complex_markdown_text():
-    text =  """# Heading 1
+    text = """# Heading 1
     This is a paragraph with some **bold text** and _italic text_. 
     ## Heading 2
     - Bullet point 1

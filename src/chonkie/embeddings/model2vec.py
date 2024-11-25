@@ -7,9 +7,10 @@ from chonkie.embeddings.base import BaseEmbeddings
 if TYPE_CHECKING:
     from model2vec import StaticModel
 
+
 class Model2VecEmbeddings(BaseEmbeddings):
     """
-    Class for model2vec embeddings. 
+    Class for model2vec embeddings.
 
     This class provides an interface for the model2vec library, which provides a variety
     of pre-trained models for text embeddings.
@@ -18,8 +19,9 @@ class Model2VecEmbeddings(BaseEmbeddings):
         model (str or StaticModel): Name of the model2vec model to load or a StaticModel instance
     """
 
-    def __init__(self,
-                 model: Union[str, "StaticModel"] = "minishlab/potion-base-8M") -> None:
+    def __init__(
+        self, model: Union[str, "StaticModel"] = "minishlab/potion-base-8M"
+    ) -> None:
         """
         Initialize Model2VecEmbeddings with a str or StaticModel instance.
         """
@@ -67,7 +69,9 @@ class Model2VecEmbeddings(BaseEmbeddings):
 
     def similarity(self, u: "np.ndarray", v: "np.ndarray") -> float:
         """Compute cosine similarity of two embeddings."""
-        return np.divide(np.dot(u, v), np.linalg.norm(u) * np.linalg.norm(v), dtype=float)
+        return np.divide(
+            np.dot(u, v), np.linalg.norm(u) * np.linalg.norm(v), dtype=float
+        )
 
     def get_tokenizer_or_token_counter(self):
         return self.model.tokenizer

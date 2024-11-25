@@ -3,6 +3,7 @@ import numpy as np
 from chonkie import Model2VecEmbeddings
 from model2vec import StaticModel
 
+
 @pytest.fixture
 def embedding_model():
     return Model2VecEmbeddings("minishlab/potion-base-8M")

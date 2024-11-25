@@ -16,9 +16,10 @@ def sample_text():
     text = """The process of text chunking in RAG applications represents a delicate balance between competing requirements. On one side, we have the need for semantic coherence – ensuring that each chunk maintains meaningful context that can be understood and processed independently. On the other, we must optimize for information density, ensuring that each chunk carries sufficient signal without excessive noise that might impede retrieval accuracy. In this post, we explore the challenges of text chunking in RAG applications and propose a novel approach that leverages recent advances in transformer-based language models to achieve a more effective balance between these competing requirements."""
     return text
 
+
 @pytest.fixture
 def sample_complex_markdown_text():
-    text =  """# Heading 1
+    text = """# Heading 1
     This is a paragraph with some **bold text** and _italic text_. 
     ## Heading 2
     - Bullet point 1
@@ -106,6 +107,7 @@ def test_sentence_chunker_overlap(tokenizer, sample_text):
     for i in range(1, len(chunks)):
         assert chunks[i].start_index < chunks[i - 1].end_index
 
+
 def test_sentence_chunker_min_sentences(tokenizer):
     """Test that the SentenceChunker respects minimum sentences per chunk."""
     chunker = SentenceChunker(
@@ -124,21 +126,23 @@ def test_sentence_chunker_min_sentences(tokenizer):
             sentence_count >= 2 or sentence_count == 1
         )  # Last chunk might have fewer sentences
 
+
 def verify_chunk_indices(chunks: List[Chunk], original_text: str):
     """Verify that chunk indices correctly map to the original text."""
     for i, chunk in enumerate(chunks):
         # Extract text using the indices
-        extracted_text = original_text[chunk.start_index:chunk.end_index]
+        extracted_text = original_text[chunk.start_index : chunk.end_index]
         # Remove any leading/trailing whitespace from both texts for comparison
         chunk_text = chunk.text.strip()
         extracted_text = extracted_text.strip()
-        
+
         assert chunk_text == extracted_text, (
             f"Chunk {i} text mismatch:\n"
             f"Chunk text: '{chunk_text}'\n"
             f"Extracted text: '{extracted_text}'\n"
             f"Indices: [{chunk.start_index}:{chunk.end_index}]"
         )
+
 
 def test_sentence_chunker_indices(sample_text):
     """Test that the SentenceChunker correctly maps chunk indices to the original text."""
@@ -147,12 +151,14 @@ def test_sentence_chunker_indices(sample_text):
     chunks = chunker.chunk(sample_text)
     verify_chunk_indices(chunks, sample_text)
 
+
 def test_sentence_chunker_indices_complex_md(sample_complex_markdown_text):
     """Test that the SentenceChunker correctly maps chunk indices to the original text."""
     tokenizer = Tokenizer.from_pretrained("gpt2")
     chunker = SentenceChunker(tokenizer=tokenizer, chunk_size=512, chunk_overlap=128)
     chunks = chunker.chunk(sample_complex_markdown_text)
     verify_chunk_indices(chunks, sample_complex_markdown_text)
+
 
 if __name__ == "__main__":
     pytest.main()

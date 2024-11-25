@@ -6,12 +6,13 @@ from typing import List, Union, Any, Callable
 from multiprocessing import Pool, cpu_count
 import warnings
 
+
 @dataclass
 class Chunk:
-    """Dataclass representing a text chunk with metadata. 
-    
+    """Dataclass representing a text chunk with metadata.
+
     All attributes are read-only via slots for performance reasons.
-    
+
     Attributes:
         text: The text content of the chunk
         start_index: The starting index of the chunk in the original text
@@ -24,6 +25,7 @@ class Chunk:
     end_index: int
     token_count: int
     __slots__ = ["text", "start_index", "end_index", "token_count"]
+
 
 class BaseChunker(ABC):
     """Abstract base class for all chunker implementations.
@@ -105,7 +107,7 @@ class BaseChunker(ABC):
                             "Tokenizer not found in the following libraries: transformers, tokenizers, autotiktokenizer, tiktoken",
                             "Please install one of these libraries to use the chunker.",
                         )
-    
+
     def _get_tokenizer_counter(self) -> Callable[[str], int]:
         """Get token counter based on tokenizer backend."""
         if self._tokenizer_backend == "transformers":
@@ -131,9 +133,14 @@ class BaseChunker(ABC):
     def _encode_batch(self, texts: List[str]):
         """Encode a batch of texts using the backend tokenizer."""
         if self._tokenizer_backend == "transformers":
-            return self.tokenizer.batch_encode_plus(texts, add_special_tokens=False)["input_ids"]
+            return self.tokenizer.batch_encode_plus(texts, add_special_tokens=False)[
+                "input_ids"
+            ]
         elif self._tokenizer_backend == "tokenizers":
-            return [t.ids for t in self.tokenizer.encode_batch(texts, add_special_tokens=False)]
+            return [
+                t.ids
+                for t in self.tokenizer.encode_batch(texts, add_special_tokens=False)
+            ]
         elif self._tokenizer_backend == "tiktoken":
             return self.tokenizer.encode_batch(texts)
         else:
@@ -160,11 +167,11 @@ class BaseChunker(ABC):
             return [self.tokenizer.decode(tokens) for tokens in token_lists]
         else:
             raise ValueError("Tokenizer backend not supported.")
-    
+
     def _count_tokens(self, text: str) -> int:
         """Count tokens in text using the backend tokenizer."""
         return self.token_counter(text)
-    
+
     def _count_tokens_batch(self, texts: List[str]) -> List[int]:
         """Count tokens in multiple texts using the backend tokenizer."""
         return [self.token_counter(text) for text in texts]
@@ -186,41 +193,45 @@ class BaseChunker(ABC):
         try:
             # Get CPU cores
             cpu_cores = cpu_count()
-            
+
             # Never use more than 75% of available cores
             max_workers = max(1, int(cpu_cores * 0.75))
-            
+
             # Cap at 8 workers
             return min(max_workers, 8)
 
         except Exception as e:
-            warnings.warn(f"Error determining optimal workers: {e}. Using single process.")
+            warnings.warn(
+                f"Error determining optimal workers: {e}. Using single process."
+            )
             return 1
-    
+
     def chunk_batch(self, text: List[str]) -> List[List[Chunk]]:
         """Split a List of texts into their respective chunks
-        
+
         By default, this method uses multiprocessing to parallelize the chunking process.
 
         Args:
             text: List of input texts to be chunked
-        
+
         Returns:
             List of lists of Chunk objects containing the chunked text and metadata
         """
         workers = self._determine_optimal_workers()
         if workers > 1:
-          with Pool(workers) as pool:
-              return pool.map(self.chunk, text)
+            with Pool(workers) as pool:
+                return pool.map(self.chunk, text)
         else:
-          return [self.chunk(t) for t in text]
+            return [self.chunk(t) for t in text]
 
-    def __call__(self, text: Union[str, List[str]]) -> Union[List[Chunk], List[List[Chunk]]]:
+    def __call__(
+        self, text: Union[str, List[str]]
+    ) -> Union[List[Chunk], List[List[Chunk]]]:
         """Make the chunker callable directly.
 
         Args:
             text: Input text or list of texts to be chunked
-        
+
         Returns:
             List of Chunk objects or list of lists of Chunk
         """

@@ -8,6 +8,7 @@ from chonkie import Chunk, TokenChunker
 
 from datasets import load_dataset
 
+
 @pytest.fixture
 def transformers_tokenizer():
     return AutoTokenizer.from_pretrained("gpt2")
@@ -28,14 +29,16 @@ def sample_text():
     text = """The process of text chunking in RAG applications represents a delicate balance between competing requirements. On one side, we have the need for semantic coherence – ensuring that each chunk maintains meaningful context that can be understood and processed independently. On the other, we must optimize for information density, ensuring that each chunk carries sufficient signal without excessive noise that might impede retrieval accuracy. In this post, we explore the challenges of text chunking in RAG applications and propose a novel approach that leverages recent advances in transformer-based language models to achieve a more effective balance between these competing requirements."""
     return text
 
+
 @pytest.fixture
 def sample_batch():
     ds = load_dataset("bhavnicksm/fineweb-edu-micro", split="train")
     return list(ds["text"])
 
+
 @pytest.fixture
 def sample_complex_markdown_text():
-    text =  """# Heading 1
+    text = """# Heading 1
     This is a paragraph with some **bold text** and _italic text_. 
     ## Heading 2
     - Bullet point 1
@@ -163,16 +166,20 @@ def test_token_chunker_single_token_text(tokenizer):
     assert chunks[0].token_count == 1
     assert chunks[0].text == "Hello"
 
+
 def test_token_chunker_single_token_text_hf(transformers_tokenizer):
     """
     Test that the TokenChunker can handle text with a single token.
     """
-    chunker = TokenChunker(tokenizer=transformers_tokenizer, chunk_size=512, chunk_overlap=128)
+    chunker = TokenChunker(
+        tokenizer=transformers_tokenizer, chunk_size=512, chunk_overlap=128
+    )
     chunks = chunker.chunk("Hello")
 
     assert len(chunks) == 1
     assert chunks[0].token_count == 1
     assert chunks[0].text == "Hello"
+
 
 def test_token_chunker_single_token_text_tik(tiktokenizer):
     """
@@ -184,6 +191,7 @@ def test_token_chunker_single_token_text_tik(tiktokenizer):
     assert len(chunks) == 1
     assert chunks[0].token_count == 1
     assert chunks[0].text == "Hello"
+
 
 def test_token_chunker_single_chunk_text(tokenizer):
     """
@@ -207,11 +215,17 @@ def test_token_chunker_batch_chunking(tokenizer, sample_batch):
     assert len(chunks) > 0
     assert all([len(chunk) > 0 for chunk in chunks])
     assert all([type(chunk[0]) is Chunk for chunk in chunks])
-    assert all([all([chunk.token_count <= 512 for chunk in chunks]) for chunks in chunks])
+    assert all(
+        [all([chunk.token_count <= 512 for chunk in chunks]) for chunks in chunks]
+    )
     assert all([all([chunk.token_count > 0 for chunk in chunks]) for chunks in chunks])
     assert all([all([chunk.text is not None for chunk in chunks]) for chunks in chunks])
-    assert all([all([chunk.start_index is not None for chunk in chunks]) for chunks in chunks])
-    assert all([all([chunk.end_index is not None for chunk in chunks]) for chunks in chunks])
+    assert all(
+        [all([chunk.start_index is not None for chunk in chunks]) for chunks in chunks]
+    )
+    assert all(
+        [all([chunk.end_index is not None for chunk in chunks]) for chunks in chunks]
+    )
 
 
 def test_token_chunker_repr(tokenizer):
@@ -238,21 +252,23 @@ def test_token_chunker_call(tokenizer, sample_text):
     assert all([chunk.start_index is not None for chunk in chunks])
     assert all([chunk.end_index is not None for chunk in chunks])
 
+
 def verify_chunk_indices(chunks: List[Chunk], original_text: str):
     """Verify that chunk indices correctly map to the original text."""
     for i, chunk in enumerate(chunks):
         # Extract text using the indices
-        extracted_text = original_text[chunk.start_index:chunk.end_index]
+        extracted_text = original_text[chunk.start_index : chunk.end_index]
         # Remove any leading/trailing whitespace from both texts for comparison
         chunk_text = chunk.text.strip()
         extracted_text = extracted_text.strip()
-        
+
         assert chunk_text == extracted_text, (
             f"Chunk {i} text mismatch:\n"
             f"Chunk text: '{chunk_text}'\n"
             f"Extracted text: '{extracted_text}'\n"
             f"Indices: [{chunk.start_index}:{chunk.end_index}]"
         )
+
 
 def test_token_chunker_indices(sample_text):
     """Test that TokenChunker's indices correctly map to original text."""
@@ -261,12 +277,14 @@ def test_token_chunker_indices(sample_text):
     chunks = chunker.chunk(sample_text)
     verify_chunk_indices(chunks, sample_text)
 
+
 def test_token_chunker_indices_complex_md(sample_complex_markdown_text):
     """Test that TokenChunker's indices correctly map to original text."""
     tokenizer = Tokenizer.from_pretrained("gpt2")
     chunker = TokenChunker(tokenizer=tokenizer, chunk_size=512, chunk_overlap=128)
     chunks = chunker.chunk(sample_complex_markdown_text)
     verify_chunk_indices(chunks, sample_complex_markdown_text)
+
 
 if __name__ == "__main__":
     pytest.main()
