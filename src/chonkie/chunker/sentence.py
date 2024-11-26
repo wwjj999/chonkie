@@ -1,10 +1,10 @@
+from bisect import bisect_left
 from dataclasses import dataclass
+from itertools import accumulate
 from typing import Any, List, Union
 
 from .base import BaseChunker, Chunk
 
-from bisect import bisect_left
-from itertools import accumulate
 
 @dataclass
 class Sentence:
