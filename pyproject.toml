@@ -35,7 +35,7 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/bhavnicksm/chonkie"
-
+Documentation = "https://docs.chonkie.ai"
 [project.optional-dependencies]
 model2vec = ["model2vec>=0.1.0", "numpy>=1.23.0"]
 st = ["sentence-transformers>=2.3.0", "numpy>=1.23.0"]

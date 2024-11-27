@@ -6,7 +6,7 @@
 
 [![PyPI version](https://img.shields.io/pypi/v/chonkie.svg)](https://pypi.org/project/chonkie/)
 [![License](https://img.shields.io/github/license/bhavnicksm/chonkie.svg)](https://github.com/bhavnicksm/chonkie/blob/main/LICENSE)
-[![Documentation](https://img.shields.io/badge/docs-DOCS.md-blue.svg)](DOCS.md)
+[![Documentation](https://img.shields.io/badge/docs-chonkie.ai-blue.svg)](https://docs.chonkie.ai)
 ![Package size](https://img.shields.io/badge/size-9.7MB-blue)
 [![Downloads](https://static.pepy.tech/badge/chonkie)](https://pepy.tech/project/chonkie)
 [![GitHub stars](https://img.shields.io/github/stars/bhavnicksm/chonkie.svg)](https://github.com/bhavnicksm/chonkie/stargazers)
@@ -17,7 +17,7 @@ _The no-nonsense RAG chunking library that's lightweight, lightning-fast, and re
 [Usage](#usage) •
 [Supported Methods](#supported-methods) •
 [Benchmarks](#benchmarks-️) •
-[Acknowledgements](#acknowledgements) •
+[Documentation](https://docs.chonkie.ai) •
 [Citation](#citation)
 
 </div>
@@ -46,7 +46,7 @@ To install chonkie, simply run:
 pip install chonkie
 ```
 
-Chonkie follows the rule to have minimal defualt installs, read the [DOCS](/DOCS.md) to know the installation for your required chunker, or simply install `all` if you don't want to think about it (not recommended).
+Chonkie follows the rule to have minimal defualt installs, read the [DOCS](https://docs.chonkie.ai) to know the installation for your required chunker, or simply install `all` if you don't want to think about it (not recommended).
 
 ```bash
 pip install chonkie[all]
@@ -77,7 +77,7 @@ for chunk in chunks:
     print(f"Tokens: {chunk.token_count}")
 ```
 
-More example usages given inside the [DOCS](/DOCS.md)
+More example usages given inside the [DOCS](https://docs.chonkie.ai)
 
 # Supported Methods
 
@@ -89,7 +89,7 @@ Chonkie provides several chunkers to help you split your text efficiently for RA
 - **SemanticChunker**: Splits text into chunks based on semantic similarity.
 - **SDPMChunker**: Splits text using a Semantic Double-Pass Merge approach.
 
-More on these methods and the approaches taken inside the [DOCS](/DOCS.md)
+More on these methods and the approaches taken inside the [DOCS](https://docs.chonkie.ai)
 
 # Benchmarks 🏃‍♂️
 
@@ -108,7 +108,7 @@ Here's a quick peek at how Chonkie performs:
 - **Sentence Chunking:** Almost 2x faster than competitors
 - **Semantic Chunking:** Up to 2.5x faster than others
 
-Check out our detailed [benchmarks](/benchmarks/README.md) to see how Chonkie races past the competition! 🏃‍♂️💨
+Check out our detailed [benchmarks](https://docs.chonkie.ai/benchmarks) to see how Chonkie races past the competition! 🏃‍♂️💨
 
 # Acknowledgements
 
