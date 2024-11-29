@@ -24,7 +24,7 @@ class SemanticSentence(Sentence):
 
     """
 
-    embedding: Optional[np.ndarray]
+    embedding: Optional[np.ndarray] = field(default=None)
 
 @dataclass
 class SemanticChunk(SentenceChunk):
@@ -40,24 +40,8 @@ class SemanticChunk(SentenceChunk):
         sentences: List of SemanticSentence objects in the chunk
 
     """
-
+    
     sentences: List[SemanticSentence] = field(default_factory=list)
-
-    # No new slots needed since we're just overriding the sentences field
-    __slots__ = []
-
-    def __init__(
-        self,
-        text: str,
-        start_index: int,
-        end_index: int,
-        token_count: int,
-        sentences: List[SemanticSentence] = None,
-    ):
-        super().__init__(text, start_index, end_index, token_count)
-        object.__setattr__(
-            self, "sentences", sentences if sentences is not None else []
-        )
 
 
 class SemanticChunker(BaseChunker):
