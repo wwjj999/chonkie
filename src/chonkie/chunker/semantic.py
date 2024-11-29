@@ -23,14 +23,6 @@ class SemanticSentence(Sentence):
     """
     embedding: Optional[np.ndarray]
     
-    # Only define new slots, not the ones inherited from Sentence
-    __slots__ = ['embedding',]
-    
-    def __init__(self, text: str, start_index: int, end_index: int, 
-                 token_count: int, embedding: Optional[np.ndarray] = None):
-        super().__init__(text, start_index, end_index, token_count)
-        object.__setattr__(self, 'embedding', embedding if embedding is not None else None)
-
 @dataclass
 class SemanticChunk(SentenceChunk):
     """SemanticChunk dataclass representing a semantic chunk with metadata.

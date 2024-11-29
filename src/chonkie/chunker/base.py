@@ -23,7 +23,6 @@ class Chunk:
     start_index: int
     end_index: int
     token_count: int
-    __slots__ = ["text", "start_index", "end_index", "token_count"]
 
 class BaseChunker(ABC):
     """Abstract base class for all chunker implementations.
