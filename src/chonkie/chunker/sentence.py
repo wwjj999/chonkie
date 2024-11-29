@@ -24,7 +24,6 @@ class Sentence:
     start_index: int
     end_index: int
     token_count: int
-    __slots__ = ["text", "start_index", "end_index", "token_count"]
 
 
 @dataclass
@@ -44,22 +43,6 @@ class SentenceChunk(Chunk):
 
     # Don't redeclare inherited fields
     sentences: List[Sentence]
-
-    __slots__ = ["sentences"]
-
-    def __init__(
-        self,
-        text: str,
-        start_index: int,
-        end_index: int,
-        token_count: int,
-        sentences: List[Sentence] = None,
-    ):
-        super().__init__(text, start_index, end_index, token_count)
-        object.__setattr__(
-            self, "sentences", sentences if sentences is not None else []
-        )
-
 
 class SentenceChunker(BaseChunker):
     """SentenceChunker splits the sentences in a text based on token limits and sentence boundaries.
