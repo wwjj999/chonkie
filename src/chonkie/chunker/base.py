@@ -27,6 +27,29 @@ class Chunk:
     end_index: int
     token_count: int
 
+    def __str__(self) -> str:
+        """Return string representation of the chunk."""
+        return self.text
+    
+    def __len__(self) -> int:
+        """Return the length of the chunk."""
+        return len(self.text)
+    
+    def __repr__(self) -> str:
+        """Return string representation of the chunk."""
+        return (f"Chunk(text={self.text}, start_index={self.start_index}, "
+                f"end_index={self.end_index}, token_count={self.token_count})")
+
+    def copy(self) -> "Chunk":
+        """Return a deep copy of the chunk."""
+        return Chunk(
+            text=self.text,
+            start_index=self.start_index,
+            end_index=self.end_index,
+            token_count=self.token_count
+        )
+    
+    
 
 class BaseChunker(ABC):
     """Abstract base class for all chunker implementations.
