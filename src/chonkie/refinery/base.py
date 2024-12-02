@@ -1,25 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import List
-
-from dataclasses import dataclass
+from typing import Any, List
 
 from chonkie.chunker import Chunk
 
-@dataclass
-class RefinedChunk(Chunk):
-    """
-    Dataclass for a chunk refinement.
-
-    A ChunkRefinement object contains the refined chunk and the context
-    of the chunk.
-    """
-    
-    context: str
-    __slots__ = ["text", "start_index", "end_index", "token_count", "context"]
-    
 class BaseRefinery(ABC):
-    """
-    Base class for all Refinery classes.
+    """Base class for all Refinery classes.
 
     Refinery classes are used to refine the Chunks generated from the 
     Chunkers. These classes take in chunks and return refined chunks.
@@ -28,9 +13,7 @@ class BaseRefinery(ABC):
     """
 
     def __init__(self, context_size: int = 0) -> None:
-        """
-        Initialize the Refinery.        
-        """
+        """Initialize the Refinery."""
         if context_size < 0:
             raise ValueError("context_size must be non-negative")
         self.context_size = context_size
@@ -47,5 +30,9 @@ class BaseRefinery(ABC):
         pass
 
     def __repr__(self) -> str:
+        """Representation of the Refinery."""
         return f"{self.__class__.__name__}(context_size={self.context_size})"
     
+    def __call__(self, chunks: List[Chunk]) -> List[Chunk]:
+        """Call the Refinery."""
+        return self.refine(chunks)

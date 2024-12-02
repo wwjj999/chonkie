@@ -56,7 +56,8 @@ pythonpath = "src"
 package-dir = {"" = "src"}
 packages = ["chonkie", 
             "chonkie.chunker",
-            "chonkie.embeddings"]
+            "chonkie.embeddings", 
+            "chonkie.refinery"]
 
 [tool.ruff]
 select = ["F", "I", "D", "DOC"]
