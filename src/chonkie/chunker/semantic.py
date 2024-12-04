@@ -24,25 +24,7 @@ class SemanticSentence(Sentence):
 
     """
 
-    embedding: Optional[np.ndarray]
-
-    # Only define new slots, not the ones inherited from Sentence
-    __slots__ = [
-        "embedding",
-    ]
-
-    def __init__(
-        self,
-        text: str,
-        start_index: int,
-        end_index: int,
-        token_count: int,
-        embedding: Optional[np.ndarray] = None,
-    ):
-        super().__init__(text, start_index, end_index, token_count)
-        object.__setattr__(
-            self, "embedding", embedding if embedding is not None else None
-        )
+    embedding: Optional[np.ndarray] = field(default=None)
 
 
 @dataclass
@@ -59,24 +41,8 @@ class SemanticChunk(SentenceChunk):
         sentences: List of SemanticSentence objects in the chunk
 
     """
-
+    
     sentences: List[SemanticSentence] = field(default_factory=list)
-
-    # No new slots needed since we're just overriding the sentences field
-    __slots__ = []
-
-    def __init__(
-        self,
-        text: str,
-        start_index: int,
-        end_index: int,
-        token_count: int,
-        sentences: List[SemanticSentence] = None,
-    ):
-        super().__init__(text, start_index, end_index, token_count)
-        object.__setattr__(
-            self, "sentences", sentences if sentences is not None else []
-        )
 
 
 class SemanticChunker(BaseChunker):
@@ -159,6 +125,12 @@ class SemanticChunker(BaseChunker):
             raise ValueError(
                 "embedding_model must be a string or BaseEmbeddings instance"
             )
+
+        # Probably the dependency is not installed
+        if self.embedding_model is None:
+            raise ImportError("embedding_model is not a valid embedding model", 
+                              "Please install the `semantic` extra to use this feature")
+
 
         # Keeping the tokenizer the same as the sentence model is important
         # for the group semantic meaning to be calculated properly
@@ -299,11 +271,11 @@ class SemanticChunker(BaseChunker):
                 )
                 for i in range(len(sentences) - 1)
             ]
-            similarity_threshold = float(
+            self.similarity_threshold = float(
                 np.percentile(all_similarities, self.similarity_percentile)
             )
         else:
-            similarity_threshold = self.similarity_threshold
+            self.similarity_threshold = self.similarity_threshold
 
         groups = []
         current_group = sentences[: self.initial_sentences]
@@ -315,7 +287,7 @@ class SemanticChunker(BaseChunker):
                 current_embedding, sentence.embedding
             )
 
-            if similarity >= similarity_threshold:
+            if similarity >= self.similarity_threshold:
                 # Add to current group
                 current_group.append(sentence)
                 # Update mean embedding

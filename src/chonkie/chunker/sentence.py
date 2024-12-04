@@ -1,5 +1,6 @@
 from bisect import bisect_left
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+
 from itertools import accumulate
 from typing import Any, List, Union
 
@@ -24,8 +25,6 @@ class Sentence:
     start_index: int
     end_index: int
     token_count: int
-    __slots__ = ["text", "start_index", "end_index", "token_count"]
-
 
 @dataclass
 class SentenceChunk(Chunk):
@@ -41,25 +40,8 @@ class SentenceChunk(Chunk):
         sentences: List of Sentence objects in the chunk
 
     """
-
     # Don't redeclare inherited fields
-    sentences: List[Sentence]
-
-    __slots__ = ["sentences"]
-
-    def __init__(
-        self,
-        text: str,
-        start_index: int,
-        end_index: int,
-        token_count: int,
-        sentences: List[Sentence] = None,
-    ):
-        super().__init__(text, start_index, end_index, token_count)
-        object.__setattr__(
-            self, "sentences", sentences if sentences is not None else []
-        )
-
+    sentences: List[Sentence] = field(default_factory=list)
 
 class SentenceChunker(BaseChunker):
     """SentenceChunker splits the sentences in a text based on token limits and sentence boundaries.

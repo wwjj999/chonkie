@@ -1,11 +1,15 @@
+"""Base classes for chunking text."""
+
 import importlib
+
+import inspect
 import warnings
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from multiprocessing import Pool, cpu_count
-from typing import Any, Callable, List, Union
+from typing import Any, Callable, List, Optional, Union
 
-import inspect
+from chonkie.context import Context
 
 
 @dataclass
@@ -19,6 +23,7 @@ class Chunk:
         start_index: The starting index of the chunk in the original text
         end_index: The ending index of the chunk in the original text
         token_count: The number of tokens in the chunk
+        context: The context of the chunk, useful for refinery classes
 
     """
 
@@ -26,7 +31,47 @@ class Chunk:
     start_index: int
     end_index: int
     token_count: int
-    __slots__ = ["text", "start_index", "end_index", "token_count"]
+    context: Optional[Context] = None
+
+    def __str__(self) -> str:
+        """Return string representation of the chunk."""
+        return self.text
+
+    def __len__(self) -> int:
+        """Return the length of the chunk."""
+        return len(self.text)
+
+    def __repr__(self) -> str:
+        """Return string representation of the chunk."""
+        if self.context is not None:
+            return (
+                f"Chunk(text={self.text}, start_index={self.start_index}, "
+                f"end_index={self.end_index}, token_count={self.token_count})"
+            )
+        else:
+            return (
+                f"Chunk(text={self.text}, start_index={self.start_index}, "
+                f"end_index={self.end_index}, token_count={self.token_count}, "
+                f"context={self.context})"
+            )
+
+    def __iter__(self):
+        """Return an iterator over the chunk."""
+        return iter(self.text)
+    
+    def __getitem__(self, index: int):
+        """Return the item at the given index."""
+        return self.text[index]
+
+    def copy(self) -> "Chunk":
+        """Return a deep copy of the chunk."""
+        return Chunk(
+            text=self.text,
+            start_index=self.start_index,
+            end_index=self.end_index,
+            token_count=self.token_count,
+        )
+
 
 
 class BaseChunker(ABC):
@@ -67,7 +112,10 @@ class BaseChunker(ABC):
         elif "tiktoken" in str(type(self.tokenizer)):
             return "tiktoken"
         else:
-            raise ValueError(f"Tokenizer backend {str(type(self.tokenizer))} not supported")
+            raise ValueError(
+                f"Tokenizer backend {str(type(self.tokenizer))} not supported"
+            )
+
 
     def _load_tokenizer(self, tokenizer_name: str):
         """Load a tokenizer based on the backend."""
@@ -134,7 +182,10 @@ class BaseChunker(ABC):
         elif self._tokenizer_backend == "tiktoken":
             return self.tokenizer.encode(text)
         else:
-            raise ValueError(f"Tokenizer backend {self._tokenizer_backend} not supported.")
+            raise ValueError(
+                f"Tokenizer backend {self._tokenizer_backend} not supported."
+            )
+
 
     def _encode_batch(self, texts: List[str]):
         """Encode a batch of texts using the backend tokenizer."""
@@ -150,7 +201,10 @@ class BaseChunker(ABC):
         elif self._tokenizer_backend == "tiktoken":
             return self.tokenizer.encode_batch(texts)
         else:
-            raise ValueError(f"Tokenizer backend {self._tokenizer_backend} not supported.")
+            raise ValueError(
+                f"Tokenizer backend {self._tokenizer_backend} not supported."
+            )
+
 
     def _decode(self, tokens) -> str:
         """Decode tokens using the backend tokenizer."""
@@ -161,7 +215,10 @@ class BaseChunker(ABC):
         elif self._tokenizer_backend == "tiktoken":
             return self.tokenizer.decode(tokens)
         else:
-            raise ValueError(f"Tokenizer backend {self._tokenizer_backend} not supported.")
+            raise ValueError(
+                f"Tokenizer backend {self._tokenizer_backend} not supported."
+            )
+
 
     def _decode_batch(self, token_lists: List[List[int]]) -> List[str]:
         """Decode a batch of token lists using the backend tokenizer."""
@@ -172,7 +229,10 @@ class BaseChunker(ABC):
         elif self._tokenizer_backend == "tiktoken":
             return [self.tokenizer.decode(tokens) for tokens in token_lists]
         else:
-            raise ValueError(f"Tokenizer backend {self._tokenizer_backend} not supported.")
+            raise ValueError(
+                f"Tokenizer backend {self._tokenizer_backend} not supported."
+            )
+
 
     def _count_tokens(self, text: str) -> int:
         """Count tokens in text using the backend tokenizer."""
