@@ -124,6 +124,11 @@ class SemanticChunker(BaseChunker):
             raise ValueError(
                 "embedding_model must be a string or BaseEmbeddings instance"
             )
+        
+        # Probably the dependency is not installed
+        if self.embedding_model is None:
+            raise ImportError("embedding_model is not a valid embedding model", 
+                              "Please install the `semantic` extra to use this feature")
 
         # Keeping the tokenizer the same as the sentence model is important
         # for the group semantic meaning to be calculated properly
@@ -264,11 +269,11 @@ class SemanticChunker(BaseChunker):
                 )
                 for i in range(len(sentences) - 1)
             ]
-            similarity_threshold = float(
+            self.similarity_threshold = float(
                 np.percentile(all_similarities, self.similarity_percentile)
             )
         else:
-            similarity_threshold = self.similarity_threshold
+            self.similarity_threshold = self.similarity_threshold
 
         groups = []
         current_group = sentences[: self.initial_sentences]
@@ -280,7 +285,7 @@ class SemanticChunker(BaseChunker):
                 current_embedding, sentence.embedding
             )
 
-            if similarity >= similarity_threshold:
+            if similarity >= self.similarity_threshold:
                 # Add to current group
                 current_group.append(sentence)
                 # Update mean embedding
