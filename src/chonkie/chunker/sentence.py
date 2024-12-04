@@ -1,5 +1,6 @@
 from bisect import bisect_left
 from dataclasses import dataclass, field
+
 from itertools import accumulate
 from typing import Any, List, Union
 
@@ -25,7 +26,6 @@ class Sentence:
     end_index: int
     token_count: int
 
-
 @dataclass
 class SentenceChunk(Chunk):
     """Dataclass representing a sentence chunk with metadata.
@@ -40,7 +40,6 @@ class SentenceChunk(Chunk):
         sentences: List of Sentence objects in the chunk
 
     """
-
     # Don't redeclare inherited fields
     sentences: List[Sentence] = field(default_factory=list)
 

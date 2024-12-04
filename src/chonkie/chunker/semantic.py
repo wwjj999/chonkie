@@ -26,6 +26,7 @@ class SemanticSentence(Sentence):
 
     embedding: Optional[np.ndarray] = field(default=None)
 
+
 @dataclass
 class SemanticChunk(SentenceChunk):
     """SemanticChunk dataclass representing a semantic chunk with metadata.
@@ -124,11 +125,12 @@ class SemanticChunker(BaseChunker):
             raise ValueError(
                 "embedding_model must be a string or BaseEmbeddings instance"
             )
-        
+
         # Probably the dependency is not installed
         if self.embedding_model is None:
             raise ImportError("embedding_model is not a valid embedding model", 
                               "Please install the `semantic` extra to use this feature")
+
 
         # Keeping the tokenizer the same as the sentence model is important
         # for the group semantic meaning to be calculated properly
