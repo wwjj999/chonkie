@@ -389,7 +389,7 @@ class OverlapRefinery(BaseRefinery):
         # Process remaining chunks
         for i in range(1, len(refined_chunks)):
             # Get context from previous chunk
-            context = self._get_overlap_context(chunks[i - 1])
+            context = self._get_prefix_overlap_context(chunks[i - 1])
             setattr(refined_chunks[i], "context", context)
 
             # Optionally update chunk text to include context

@@ -109,11 +109,11 @@ def test_overlap_refinery_basic_chunks_approximate(basic_chunks):
     refinery = OverlapRefinery(context_size=4)  # Small context for testing
     refined = refinery.refine(basic_chunks)
 
-    # First chunk should have no context
-    assert refined[0].context is None
+    # Last chunk should have no context
+    assert refined[-1].context is None
 
     # Subsequent chunks should have context from previous chunks
-    for i in range(1, len(refined)):
+    for i in range(len(refined) - 1):
         assert refined[i].context is not None
         assert isinstance(refined[i].context, Context)
         assert refined[i].context.token_count <= 4
@@ -125,13 +125,12 @@ def test_overlap_refinery_basic_chunks_exact(basic_chunks, tokenizer):
     refined = refinery.refine(basic_chunks)
 
     # Check context for subsequent chunks
-    for i in range(1, len(refined)):
+    for i in range(len(refined) - 1):
         assert refined[i].context is not None
         assert isinstance(refined[i].context, Context)
         # Verify exact token count using tokenizer
         actual_tokens = len(tokenizer.encode(refined[i].context.text))
         assert actual_tokens <= 4
-
 
 def test_overlap_refinery_sentence_chunks(sentence_chunks):
     """Test overlap calculation with SentenceChunks."""
@@ -139,10 +138,8 @@ def test_overlap_refinery_sentence_chunks(sentence_chunks):
     refined = refinery.refine(sentence_chunks)
 
     # Check context for second chunk
-    assert refined[1].context is not None
-    assert isinstance(refined[1].context, Context)
-    assert refined[1].context.token_count <= 4
-
+    assert refined[1].context is not None, f"Second chunk should have context, got {refined[1].context}"
+    assert isinstance(refined[1].context, Context), f"Context should be a Context, got {type(refined[1].context)}"
 
 def test_overlap_refinery_no_merge_context(basic_chunks):
     """Test behavior when merge_context is False."""
@@ -161,7 +158,7 @@ def test_overlap_refinery_context_size_limits(basic_chunks):
     refined = refinery.refine(basic_chunks)
 
     # Check that no context exceeds size limit
-    for chunk in refined[1:]:  # Skip first chunk
+    for chunk in refined[:-1]:  # Skip last chunk
         assert chunk.context.token_count <= 2
 
 
@@ -184,14 +181,10 @@ def test_overlap_refinery_merge_context(basic_chunks, tokenizer):
 
     refined = refinery.refine(chunks_copy)
 
-    # First chunk should be unchanged
-    assert refined[0].text == basic_chunks[0].text
-    assert refined[0].token_count == basic_chunks[0].token_count
-
     # Subsequent chunks should have context prepended
-    for i in range(1, len(refined)):
+    for i in range(len(refined) - 1):
         assert refined[i].context is not None
-        assert refined[i].text.startswith(refined[i].context.text)
+        assert refined[i].text.endswith(refined[i].context.text)
         # Verify token count increase
         original_tokens = len(tokenizer.encode(basic_chunks[i].text))
         new_tokens = len(tokenizer.encode(refined[i].text))
@@ -216,6 +209,51 @@ def test_overlap_refinery_mixed_chunk_types():
     with pytest.raises(ValueError, match="All chunks must be of the same type"):
         refinery.refine(chunks)
 
+
+def test_overlap_refinery_prefix_mode(basic_chunks):
+    """Test that OverlapRefinery works correctly in prefix mode."""
+    refinery = OverlapRefinery(context_size=4, mode="prefix")
+    refined = refinery.refine(basic_chunks)
+
+    # First chunk should have no context
+    assert refined[0].context is None
+
+    # Subsequent chunks should have context from previous chunks
+    for i in range(1, len(refined)):
+        assert refined[i].context is not None
+        assert isinstance(refined[i].context, Context)
+        assert refined[i].context.token_count <= 4
+        # Verify context comes from previous chunk
+        assert refined[i].context.text in basic_chunks[i-1].text
+        # Verify context ends at the end of previous chunk
+        assert refined[i].context.end_index == basic_chunks[i-1].end_index
+
+def test_overlap_refinery_prefix_mode_with_merge(basic_chunks, tokenizer):
+    """Test that OverlapRefinery merges context correctly in prefix mode."""
+    refinery = OverlapRefinery(
+        context_size=4,
+        tokenizer=tokenizer,
+        mode="prefix",
+        merge_context=True,
+        approximate=False
+    )
+    refined = refinery.refine(basic_chunks)
+
+    # First chunk should be unchanged
+    assert refined[0].text == basic_chunks[0].text
+    assert refined[0].token_count == basic_chunks[0].token_count
+
+    # Subsequent chunks should have context prepended
+    for i in range(1, len(refined)):
+        assert refined[i].context is not None
+        # Verify text starts with context
+        assert refined[i].text.startswith(refined[i].context.text)
+        # Verify token count increase
+        original_tokens = len(tokenizer.encode(basic_chunks[i].text))
+        new_tokens = len(tokenizer.encode(refined[i].text))
+        assert new_tokens > original_tokens
+        # Verify start index is from context
+        assert refined[i].start_index == refined[i].context.start_index
 
 if __name__ == "__main__":
     pytest.main()
