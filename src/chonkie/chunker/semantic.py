@@ -7,6 +7,7 @@ from chonkie.embeddings.base import BaseEmbeddings
 
 from .base import BaseChunker
 from .sentence import Sentence, SentenceChunk
+import warnings
 
 
 @dataclass
@@ -102,10 +103,15 @@ class SemanticChunker(BaseChunker):
                 "Cannot specify both similarity_threshold and similarity_percentile"
             )
         if similarity_threshold is None and similarity_percentile is None:
+            # Send a lovely warning if no similarity threshold is specified
+            warnings.warn(
+                "🦛 Heyyo! I think you forgot to specify a similarity threshold; " + 
+                "but don't worry, I'm defaulting to 80th percentile." + 
+                " Though, you should probably specify one as this is a bit arbitrary.\n" +
+                "Thanks! 🤎",
+                stacklevel=2,
+            )
             similarity_percentile = 0.8
-            raise Warning(
-                "No similarity threshold specified. Defaulting to 80th percentile."
-            )  # TODO: Change this to be a non-blocking warning
         if min_chunk_size < 1:
             raise ValueError("min_chunk_size must be at least 1")
 
@@ -273,7 +279,9 @@ class SemanticChunker(BaseChunker):
                 for i in range(len(sentences) - 1)
             ]
             self.similarity_threshold = float(
-                np.percentile(all_similarities, self.similarity_percentile)
+                np.percentile(all_similarities,
+                              self.similarity_percentile * 100 if 0 < self.similarity_percentile <= 1 else self.similarity_percentile
+                )
             )
         else:
             self.similarity_threshold = self.similarity_threshold
