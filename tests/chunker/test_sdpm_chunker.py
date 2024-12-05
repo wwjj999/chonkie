@@ -141,5 +141,24 @@ def test_spdm_chunker_repr(embedding_model):
     assert repr(chunker) == expected
 
 
+def test_spdm_chunker_percentile_mode(embedding_model, sample_complex_markdown_text):
+    """Test the SPDMChunker works with percentile-based similarity."""
+    chunker = SDPMChunker(
+        embedding_model=embedding_model,
+        chunk_size=512,
+        similarity_percentile=50,
+    )
+    chunks = chunker.chunk(sample_complex_markdown_text)
+
+    assert len(chunks) > 0
+    assert isinstance(chunks[0], SemanticChunk)
+    assert all([chunk.token_count <= 512 for chunk in chunks])
+    assert all([chunk.token_count > 0 for chunk in chunks])
+    assert all([chunk.text is not None for chunk in chunks])
+    assert all([chunk.start_index is not None for chunk in chunks])
+    assert all([chunk.end_index is not None for chunk in chunks])
+    assert all([chunk.sentences is not None for chunk in chunks])
+
+
 if __name__ == "__main__":
     pytest.main()

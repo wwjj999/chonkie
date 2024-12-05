@@ -1,3 +1,5 @@
+"""Main package for Chonkie."""
+
 from .chunker import (
     BaseChunker,
     Chunk,
@@ -11,12 +13,17 @@ from .chunker import (
     TokenChunker,
     WordChunker,
 )
+from .context import Context
 from .embeddings import (
     AutoEmbeddings,
     BaseEmbeddings,
     Model2VecEmbeddings,
     OpenAIEmbeddings,
     SentenceTransformerEmbeddings,
+)
+from .refinery import (
+    BaseRefinery,
+    OverlapRefinery,
 )
 
 __version__ = "0.2.1.post1"
@@ -32,6 +39,7 @@ __all__ = [
 
 # Add all data classes to __all__
 __all__ += [
+    "Context",
     "Chunk",
     "SentenceChunk",
     "SemanticChunk",
@@ -56,4 +64,10 @@ __all__ += [
     "SentenceTransformerEmbeddings",
     "OpenAIEmbeddings",
     "AutoEmbeddings",
+]
+
+# Add all refinery classes to __all__
+__all__ += [
+    "BaseRefinery",
+    "OverlapRefinery",
 ]
