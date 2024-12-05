@@ -1,18 +1,18 @@
+"""Refinery class which adds overlap as context to chunks."""
 from typing import Any, List, Optional
-from dataclasses import dataclass
 
-from chonkie.chunker import Chunk, SentenceChunk, SemanticChunk
+from chonkie.chunker import Chunk, SemanticChunk, SentenceChunk
+from chonkie.context import Context
 from chonkie.refinery.base import BaseRefinery
 
-from chonkie.context import Context
 
 class OverlapRefinery(BaseRefinery):
     """Refinery class which adds overlap as context to chunks.
-    
+
     This refinery provides two methods for calculating overlap:
     1. Exact: Uses a tokenizer to precisely determine token boundaries
     2. Approximate: Estimates tokens based on text length ratios
-    
+
     It can handle different types of chunks (basic Chunks, SentenceChunks,
     and SemanticChunks) and can optionally update the chunk text to include
     the overlap content.
@@ -24,10 +24,10 @@ class OverlapRefinery(BaseRefinery):
         tokenizer: Any = None,
         merge_context: bool = True,
         inplace: bool = True,
-        approximate: bool = True
+        approximate: bool = True,
     ) -> None:
         """Initialize the OverlapRefinery class.
-        
+
         Args:
             context_size: Number of tokens to include in context
             tokenizer: Optional tokenizer for exact token counting
@@ -39,7 +39,7 @@ class OverlapRefinery(BaseRefinery):
         super().__init__(context_size)
         self.merge_context = merge_context
         self.inplace = inplace
-        
+
         # If tokenizer provided, we can do exact token counting
         if tokenizer is not None:
             self.tokenizer = tokenizer
@@ -48,9 +48,11 @@ class OverlapRefinery(BaseRefinery):
             # Without tokenizer, must use approximate method
             self.approximate = True
 
-    def _get_refined_chunks(self, chunks: List[Chunk], inplace: bool = True) -> List[Chunk]:
+    def _get_refined_chunks(
+        self, chunks: List[Chunk], inplace: bool = True
+    ) -> List[Chunk]:
         """Convert regular chunks to refined chunks with progressive memory cleanup.
-        
+
         This method takes regular chunks and converts them to RefinedChunks one at a
         time. When inplace is True, it progressively removes chunks from the input
         list to minimize memory usage.
@@ -58,14 +60,14 @@ class OverlapRefinery(BaseRefinery):
         The conversion preserves all relevant information from the original chunks,
         including sentences and embeddings if they exist. This allows us to maintain
         the full capabilities of semantic chunks while adding refinement features.
-        
+
         Args:
             chunks: List of original chunks to convert
             inplace: Whether to modify the input list during conversion
-            
+
         Returns:
             List of RefinedChunks without any context (context is added later)
-            
+
         Example:
             For memory efficiency with large datasets:
             ```
@@ -77,9 +79,9 @@ class OverlapRefinery(BaseRefinery):
         """
         if not chunks:
             return []
-            
+
         refined_chunks = []
-        
+
         # Use enumerate to track position without modifying list during iteration
         for i in range(len(chunks)):
             if inplace:
@@ -88,7 +90,7 @@ class OverlapRefinery(BaseRefinery):
             else:
                 # Just get a reference if not modifying in place
                 chunk = chunks[i]
-                
+
             # Create refined version preserving appropriate attributes
             refined_chunk = SemanticChunk(
                 text=chunk.text,
@@ -96,97 +98,98 @@ class OverlapRefinery(BaseRefinery):
                 end_index=chunk.end_index,
                 token_count=chunk.token_count,
                 # Preserve sentences and embeddings if they exist
-                sentences=chunk.sentences if isinstance(chunk, (SentenceChunk, SemanticChunk)) else None,
+                sentences=chunk.sentences
+                if isinstance(chunk, (SentenceChunk, SemanticChunk))
+                else None,
                 embedding=chunk.embedding if isinstance(chunk, SemanticChunk) else None,
-                context=None  # Context is added later in the refinement process
+                context=None,  # Context is added later in the refinement process
             )
-            
+
             refined_chunks.append(refined_chunk)
-        
+
         if inplace:
             # Clear the input list to free memory
             chunks.clear()
             chunks += refined_chunks
-                
+
         return refined_chunks
-    
+
     def _overlap_token_exact(self, chunk: Chunk) -> Optional[Context]:
         """Calculate precise token-based overlap context using tokenizer.
-        
+
         Takes a larger window of text from the chunk end, tokenizes it,
         and selects exactly context_size tokens worth of text.
-        
+
         Args:
             chunk: Chunk to extract context from
-            
+
         Returns:
             Context object with precise token boundaries, or None if no tokenizer
 
         """
-        if not hasattr(self, 'tokenizer'):
+        if not hasattr(self, "tokenizer"):
             return None
-            
+
         # Take 6x context_size characters to ensure enough tokens
         char_window = min(len(chunk.text), self.context_size * 6)
         text_portion = chunk.text[-char_window:]
-        
+
         # Get exact token boundaries
         tokens = self.tokenizer.encode(text_portion)
         context_tokens = min(self.context_size, len(tokens))
         context_tokens_ids = tokens[-context_tokens:]
         context_text = self.tokenizer.decode(context_tokens_ids)
-        
+
         # Find where context text starts in chunk
         try:
             context_start = chunk.text.rindex(context_text)
             start_index = chunk.start_index + context_start
-            
+
             return Context(
                 text=context_text,
                 token_count=context_tokens,
                 start_index=start_index,
-                end_index=chunk.end_index
+                end_index=chunk.end_index,
             )
         except ValueError:
             # If context text can't be found (e.g., due to special tokens), fall back to approximate
             return self._overlap_token_approximate(chunk)
-    
+
     def _overlap_token_approximate(self, chunk: Chunk) -> Optional[Context]:
         """Calculate approximate token-based overlap context.
-        
+
         Estimates token positions based on character length ratios.
-        
+
         Args:
             chunk: Chunk to extract context from
-            
+
         Returns:
             Context object with estimated token boundaries
-            
+
         """
         # Calculate desired context size
         context_tokens = min(self.context_size, chunk.token_count)
-        
+
         # Estimate text length based on token ratio
         context_ratio = context_tokens / chunk.token_count
         char_length = int(len(chunk.text) * context_ratio)
-        
+
         # Extract context text from end
         context_text = chunk.text[-char_length:]
-        
+
         return Context(
             text=context_text,
             token_count=context_tokens,
             start_index=chunk.end_index - char_length,
-            end_index=chunk.end_index
+            end_index=chunk.end_index,
         )
-    
 
     def _overlap_token(self, chunk: Chunk) -> Optional[Context]:
         """Choose between exact or approximate token overlap calculation.
-        
+
         Args:
             chunk: Chunk to process
-            
+
         Returns:
             Context object from either exact or approximate calculation
 
@@ -194,25 +197,25 @@ class OverlapRefinery(BaseRefinery):
         if self.approximate:
             return self._overlap_token_approximate(chunk)
         return self._overlap_token_exact(chunk)
-        
+
     def _overlap_sentence(self, chunk: SentenceChunk) -> Optional[Context]:
         """Calculate overlap context based on sentences.
-        
+
         Takes sentences from the end of the chunk up to context_size tokens.
-        
+
         Args:
             chunk: SentenceChunk to process
-            
+
         Returns:
             Context object containing complete sentences
 
         """
         if not chunk.sentences:
             return None
-            
+
         context_sentences = []
         total_tokens = 0
-        
+
         # Add sentences from the end until we hit context_size
         for sentence in reversed(chunk.sentences):
             if total_tokens + sentence.token_count <= self.context_size:
@@ -224,14 +227,14 @@ class OverlapRefinery(BaseRefinery):
         if not context_sentences:
             context_sentences.append(chunk.sentences[-1])
             total_tokens = chunk.sentences[-1].token_count
-            
+
         return Context(
             text=" ".join(s.text for s in context_sentences),
             token_count=total_tokens,
             start_index=context_sentences[0].start_index,
-            end_index=context_sentences[-1].end_index
+            end_index=context_sentences[-1].end_index,
         )
-   
+
     def _get_overlap_context(self, chunk: Chunk) -> Optional[Context]:
         """Get appropriate overlap context based on chunk type."""
         if isinstance(chunk, SemanticChunk):
@@ -242,16 +245,16 @@ class OverlapRefinery(BaseRefinery):
             return self._overlap_token(chunk)
         else:
             raise ValueError(f"Unsupported chunk type: {type(chunk)}")
-        
+
     def refine(self, chunks: List[Chunk]) -> List[Chunk]:
         """Refine chunks by adding overlap context.
-        
+
         For each chunk after the first, adds context from the previous chunk.
         Can optionally update the chunk text to include the context.
-        
+
         Args:
             chunks: List of chunks to refine
-            
+
         Returns:
             List of refined chunks with added context
 
@@ -267,12 +270,12 @@ class OverlapRefinery(BaseRefinery):
             refined_chunks = [chunk.copy() for chunk in chunks]
         else:
             refined_chunks = chunks
-            
+
         # Process remaining chunks
         for i in range(1, len(refined_chunks)):
             # Get context from previous chunk
-            context = self._get_overlap_context(chunks[i-1])
-            setattr(refined_chunks[i], 'context', context)
+            context = self._get_overlap_context(chunks[i - 1])
+            setattr(refined_chunks[i], "context", context)
 
             # Optionally update chunk text to include context
             if self.merge_context and context:
@@ -280,19 +283,23 @@ class OverlapRefinery(BaseRefinery):
                 refined_chunks[i].start_index = context.start_index
                 # Update token count to include context and space
                 # Calculate new token count
-                if hasattr(self, 'tokenizer') and not self.approximate:
+                if hasattr(self, "tokenizer") and not self.approximate:
                     # Use exact token count if we have a tokenizer
-                    refined_chunks[i].token_count = len(self.tokenizer.encode(refined_chunks[i].text))
+                    refined_chunks[i].token_count = len(
+                        self.tokenizer.encode(refined_chunks[i].text)
+                    )
                 else:
                     # Otherwise use approximate by adding context tokens plus one for space
-                    refined_chunks[i].token_count = refined_chunks[i].token_count + context.token_count + 1
+                    refined_chunks[i].token_count = (
+                        refined_chunks[i].token_count + context.token_count + 1
+                    )
 
         return refined_chunks
-        
+
     @classmethod
     def is_available(cls) -> bool:
         """Check if the OverlapRefinery is available.
-        
+
         Always returns True as this refinery has no external dependencies.
         """
         return True
