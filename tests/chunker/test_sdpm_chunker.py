@@ -140,6 +140,7 @@ def test_spdm_chunker_repr(embedding_model):
     )
     assert repr(chunker) == expected
 
+
 def test_spdm_chunker_percentile_mode(embedding_model, sample_complex_markdown_text):
     """Test the SPDMChunker works with percentile-based similarity."""
     chunker = SDPMChunker(

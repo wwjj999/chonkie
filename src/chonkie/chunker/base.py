@@ -1,7 +1,6 @@
 """Base classes for chunking text."""
 
 import importlib
-
 import inspect
 import warnings
 from abc import ABC, abstractmethod
@@ -58,7 +57,7 @@ class Chunk:
     def __iter__(self):
         """Return an iterator over the chunk."""
         return iter(self.text)
-    
+
     def __getitem__(self, index: int):
         """Return the item at the given index."""
         return self.text[index]
@@ -73,7 +72,6 @@ class Chunk:
         )
 
 
-
 class BaseChunker(ABC):
     """Abstract base class for all chunker implementations.
 
@@ -81,7 +79,9 @@ class BaseChunker(ABC):
     the chunk() method according to their specific chunking strategy.
     """
 
-    def __init__(self, tokenizer_or_token_counter: Union[str, Any, Callable[[str], int]]):
+    def __init__(
+        self, tokenizer_or_token_counter: Union[str, Any, Callable[[str], int]]
+    ):
         """Initialize the chunker with a tokenizer.
 
         Args:
@@ -115,7 +115,6 @@ class BaseChunker(ABC):
             raise ValueError(
                 f"Tokenizer backend {str(type(self.tokenizer))} not supported"
             )
-
 
     def _load_tokenizer(self, tokenizer_name: str):
         """Load a tokenizer based on the backend."""
@@ -186,7 +185,6 @@ class BaseChunker(ABC):
                 f"Tokenizer backend {self._tokenizer_backend} not supported."
             )
 
-
     def _encode_batch(self, texts: List[str]):
         """Encode a batch of texts using the backend tokenizer."""
         if self._tokenizer_backend == "transformers":
@@ -205,7 +203,6 @@ class BaseChunker(ABC):
                 f"Tokenizer backend {self._tokenizer_backend} not supported."
             )
 
-
     def _decode(self, tokens) -> str:
         """Decode tokens using the backend tokenizer."""
         if self._tokenizer_backend == "transformers":
@@ -219,7 +216,6 @@ class BaseChunker(ABC):
                 f"Tokenizer backend {self._tokenizer_backend} not supported."
             )
 
-
     def _decode_batch(self, token_lists: List[List[int]]) -> List[str]:
         """Decode a batch of token lists using the backend tokenizer."""
         if self._tokenizer_backend == "transformers":
@@ -232,7 +228,6 @@ class BaseChunker(ABC):
             raise ValueError(
                 f"Tokenizer backend {self._tokenizer_backend} not supported."
             )
-
 
     def _count_tokens(self, text: str) -> int:
         """Count tokens in text using the backend tokenizer."""

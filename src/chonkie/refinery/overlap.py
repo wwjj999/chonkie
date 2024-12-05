@@ -1,4 +1,5 @@
 """Refinery class which adds overlap as context to chunks."""
+
 from typing import Any, List, Optional
 
 from chonkie.chunker import Chunk, SemanticChunk, SentenceChunk

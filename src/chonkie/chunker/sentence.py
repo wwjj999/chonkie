@@ -1,6 +1,5 @@
 from bisect import bisect_left
 from dataclasses import dataclass, field
-
 from itertools import accumulate
 from typing import Any, List, Union
 
@@ -26,6 +25,7 @@ class Sentence:
     end_index: int
     token_count: int
 
+
 @dataclass
 class SentenceChunk(Chunk):
     """Dataclass representing a sentence chunk with metadata.
@@ -40,8 +40,10 @@ class SentenceChunk(Chunk):
         sentences: List of Sentence objects in the chunk
 
     """
+
     # Don't redeclare inherited fields
     sentences: List[Sentence] = field(default_factory=list)
+
 
 class SentenceChunker(BaseChunker):
     """SentenceChunker splits the sentences in a text based on token limits and sentence boundaries.
@@ -238,18 +240,20 @@ class SentenceChunker(BaseChunker):
 
     def _estimate_token_counts(self, text: str) -> int:
         """Estimate token count using character length."""
-        CHARS_PER_TOKEN = 6. # Avg. char per token for llama3 is b/w 6-7
+        CHARS_PER_TOKEN = 6.0  # Avg. char per token for llama3 is b/w 6-7
         if type(text) is str:
             return max(1, int(len(text) / CHARS_PER_TOKEN))
         elif type(text) is list and type(text[0]) is str:
             return [max(1, int(len(t) / CHARS_PER_TOKEN)) for t in text]
         else:
-            raise ValueError(f"Unknown type passed to _estimate_token_count: {type(text)}")
-   
+            raise ValueError(
+                f"Unknown type passed to _estimate_token_count: {type(text)}"
+            )
+
     def _get_feedback(self, estimate: int, actual: int) -> float:
         """Validate against the actual token counts and correct the estimates."""
-        feedback = 1 - ((estimate-actual)/estimate)
-        return feedback 
+        feedback = 1 - ((estimate - actual) / estimate)
+        return feedback
 
     def _prepare_sentences(self, text: str) -> List[Sentence]:
         """Split text into sentences and calculate token counts for each sentence.
@@ -261,67 +265,62 @@ class SentenceChunker(BaseChunker):
             List of Sentence objects
 
         """
-         # Split text into sentences
+        # Split text into sentences
         sentence_texts = self._split_sentences(text)
         if not sentence_texts:
             return []
-            
+
         # Calculate positions once
         positions = []
         current_pos = 0
         for sent in sentence_texts:
             positions.append(current_pos)
             current_pos += len(sent) + 1  # +1 for space/separator
-            
+
         if not self.use_approximate:
             # Get accurate token counts in batch
             token_counts = self._get_token_counts(sentence_texts)
         else:
             # Estimate token counts using character length
             token_counts = self._estimate_token_counts(sentence_texts)
-            
+
         # Create sentence objects
         return [
             Sentence(
-                text=sent,
-                start_index=pos,
-                end_index=pos + len(sent),
-                token_count=count
+                text=sent, start_index=pos, end_index=pos + len(sent), token_count=count
             )
             for sent, pos, count in zip(sentence_texts, positions, token_counts)
         ]
-    
+
     def _prepare_sentences(self, text: str) -> List[Sentence]:
         """Prepare sentences with either estimated or accurate token counts."""
         # Split text into sentences
         sentence_texts = self._split_sentences(text)
         if not sentence_texts:
             return []
-            
+
         # Calculate positions once
         positions = []
         current_pos = 0
         for sent in sentence_texts:
             positions.append(current_pos)
             current_pos += len(sent) + 1  # +1 for space/separator
-            
+
         if not self.use_approximate:
             # Get accurate token counts in batch
             token_counts = self._get_token_counts(sentence_texts)
         else:
             # Estimate token counts using character length
             token_counts = self._estimate_token_counts(sentence_texts)
-            
+
         # Create sentence objects
         return [
             Sentence(
-                text=sent,
-                start_index=pos,
-                end_index=pos + len(sent),
-                token_count=count
+                text=sent, start_index=pos, end_index=pos + len(sent), token_count=count
             )
             for sent, pos, count in zip(sentence_texts, positions, token_counts)
         ]
+
     def _create_chunk(self, sentences: List[Sentence], token_count: int) -> Chunk:
         """Create a chunk from a list of sentences.
 
@@ -354,41 +353,43 @@ class SentenceChunker(BaseChunker):
         """
         if not text.strip():
             return []
-            
+
         # Get prepared sentences with token counts
-        sentences = self._prepare_sentences(text)  #28mus
+        sentences = self._prepare_sentences(text)  # 28mus
         if not sentences:
             return []
-            
+
         # Pre-calculate cumulative token counts for bisect
         # Add 1 token for spaces between sentences
-        token_sums = list(accumulate(
-            [s.token_count for s in sentences], lambda a,b: a + b, initial=0
-        ))
-        
+        token_sums = list(
+            accumulate(
+                [s.token_count for s in sentences], lambda a, b: a + b, initial=0
+            )
+        )
+
         chunks = []
-        feedback = 1.
+        feedback = 1.0
         pos = 0
-        
+
         while pos < len(sentences):
             # use updated feedback on the token sums
             token_sums = [int(s * feedback) for s in token_sums]
-            
+
             # Use bisect_left to find initial split point
             target_tokens = token_sums[pos] + self.chunk_size
-            split_idx = bisect_left(token_sums, target_tokens) -1
+            split_idx = bisect_left(token_sums, target_tokens) - 1
             split_idx = min(split_idx, len(sentences))
-            
+
             # Ensure we include at least one sentence beyond pos
             split_idx = max(split_idx, pos + 1)
-            
+
             # Handle minimum sentences requirement
             if split_idx - pos < self.min_sentences_per_chunk:
                 split_idx = pos + self.min_sentences_per_chunk
 
             # Get the estimated token count
-            estimate = token_sums[split_idx] - token_sums[pos] 
-            
+            estimate = token_sums[split_idx] - token_sums[pos]
+
             # Get candidate sentences and verify actual token count
             chunk_sentences = sentences[pos:split_idx]
             chunk_text = " ".join(s.text for s in chunk_sentences)
@@ -397,23 +398,25 @@ class SentenceChunker(BaseChunker):
             # Given the actual token_count and the estimate, get a feedback value for the next loop
             feedback = self._get_feedback(estimate, actual)
             # print(f"Estimate: {estimate} Actual: {actual} feedback: {feedback}")
-            
+
             # Back off one sentence at a time if we exceeded chunk size
-            while (actual > self.chunk_size and 
-                   len(chunk_sentences) > self.min_sentences_per_chunk):
+            while (
+                actual > self.chunk_size
+                and len(chunk_sentences) > self.min_sentences_per_chunk
+            ):
                 split_idx -= 1
                 chunk_sentences = sentences[pos:split_idx]
                 chunk_text = " ".join(s.text for s in chunk_sentences)
                 actual = len(self._encode(chunk_text))
-            
+
             chunks.append(self._create_chunk(chunk_sentences, actual))
-            
+
             # Calculate next position with overlap
             if self.chunk_overlap > 0 and split_idx < len(sentences):
                 # Calculate how many sentences we need for overlap
                 overlap_tokens = 0
                 overlap_idx = split_idx - 1
-                
+
                 while overlap_idx > pos and overlap_tokens < self.chunk_overlap:
                     sent = sentences[overlap_idx]
                     next_tokens = overlap_tokens + sent.token_count + 1  # +1 for space
@@ -421,12 +424,12 @@ class SentenceChunker(BaseChunker):
                         break
                     overlap_tokens = next_tokens
                     overlap_idx -= 1
-                
+
                 # Move position to after the overlap
                 pos = overlap_idx + 1
             else:
                 pos = split_idx
-                
+
         return chunks
 
     def __repr__(self) -> str:

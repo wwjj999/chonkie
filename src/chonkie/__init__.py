@@ -1,7 +1,5 @@
 """Main package for Chonkie."""
 
-from .context import Context
-
 from .chunker import (
     BaseChunker,
     Chunk,
@@ -15,6 +13,7 @@ from .chunker import (
     TokenChunker,
     WordChunker,
 )
+from .context import Context
 from .embeddings import (
     AutoEmbeddings,
     BaseEmbeddings,
@@ -22,7 +21,6 @@ from .embeddings import (
     OpenAIEmbeddings,
     SentenceTransformerEmbeddings,
 )
-
 from .refinery import (
     BaseRefinery,
     OverlapRefinery,

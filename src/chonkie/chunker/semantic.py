@@ -41,7 +41,7 @@ class SemanticChunk(SentenceChunk):
         sentences: List of SemanticSentence objects in the chunk
 
     """
-    
+
     sentences: List[SemanticSentence] = field(default_factory=list)
 
 
@@ -128,9 +128,10 @@ class SemanticChunker(BaseChunker):
 
         # Probably the dependency is not installed
         if self.embedding_model is None:
-            raise ImportError("embedding_model is not a valid embedding model", 
-                              "Please install the `semantic` extra to use this feature")
-
+            raise ImportError(
+                "embedding_model is not a valid embedding model",
+                "Please install the `semantic` extra to use this feature",
+            )
 
         # Keeping the tokenizer the same as the sentence model is important
         # for the group semantic meaning to be calculated properly
