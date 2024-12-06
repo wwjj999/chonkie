@@ -28,7 +28,7 @@ from .types import (
     SentenceChunk,
 )
 
-__version__ = "0.2.1.post1"
+__version__ = "0.2.2"
 __name__ = "chonkie"
 __author__ = "Bhavnick Minhas"
 
