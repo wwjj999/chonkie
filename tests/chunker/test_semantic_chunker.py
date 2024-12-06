@@ -3,8 +3,9 @@ from typing import List
 
 import pytest
 
-from chonkie import Chunk, SemanticChunk, SemanticChunker
+from chonkie import SemanticChunker
 from chonkie.embeddings import Model2VecEmbeddings, OpenAIEmbeddings
+from chonkie.types import Chunk, SemanticChunk
 
 
 @pytest.fixture

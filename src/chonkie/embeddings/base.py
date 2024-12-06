@@ -1,13 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Callable, List, Union
 
-# import importlib
-
-# if importlib.util.find_spec("numpy") is not None:
-#     import numpy as np
-# else:
-#     np = None
-
 # for type checking
 if TYPE_CHECKING:
     import numpy as np

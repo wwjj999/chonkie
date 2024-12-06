@@ -14,8 +14,8 @@ a chunking strategy based on semantic density and peak mapping. The tests verify
 import pytest
 
 from chonkie.chunker.sdpm import SDPMChunker
-from chonkie.chunker.semantic import SemanticChunk
 from chonkie.embeddings.sentence_transformer import SentenceTransformerEmbeddings
+from chonkie.types import SemanticChunk
 
 
 @pytest.fixture

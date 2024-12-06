@@ -4,72 +4,10 @@ import importlib
 import inspect
 import warnings
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from multiprocessing import Pool, cpu_count
-from typing import Any, Callable, List, Optional, Union
+from typing import Any, Callable, List, Union
 
-from chonkie.context import Context
-
-
-@dataclass
-class Chunk:
-    """Dataclass representing a text chunk with metadata.
-
-    All attributes are read-only via slots for performance reasons.
-
-    Attributes:
-        text: The text content of the chunk
-        start_index: The starting index of the chunk in the original text
-        end_index: The ending index of the chunk in the original text
-        token_count: The number of tokens in the chunk
-        context: The context of the chunk, useful for refinery classes
-
-    """
-
-    text: str
-    start_index: int
-    end_index: int
-    token_count: int
-    context: Optional[Context] = None
-
-    def __str__(self) -> str:
-        """Return string representation of the chunk."""
-        return self.text
-
-    def __len__(self) -> int:
-        """Return the length of the chunk."""
-        return len(self.text)
-
-    def __repr__(self) -> str:
-        """Return string representation of the chunk."""
-        if self.context is not None:
-            return (
-                f"Chunk(text={self.text}, start_index={self.start_index}, "
-                f"end_index={self.end_index}, token_count={self.token_count})"
-            )
-        else:
-            return (
-                f"Chunk(text={self.text}, start_index={self.start_index}, "
-                f"end_index={self.end_index}, token_count={self.token_count}, "
-                f"context={self.context})"
-            )
-
-    def __iter__(self):
-        """Return an iterator over the chunk."""
-        return iter(self.text)
-
-    def __getitem__(self, index: int):
-        """Return the item at the given index."""
-        return self.text[index]
-
-    def copy(self) -> "Chunk":
-        """Return a deep copy of the chunk."""
-        return Chunk(
-            text=self.text,
-            start_index=self.start_index,
-            end_index=self.end_index,
-            token_count=self.token_count,
-        )
+from chonkie.types import Chunk
 
 
 class BaseChunker(ABC):

@@ -1,7 +1,10 @@
 """Semantic Double Pass Merge chunking using sentence embeddings."""
+
 from typing import Any, List, Union
 
-from .semantic import SemanticChunk, SemanticChunker, Sentence
+from chonkie.types import SemanticChunk, Sentence
+
+from .semantic import SemanticChunker
 
 
 class SDPMChunker(SemanticChunker):
@@ -23,7 +26,7 @@ class SDPMChunker(SemanticChunker):
 
     Methods:
         chunk: Split text into chunks using the SDPM approach.
-        
+
     """
 
     def __init__(
@@ -133,7 +136,7 @@ class SDPMChunker(SemanticChunker):
         sentences = self._prepare_sentences(text)
         if len(sentences) <= self.min_sentences:
             return [self._create_chunk(sentences)]
-        
+
         # Calculate similarity threshold
         self.similarity_threshold = self._calculate_similarity_threshold(sentences)
 

@@ -3,9 +3,8 @@ from typing import List
 import pytest
 from transformers import AutoTokenizer
 
-from chonkie.chunker import Chunk, Sentence, SentenceChunk
-from chonkie.context import Context
 from chonkie.refinery import OverlapRefinery
+from chonkie.types import Chunk, Context, Sentence, SentenceChunk
 
 
 @pytest.fixture
@@ -132,6 +131,7 @@ def test_overlap_refinery_basic_chunks_exact(basic_chunks, tokenizer):
         actual_tokens = len(tokenizer.encode(refined[i].context.text))
         assert actual_tokens <= 4
 
+
 def test_overlap_refinery_sentence_chunks(sentence_chunks):
     """Test overlap calculation with SentenceChunks."""
     refinery = OverlapRefinery(context_size=4)
@@ -140,6 +140,7 @@ def test_overlap_refinery_sentence_chunks(sentence_chunks):
     # Check context for first chunk
     assert refined[0].context is not None
     assert isinstance(refined[0].context, Context)
+
 
 def test_overlap_refinery_no_merge_context(basic_chunks):
     """Test behavior when merge_context is False."""
@@ -224,9 +225,10 @@ def test_overlap_refinery_prefix_mode(basic_chunks):
         assert isinstance(refined[i].context, Context)
         assert refined[i].context.token_count <= 4
         # Verify context comes from previous chunk
-        assert refined[i].context.text in basic_chunks[i-1].text
+        assert refined[i].context.text in basic_chunks[i - 1].text
         # Verify context ends at the end of previous chunk
-        assert refined[i].context.end_index == basic_chunks[i-1].end_index
+        assert refined[i].context.end_index == basic_chunks[i - 1].end_index
+
 
 def test_overlap_refinery_prefix_mode_with_merge(basic_chunks, tokenizer):
     """Test that OverlapRefinery merges context correctly in prefix mode."""
@@ -235,7 +237,7 @@ def test_overlap_refinery_prefix_mode_with_merge(basic_chunks, tokenizer):
         tokenizer=tokenizer,
         mode="prefix",
         merge_context=True,
-        approximate=False
+        approximate=False,
     )
     refined = refinery.refine(basic_chunks)
 
@@ -251,9 +253,12 @@ def test_overlap_refinery_prefix_mode_with_merge(basic_chunks, tokenizer):
         # Verify token count increase
         original_tokens = len(tokenizer.encode(basic_chunks[i].text))
         new_tokens = len(tokenizer.encode(refined[i].text))
-        assert new_tokens >= original_tokens, f"{refined[i].text} {basic_chunks[i].text}"
+        assert (
+            new_tokens >= original_tokens
+        ), f"{refined[i].text} {basic_chunks[i].text}"
         # Verify start index is from context
         assert refined[i].start_index == refined[i].context.start_index
+
 
 if __name__ == "__main__":
     pytest.main()

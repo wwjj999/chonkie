@@ -1,12 +1,15 @@
 """Token-based chunking."""
+
 from typing import Any, Generator, List, Tuple, Union
 
-from .base import BaseChunker, Chunk
+from chonkie.types import Chunk
+
+from .base import BaseChunker
 
 
 class TokenChunker(BaseChunker):
     """Chunker that splits text into chunks of a specified token size.
-    
+
     Args:
         tokenizer: The tokenizer instance to use for encoding/decoding
         chunk_size: Maximum number of tokens per chunk

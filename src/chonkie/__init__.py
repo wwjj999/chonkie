@@ -2,18 +2,12 @@
 
 from .chunker import (
     BaseChunker,
-    Chunk,
     SDPMChunker,
-    SemanticChunk,
     SemanticChunker,
-    SemanticSentence,
-    Sentence,
-    SentenceChunk,
     SentenceChunker,
     TokenChunker,
     WordChunker,
 )
-from .context import Context
 from .embeddings import (
     AutoEmbeddings,
     BaseEmbeddings,
@@ -24,6 +18,14 @@ from .embeddings import (
 from .refinery import (
     BaseRefinery,
     OverlapRefinery,
+)
+from .types import (
+    Chunk,
+    Context,
+    SemanticChunk,
+    SemanticSentence,
+    Sentence,
+    SentenceChunk,
 )
 
 __version__ = "0.2.1.post1"

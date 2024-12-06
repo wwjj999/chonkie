@@ -1,20 +1,17 @@
-from .base import BaseChunker, Chunk
+"""Module for chunkers."""
+
+from .base import BaseChunker
 from .sdpm import SDPMChunker
-from .semantic import SemanticChunk, SemanticChunker, SemanticSentence
-from .sentence import Sentence, SentenceChunk, SentenceChunker
+from .semantic import SemanticChunker
+from .sentence import SentenceChunker
 from .token import TokenChunker
 from .word import WordChunker
 
 __all__ = [
-    "Chunk",
     "BaseChunker",
     "TokenChunker",
     "WordChunker",
-    "Sentence",
-    "SentenceChunk",
     "SentenceChunker",
-    "SemanticSentence",
-    "SemanticChunk",
     "SemanticChunker",
     "SDPMChunker",
 ]
