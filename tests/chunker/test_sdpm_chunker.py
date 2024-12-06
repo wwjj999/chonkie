@@ -69,14 +69,17 @@ def test_spdm_chunker_initialization(embedding_model):
     chunker = SDPMChunker(
         embedding_model=embedding_model,
         chunk_size=512,
-        similarity_threshold=0.5,
+        threshold=0.5,
         skip_window=2,
     )
 
     assert chunker is not None
     assert chunker.chunk_size == 512
-    assert chunker.similarity_threshold == 0.5
-    assert chunker.initial_sentences == 1
+    assert chunker.threshold == 0.5
+    assert chunker.mode == "window"
+    assert chunker.similarity_window == 1
+    assert chunker.min_sentences == 1
+    assert chunker.min_chunk_size == 2
     assert chunker.skip_window == 2
 
 
@@ -85,7 +88,7 @@ def test_spdm_chunker_chunking(embedding_model, sample_text):
     chunker = SDPMChunker(
         embedding_model=embedding_model,
         chunk_size=512,
-        similarity_threshold=0.5,
+        threshold=0.5,
     )
     chunks = chunker.chunk(sample_text)
 
@@ -104,7 +107,7 @@ def test_spdm_chunker_empty_text(embedding_model):
     chunker = SDPMChunker(
         embedding_model=embedding_model,
         chunk_size=512,
-        similarity_threshold=0.5,
+        threshold=0.5,
     )
     chunks = chunker.chunk("")
 
@@ -116,7 +119,7 @@ def test_spdm_chunker_single_sentence(embedding_model):
     chunker = SDPMChunker(
         embedding_model=embedding_model,
         chunk_size=512,
-        similarity_threshold=0.5,
+        threshold=0.5,
     )
     chunks = chunker.chunk("This is a single sentence.")
 
@@ -130,13 +133,15 @@ def test_spdm_chunker_repr(embedding_model):
     chunker = SDPMChunker(
         embedding_model=embedding_model,
         chunk_size=512,
-        similarity_threshold=0.5,
+        threshold=0.5,
         skip_window=2,
     )
 
     expected = (
-        "SPDMChunker(chunk_size=512, similarity_threshold=0.5, "
-        "initial_sentences=1, skip_window=2)"
+        "SPDMChunker(embedding_model=SentenceTransformerEmbeddings(model=all-MiniLM-L6-v2), "
+        "mode=window, threshold=0.5, chunk_size=512, similarity_window=1, "
+        "min_sentences=1, min_chunk_size=2, min_characters_per_sentence=12, "
+        "threshold_step=0.01, skip_window=2)"
     )
     assert repr(chunker) == expected
 
@@ -146,7 +151,7 @@ def test_spdm_chunker_percentile_mode(embedding_model, sample_complex_markdown_t
     chunker = SDPMChunker(
         embedding_model=embedding_model,
         chunk_size=512,
-        similarity_percentile=50,
+        threshold=50,
     )
     chunks = chunker.chunk(sample_complex_markdown_text)
 

@@ -1,15 +1,25 @@
+"""Token-based chunking."""
 from typing import Any, Generator, List, Tuple, Union
 
 from .base import BaseChunker, Chunk
 
 
 class TokenChunker(BaseChunker):
+    """Chunker that splits text into chunks of a specified token size.
+    
+    Args:
+        tokenizer: The tokenizer instance to use for encoding/decoding
+        chunk_size: Maximum number of tokens per chunk
+        chunk_overlap: Number of tokens to overlap between chunks
+
+    """
+
     def __init__(
         self,
         tokenizer: Union[str, Any] = "gpt2",
         chunk_size: int = 512,
         chunk_overlap: Union[int, float] = 128,
-    ):
+    ) -> None:
         """Initialize the TokenChunker with configuration parameters.
 
         Args:
@@ -93,6 +103,7 @@ class TokenChunker(BaseChunker):
     def _chunk_generator(
         self, tokens: List[int]
     ) -> Generator[Tuple[List[int], int, int], None, None]:
+        """Generate chunks from a list of tokens."""
         stride = self.chunk_size - self.chunk_overlap
         for start in range(0, len(tokens), stride):
             end = min(start + self.chunk_size, len(tokens))
@@ -101,6 +112,7 @@ class TokenChunker(BaseChunker):
                 break
 
     def _process_batch(self, chunks: List[Tuple[List[int], int, int]]) -> List[Chunk]:
+        """Process a batch of chunks."""
         token_lists = [tokens for tokens, _, _ in chunks]
         texts = self._decode_batch(token_lists)
 
@@ -110,6 +122,7 @@ class TokenChunker(BaseChunker):
         ]
 
     def _process_text_batch(self, texts: List[str]) -> List[List[Chunk]]:
+        """Process a batch of texts."""
         tokens_list = self._encode_batch(texts)
         result = []
 
@@ -136,6 +149,7 @@ class TokenChunker(BaseChunker):
 
         Args:
             texts: List of input texts to be chunked
+            batch_size: Number of texts to process in a single batch
 
         Returns:
             List of lists of Chunk objects containing the chunked text and metadata
@@ -151,6 +165,7 @@ class TokenChunker(BaseChunker):
             return self._process_text_batch(texts)
 
     def __repr__(self) -> str:
+        """Return a string representation of the TokenChunker."""
         return (
             f"TokenChunker(chunk_size={self.chunk_size}, "
             f"chunk_overlap={self.chunk_overlap})"
