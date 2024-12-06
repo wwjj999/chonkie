@@ -1,7 +1,8 @@
 """Token-based chunking."""
 from typing import Any, Generator, List, Tuple, Union
 
-from .base import BaseChunker, Chunk
+from .base import BaseChunker
+from chonkie.types import Chunk
 
 
 class TokenChunker(BaseChunker):

@@ -1,7 +1,8 @@
 """Semantic Double Pass Merge chunking using sentence embeddings."""
 from typing import Any, List, Union
 
-from .semantic import SemanticChunk, SemanticChunker, Sentence
+from .semantic import SemanticChunker
+from chonkie.types import SemanticChunk, Sentence
 
 
 class SDPMChunker(SemanticChunker):

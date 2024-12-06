@@ -1,7 +1,8 @@
 import re
 from typing import Any, List, Tuple, Union
 
-from .base import BaseChunker, Chunk
+from .base import BaseChunker
+from chonkie.types import Chunk
 
 
 class WordChunker(BaseChunker):

@@ -3,9 +3,8 @@ from typing import List
 import pytest
 from transformers import AutoTokenizer
 
-from chonkie.chunker import Chunk, Sentence, SentenceChunk
-from chonkie.context import Context
 from chonkie.refinery import OverlapRefinery
+from chonkie.types import Chunk, Context, SentenceChunk, Sentence
 
 
 @pytest.fixture

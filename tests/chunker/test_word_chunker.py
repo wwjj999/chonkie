@@ -16,8 +16,8 @@ from typing import List
 import pytest
 from tokenizers import Tokenizer
 
-from chonkie.chunker.base import Chunk
-from chonkie.chunker.word import WordChunker
+from chonkie import WordChunker
+from chonkie.types import Chunk
 
 
 @pytest.fixture

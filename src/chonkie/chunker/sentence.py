@@ -3,47 +3,8 @@ from dataclasses import dataclass, field
 from itertools import accumulate
 from typing import Any, List, Union
 
-from .base import BaseChunker, Chunk
-
-
-@dataclass
-class Sentence:
-    """Dataclass representing a sentence with metadata.
-
-    All attributes are read-only via slots for performance reasons.
-
-    Attributes:
-        text: The text content of the sentence
-        start_index: The starting index of the sentence in the original text
-        end_index: The ending index of the sentence in the original text
-        token_count: The number of tokens in the sentence
-
-    """
-
-    text: str
-    start_index: int
-    end_index: int
-    token_count: int
-
-
-@dataclass
-class SentenceChunk(Chunk):
-    """Dataclass representing a sentence chunk with metadata.
-
-    All attributes are read-only via slots for performance reasons.
-
-    Attributes:
-        text: The text content of the chunk
-        start_index: The starting index of the chunk in the original text
-        end_index: The ending index of the chunk in the original text
-        token_count: The number of tokens in the chunk
-        sentences: List of Sentence objects in the chunk
-
-    """
-
-    # Don't redeclare inherited fields
-    sentences: List[Sentence] = field(default_factory=list)
-
+from .base import BaseChunker
+from chonkie.types import Chunk, Sentence, SentenceChunk
 
 class SentenceChunker(BaseChunker):
     """SentenceChunker splits the sentences in a text based on token limits and sentence boundaries.
@@ -54,6 +15,7 @@ class SentenceChunker(BaseChunker):
         chunk_overlap: Number of tokens to overlap between chunks
         min_sentences_per_chunk: Minimum number of sentences per chunk (defaults to 1)
         min_chunk_size: Minimum number of tokens per sentence (defaults to 2)
+        use_approximate: Whether to use approximate token counting (defaults to True)
 
     Raises:
         ValueError: If parameters are invalid
@@ -79,6 +41,7 @@ class SentenceChunker(BaseChunker):
             chunk_overlap: Number of tokens to overlap between chunks
             min_sentences_per_chunk: Minimum number of sentences per chunk (defaults to 1)
             min_chunk_size: Minimum number of tokens per sentence (defaults to 2)
+            use_approximate: Whether to use approximate token counting (defaults to True)
 
         Raises:
             ValueError: If parameters are invalid

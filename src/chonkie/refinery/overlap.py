@@ -2,10 +2,8 @@
 
 from typing import Any, List, Optional
 
-from chonkie.chunker import Chunk, SemanticChunk, SentenceChunk
-from chonkie.context import Context
+from chonkie.types import Chunk, Context, SentenceChunk, SemanticChunk
 from chonkie.refinery.base import BaseRefinery
-
 
 class OverlapRefinery(BaseRefinery):
     """Refinery class which adds overlap as context to chunks.

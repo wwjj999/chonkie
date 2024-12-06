@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-from chonkie.chunker import Chunk
+from chonkie.types import Chunk
 
 
 class BaseRefinery(ABC):

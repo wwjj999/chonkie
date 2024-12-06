@@ -1,19 +1,22 @@
 """Main package for Chonkie."""
 
-from .chunker import (
-    BaseChunker,
-    Chunk,
-    SDPMChunker,
-    SemanticChunk,
-    SemanticChunker,
+from .types import (
+    Context,
     SemanticSentence,
     Sentence,
+    Chunk,
     SentenceChunk,
+    SemanticChunk,
+)
+
+from .chunker import (
+    BaseChunker,
+    SDPMChunker,
+    SemanticChunker,
     SentenceChunker,
     TokenChunker,
     WordChunker,
 )
-from .context import Context
 from .embeddings import (
     AutoEmbeddings,
     BaseEmbeddings,

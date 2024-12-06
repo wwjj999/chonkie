@@ -1,49 +1,12 @@
 """Semantic chunking using sentence embeddings."""
 import warnings
-from dataclasses import dataclass, field
-from typing import List, Optional, Union
+from typing import List, Union
 
 import numpy as np
 
 from chonkie.chunker.base import BaseChunker
-from chonkie.chunker.sentence import Sentence, SentenceChunk
 from chonkie.embeddings.base import BaseEmbeddings
-
-
-@dataclass
-class SemanticSentence(Sentence):
-    """Dataclass representing a semantic sentence with metadata.
-
-    All attributes are read-only via slots for performance reasons.
-
-    Attributes:
-        text: The text content of the sentence
-        start_index: The starting index of the sentence in the original text
-        end_index: The ending index of the sentence in the original text
-        token_count: The number of tokens in the sentence
-        embedding: The sentence embedding
-
-    """
-
-    embedding: Optional[np.ndarray] = field(default=None)
-
-
-@dataclass
-class SemanticChunk(SentenceChunk):
-    """SemanticChunk dataclass representing a semantic chunk with metadata.
-
-    All attributes are read-only via slots for performance reasons.
-
-    Attributes:
-        text: The text content of the chunk
-        start_index: The starting index of the chunk in the original text
-        end_index: The ending index of the chunk in the original text
-        token_count: The number of tokens in the chunk
-        sentences: List of SemanticSentence objects in the chunk
-
-    """
-
-    sentences: List[SemanticSentence] = field(default_factory=list)
+from chonkie.types import Sentence, SemanticSentence, SemanticChunk
 
 
 class SemanticChunker(BaseChunker):
@@ -527,7 +490,7 @@ class SemanticChunker(BaseChunker):
         return chunks
 
     def __repr__(self) -> str:
-        
+        """Return a string representation of the SemanticChunker."""
         return (
             f"SemanticChunker(embedding_model={self.embedding_model}, "
             f"mode={self.mode}, "
