@@ -1,10 +1,11 @@
 from bisect import bisect_left
-from dataclasses import dataclass, field
 from itertools import accumulate
 from typing import Any, List, Union
 
-from .base import BaseChunker
 from chonkie.types import Chunk, Sentence, SentenceChunk
+
+from .base import BaseChunker
+
 
 class SentenceChunker(BaseChunker):
     """SentenceChunker splits the sentences in a text based on token limits and sentence boundaries.

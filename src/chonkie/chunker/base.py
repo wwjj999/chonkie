@@ -4,11 +4,11 @@ import importlib
 import inspect
 import warnings
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from multiprocessing import Pool, cpu_count
-from typing import Any, Callable, List, Optional, Union
+from typing import Any, Callable, List, Union
 
-from chonkie.types import Chunk, Context
+from chonkie.types import Chunk
+
 
 class BaseChunker(ABC):
     """Abstract base class for all chunker implementations.

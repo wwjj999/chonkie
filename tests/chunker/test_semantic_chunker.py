@@ -7,6 +7,7 @@ from chonkie import SemanticChunker
 from chonkie.embeddings import Model2VecEmbeddings, OpenAIEmbeddings
 from chonkie.types import Chunk, SemanticChunk
 
+
 @pytest.fixture
 def sample_text():
     """Sample text for testing the SemanticChunker.

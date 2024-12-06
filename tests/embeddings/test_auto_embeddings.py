@@ -1,4 +1,5 @@
 """Tests for the AutoEmbeddings class."""
+
 import pytest
 
 from chonkie import AutoEmbeddings
@@ -23,7 +24,6 @@ def sentence_transformer_identifier():
 def sentence_transformer_identifier_small():
     """Fixture providing a small sentence transformer identifier."""
     return "all-minilm-l6-v2"
-
 
 
 @pytest.fixture

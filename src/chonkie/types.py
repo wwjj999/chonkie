@@ -1,9 +1,11 @@
 """Dataclasses for Chonkie."""
+
 from dataclasses import dataclass, field
-from typing import List, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Optional
 
 if TYPE_CHECKING:
     import numpy as np
+
 
 @dataclass
 class Context:
@@ -124,7 +126,7 @@ class Chunk:
             end_index=self.end_index,
             token_count=self.token_count,
         )
-    
+
 
 @dataclass
 class Sentence:
@@ -165,7 +167,6 @@ class SentenceChunk(Chunk):
     sentences: List[Sentence] = field(default_factory=list)
 
 
-
 @dataclass
 class SemanticSentence(Sentence):
     """Dataclass representing a semantic sentence with metadata.
@@ -200,4 +201,3 @@ class SemanticChunk(SentenceChunk):
     """
 
     sentences: List[SemanticSentence] = field(default_factory=list)
-

@@ -17,6 +17,7 @@ from chonkie.chunker.sdpm import SDPMChunker
 from chonkie.embeddings.sentence_transformer import SentenceTransformerEmbeddings
 from chonkie.types import SemanticChunk
 
+
 @pytest.fixture
 def sample_text():
     """Sample text for testing the SDPMChunker."""

@@ -1,14 +1,5 @@
 """Main package for Chonkie."""
 
-from .types import (
-    Context,
-    SemanticSentence,
-    Sentence,
-    Chunk,
-    SentenceChunk,
-    SemanticChunk,
-)
-
 from .chunker import (
     BaseChunker,
     SDPMChunker,
@@ -27,6 +18,14 @@ from .embeddings import (
 from .refinery import (
     BaseRefinery,
     OverlapRefinery,
+)
+from .types import (
+    Chunk,
+    Context,
+    SemanticChunk,
+    SemanticSentence,
+    Sentence,
+    SentenceChunk,
 )
 
 __version__ = "0.2.1.post1"
