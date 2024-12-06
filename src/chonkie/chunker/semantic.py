@@ -23,7 +23,8 @@ class SemanticChunker(BaseChunker):
         min_characters_per_sentence: Minimum number of characters per sentence
         min_chunk_size: Minimum number of tokens per sentence (defaults to 2)
         threshold_step: Step size for similarity threshold calculation
-
+        delim: Delimiters to split sentences on
+    
     """
 
     def __init__(
@@ -37,6 +38,7 @@ class SemanticChunker(BaseChunker):
         min_chunk_size: int = 2,
         min_characters_per_sentence: int = 12,
         threshold_step: float = 0.01,
+        delim: Union[str, List[str]] = [".", "!", "?", "\n"]
     ):
         """Initialize the SemanticChunker.
 
@@ -52,6 +54,7 @@ class SemanticChunker(BaseChunker):
             min_characters_per_sentence: Minimum number of characters per sentence
             min_chunk_size: Minimum number of tokens per chunk (and sentence, defaults to 2)
             threshold_step: Step size for similarity threshold calculation
+            delim: Delimiters to split sentences on
 
         Raises:
             ValueError: If parameters are invalid
@@ -72,6 +75,8 @@ class SemanticChunker(BaseChunker):
             raise ValueError("mode must be 'cumulative' or 'window'")
         if type(threshold) not in [str, float, int]:
             raise ValueError("threshold must be a string, float, or int")
+        if type(delim) not in [str, list]:
+            raise ValueError("delim must be a string or list of strings")
         elif type(threshold) == str and threshold not in ["auto"]:
             raise ValueError("threshold must be 'auto', 'smart', or 'percentile'")
         elif type(threshold) == float and (threshold < 0 or threshold > 1):
@@ -87,7 +92,9 @@ class SemanticChunker(BaseChunker):
         self.min_chunk_size = min_chunk_size
         self.min_characters_per_sentence = min_characters_per_sentence
         self.threshold_step = threshold_step
-
+        self.delim = delim
+        self.sep = "🦛"
+        
         if isinstance(threshold, float):
             self.similarity_threshold = threshold
             self.similarity_percentile = None
@@ -123,8 +130,6 @@ class SemanticChunker(BaseChunker):
     def _split_sentences(
         self,
         text: str,
-        delim: Union[str, List[str]] = [".", "!", "?", "\n"],
-        sep: str = "🦛",
     ) -> List[str]:
         """Fast sentence splitting while maintaining accuracy.
 
@@ -140,11 +145,11 @@ class SemanticChunker(BaseChunker):
 
         """
         t = text
-        for c in delim:
-            t = t.replace(c, c + sep)
+        for c in self.delim:
+            t = t.replace(c, c + self.sep)
 
         # Initial split
-        splits = [s for s in t.split(sep) if s != ""]
+        splits = [s for s in t.split(self.sep) if s != ""]
         # print(splits)
 
         # Combine short splits with previous sentence

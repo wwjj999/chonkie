@@ -31,6 +31,7 @@ class SentenceChunker(BaseChunker):
         min_sentences_per_chunk: int = 1,
         min_chunk_size: int = 2,
         use_approximate: bool = True,
+        delim: Union[str, List[str]] = [".", "!", "?", "\n"],
     ):
         """Initialize the SentenceChunker with configuration parameters.
 
@@ -64,6 +65,8 @@ class SentenceChunker(BaseChunker):
         self.min_sentences_per_chunk = min_sentences_per_chunk
         self.min_chunk_size = min_chunk_size
         self.use_approximate = use_approximate
+        self.delim = delim
+        self.sep = "🦛"
 
     # TODO: This is a older method of sentence splitting that uses Regex
     # but since Regex in python via re is super slooooow we use a different method
@@ -144,31 +147,24 @@ class SentenceChunker(BaseChunker):
 
     #     return sentences
 
-    def _split_sentences(
-        self,
-        text: str,
-        delim: Union[str, List[str]] = [".", "!", "?", "\n"],
-        sep: str = "🦛",
-    ) -> List[str]:
+    def _split_sentences(self, text: str) -> List[str]:
         """Fast sentence splitting while maintaining accuracy.
 
         This method is faster than using regex for sentence splitting and is more accurate than using the spaCy sentence tokenizer.
 
         Args:
             text: Input text to be split into sentences
-            delim: Delimiters to split sentences on
-            sep: Separator to use when splitting sentences
-
+            
         Returns:
             List of sentences
 
         """
         t = text
-        for c in delim:
-            t = t.replace(c, c + sep)
+        for c in self.delim:
+            t = t.replace(c, c + self.sep)
 
         # Initial split
-        splits = [s for s in t.split(sep) if s != ""]
+        splits = [s for s in t.split(self.sep) if s != ""]
         # print(splits)
 
         # Combine short splits with previous sentence

@@ -40,6 +40,7 @@ class SDPMChunker(SemanticChunker):
         min_chunk_size: int = 2,
         min_characters_per_sentence: int = 12,
         threshold_step: float = 0.01,
+        delim: Union[str, List[str]] = [".", "!", "?", "\n"],
         skip_window: int = 1,
     ):
         """Initialize the SDPMChunker.
@@ -54,6 +55,7 @@ class SDPMChunker(SemanticChunker):
             min_chunk_size: Minimum number of tokens per sentence
             min_characters_per_sentence: Minimum number of characters per sentence
             threshold_step: Step size for similarity threshold calculation
+            delim: Delimiters to split sentences on
             skip_window: Number of chunks to skip when looking for similarities
 
         """
@@ -67,6 +69,7 @@ class SDPMChunker(SemanticChunker):
             min_chunk_size=min_chunk_size,
             min_characters_per_sentence=min_characters_per_sentence,
             threshold_step=threshold_step,
+            delim=delim,
         )
         self.skip_window = skip_window
 
