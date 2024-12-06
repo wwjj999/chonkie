@@ -172,7 +172,7 @@ class BaseChunker(ABC):
         else:
             raise ValueError("Tokenizer backend not supported for token counting")
 
-    def _encode(self, text: str):
+    def _encode(self, text: str) -> List[int]:
         """Encode text using the backend tokenizer."""
         if self._tokenizer_backend == "transformers":
             return self.tokenizer.encode(text, add_special_tokens=False)
@@ -185,7 +185,7 @@ class BaseChunker(ABC):
                 f"Tokenizer backend {self._tokenizer_backend} not supported."
             )
 
-    def _encode_batch(self, texts: List[str]):
+    def _encode_batch(self, texts: List[str]) -> List[List[int]]:
         """Encode a batch of texts using the backend tokenizer."""
         if self._tokenizer_backend == "transformers":
             return self.tokenizer.batch_encode_plus(texts, add_special_tokens=False)[
