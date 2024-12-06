@@ -1,3 +1,4 @@
+"""Semantic Double Pass Merge chunking using sentence embeddings."""
 from typing import Any, List, Union
 
 from .semantic import SemanticChunk, SemanticChunker, Sentence
@@ -20,42 +21,54 @@ class SDPMChunker(SemanticChunker):
         skip_window: Number of chunks to skip when looking for similarities
         min_chunk_size: Minimum number of tokens per sentence
 
+    Methods:
+        chunk: Split text into chunks using the SDPM approach.
+        
     """
 
     def __init__(
         self,
         embedding_model: Union[str, Any] = "minishlab/potion-base-8M",
-        similarity_threshold: float = None,
-        similarity_percentile: float = None,
+        mode: str = "window",
+        threshold: Union[str, float, int] = "auto",
         chunk_size: int = 512,
-        initial_sentences: int = 1,
-        skip_window: int = 1,  # How many chunks to skip when looking for similarities
-        min_chunk_size: int = 2,  # Minimum number of tokens per sentence
+        similarity_window: int = 1,
+        min_sentences: int = 1,
+        min_chunk_size: int = 2,
+        min_characters_per_sentence: int = 12,
+        threshold_step: float = 0.01,
+        skip_window: int = 1,
     ):
         """Initialize the SDPMChunker.
 
         Args:
             embedding_model: Sentence embedding model to use
-            similarity_threshold: Minimum similarity score to consider sentences similar
-            similarity_percentile: Minimum similarity percentile to consider sentences similar
+            mode: Mode for grouping sentences, either "cumulative" or "window"
+            threshold: Threshold for semantic similarity (0-1) or percentile (1-100), defaults to "auto"
             chunk_size: Maximum token count for a chunk
-            initial_sentences: Number of sentences to consider for initial grouping
-            skip_window: Number of chunks to skip when looking for similarities
+            similarity_window: Number of sentences to consider for similarity threshold calculation
+            min_sentences: Minimum number of sentences per chunk
             min_chunk_size: Minimum number of tokens per sentence
+            min_characters_per_sentence: Minimum number of characters per sentence
+            threshold_step: Step size for similarity threshold calculation
+            skip_window: Number of chunks to skip when looking for similarities
 
         """
         super().__init__(
             embedding_model=embedding_model,
             chunk_size=chunk_size,
-            similarity_threshold=similarity_threshold,
-            similarity_percentile=similarity_percentile,
-            initial_sentences=initial_sentences,
+            mode=mode,
+            threshold=threshold,
+            similarity_window=similarity_window,
+            min_sentences=min_sentences,
             min_chunk_size=min_chunk_size,
+            min_characters_per_sentence=min_characters_per_sentence,
+            threshold_step=threshold_step,
         )
         self.skip_window = skip_window
 
     def _merge_groups(self, groups: List[List[Sentence]]) -> List[Sentence]:
-        """Merge the groups together"""
+        """Merge the groups together."""
         merged_group = []
         for group in groups:
             merged_group.extend(group)
@@ -118,8 +131,11 @@ class SDPMChunker(SemanticChunker):
 
         # Prepare sentences with precomputed information
         sentences = self._prepare_sentences(text)
-        if len(sentences) < self.initial_sentences:
+        if len(sentences) <= self.min_sentences:
             return [self._create_chunk(sentences)]
+        
+        # Calculate similarity threshold
+        self.similarity_threshold = self._calculate_similarity_threshold(sentences)
 
         # First pass: Group sentences by semantic similarity
         initial_groups = self._group_sentences(sentences)
@@ -133,14 +149,16 @@ class SDPMChunker(SemanticChunker):
         return chunks
 
     def __repr__(self) -> str:
-        threshold_info = (
-            f"similarity_threshold={self.similarity_threshold}"
-            if self.similarity_threshold is not None
-            else f"similarity_percentile={self.similarity_percentile}"
-        )
+        """Return a string representation of the SDPMChunker."""
         return (
-            f"SPDMChunker(chunk_size={self.chunk_size}, "
-            f"{threshold_info}, "
-            f"initial_sentences={self.initial_sentences}, "
+            f"SPDMChunker(embedding_model={self.embedding_model}, "
+            f"mode={self.mode}, "
+            f"threshold={self.threshold}, "
+            f"chunk_size={self.chunk_size}, "
+            f"similarity_window={self.similarity_window}, "
+            f"min_sentences={self.min_sentences}, "
+            f"min_chunk_size={self.min_chunk_size}, "
+            f"min_characters_per_sentence={self.min_characters_per_sentence}, "
+            f"threshold_step={self.threshold_step}, "
             f"skip_window={self.skip_window})"
         )
