@@ -111,7 +111,7 @@ class TokenChunker(BaseChunker):
             token_groups
         )  # decrease the time by decoding in one go (?)
 
-        chunks = self._process_batch(token_groups, token_counts, decoded_text)
+        chunks = self._create_chunks(chunk_texts, token_counts, decoded_text)
 
         return chunks
 
