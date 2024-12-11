@@ -16,7 +16,7 @@ class SentenceChunker(BaseChunker):
         chunk_overlap: Number of tokens to overlap between chunks
         min_sentences_per_chunk: Minimum number of sentences per chunk (defaults to 1)
         min_chunk_size: Minimum number of tokens per sentence (defaults to 2)
-        use_approximate: Whether to use approximate token counting (defaults to True)
+        approximate: Whether to use approximate token counting (defaults to True)
 
     Raises:
         ValueError: If parameters are invalid
@@ -32,6 +32,7 @@ class SentenceChunker(BaseChunker):
         min_chunk_size: int = 2,
         approximate: bool = True,
         delim: Union[str, List[str]] = [".", "!", "?", "\n"],
+        **kwargs
     ):
         """Initialize the SentenceChunker with configuration parameters.
 
@@ -266,7 +267,7 @@ class SentenceChunker(BaseChunker):
             positions.append(current_pos)
             current_pos += len(sent) + 1  # +1 for space/separator
 
-        if not self.use_approximate:
+        if not self.approximate:
             # Get accurate token counts in batch
             token_counts = self._get_token_counts(sentence_texts)
         else:
