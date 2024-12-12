@@ -102,13 +102,25 @@ class BaseChunker(ABC):
     def _get_tokenizer_counter(self) -> Callable[[str], int]:
         """Get token counter based on tokenizer backend."""
         if self._tokenizer_backend == "transformers":
-            return lambda x: len(self.tokenizer.encode(x, add_special_tokens=False))
+            return self._transformers_token_counter
         elif self._tokenizer_backend == "tokenizers":
-            return lambda x: len(self.tokenizer.encode(x, add_special_tokens=False).ids)
+            return self._tokenizers_token_counter
         elif self._tokenizer_backend == "tiktoken":
-            return lambda x: len(self.tokenizer.encode(x))
+            return self._tiktoken_token_counter
         else:
             raise ValueError("Tokenizer backend not supported for token counting")
+
+    def _transformers_token_counter(self, text: str) -> int:
+        """Token counter for transformers backend."""
+        return len(self.tokenizer.encode(text, add_special_tokens=False))
+
+    def _tokenizers_token_counter(self, text: str) -> int:
+        """Token counter for tokenizers backend."""
+        return len(self.tokenizer.encode(text, add_special_tokens=False).ids)
+
+    def _tiktoken_token_counter(self, text: str) -> int:
+        """Token counter for tiktoken backend."""
+        return len(self.tokenizer.encode(text))
 
     def _encode(self, text: str) -> List[int]:
         """Encode text using the backend tokenizer."""
