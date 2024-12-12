@@ -168,6 +168,15 @@ def test_word_chunker_indices_complex_markdown(sample_complex_markdown_text):
     chunks = chunker.chunk(sample_complex_markdown_text)
     verify_chunk_indices(chunks, sample_complex_markdown_text)
 
+def test_word_chunker_token_counts(tokenizer, sample_text):
+    """Test that the WordChunker correctly calculates token counts."""
+    chunker = WordChunker(tokenizer=tokenizer, chunk_size=512, chunk_overlap=128)
+    chunks = chunker.chunk(sample_text)
+    assert all([chunk.token_count > 0 for chunk in chunks]), "All chunks must have a positive token count"
+    assert all([chunk.token_count <= 512 for chunk in chunks]), "All chunks must have a token count less than or equal to 512"  
+
+    token_counts = [len(tokenizer.encode(chunk.text)) for chunk in chunks]
+    assert all([chunk.token_count == token_count for chunk, token_count in zip(chunks, token_counts)]), "All chunks must have a token count equal to the length of the encoded text"
 
 if __name__ == "__main__":
     pytest.main()

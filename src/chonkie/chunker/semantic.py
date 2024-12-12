@@ -38,7 +38,8 @@ class SemanticChunker(BaseChunker):
         min_chunk_size: int = 2,
         min_characters_per_sentence: int = 12,
         threshold_step: float = 0.01,
-        delim: Union[str, List[str]] = [".", "!", "?", "\n"]
+        delim: Union[str, List[str]] = [".", "!", "?", "\n"],
+        **kwargs
     ):
         """Initialize the SemanticChunker.
 
@@ -110,7 +111,7 @@ class SemanticChunker(BaseChunker):
         elif isinstance(embedding_model, str):
             from chonkie.embeddings.auto import AutoEmbeddings
 
-            self.embedding_model = AutoEmbeddings.get_embeddings(embedding_model)
+            self.embedding_model = AutoEmbeddings.get_embeddings(embedding_model, **kwargs)
         else:
             raise ValueError(
                 "embedding_model must be a string or BaseEmbeddings instance"
