@@ -12,6 +12,7 @@ while respecting a maximum token length. These tests verify that the chunker:
 """
 
 from typing import List
+from datasets import load_dataset
 
 import pytest
 from tokenizers import Tokenizer
@@ -31,6 +32,22 @@ def sample_text():
     """Fixture that returns a sample text for testing the WordChunker."""
     text = """The process of text chunking in RAG applications represents a delicate balance between competing requirements. On one side, we have the need for semantic coherence – ensuring that each chunk maintains meaningful context that can be understood and processed independently. On the other, we must optimize for information density, ensuring that each chunk carries sufficient signal without excessive noise that might impede retrieval accuracy. In this post, we explore the challenges of text chunking in RAG applications and propose a novel approach that leverages recent advances in transformer-based language models to achieve a more effective balance between these competing requirements."""
     return text
+
+
+@pytest.fixture
+def sample_batch():
+    """Fixture that returns a sample batch of texts for testing the TokenChunker.
+
+    This fixture loads a small dataset of educational texts from the Hugging Face
+    datasets library. It's useful for testing batch processing capabilities and
+    performance with real-world data.
+
+    Returns:
+        List[str]: A list of text samples from the dataset.
+
+    """
+    ds = load_dataset("bhavnicksm/fineweb-edu-micro", split="train")
+    return list(ds["text"])
 
 
 @pytest.fixture
@@ -105,6 +122,26 @@ def test_word_chunker_single_chunk_text(tokenizer):
     assert len(chunks) == 1, print(f"Chunks: {chunks}")
     assert chunks[0].token_count == 6
     assert chunks[0].text == "Hello, how are you?"
+
+
+def test_word_chunker_batch_chunking(tokenizer, sample_batch):
+    """Test that the WordChunker can chunk a batch of texts."""
+
+    # this is to avoid the following
+    # DeprecationWarning: This process (pid=<SOME-PID>) is multi-threaded,
+    # use of fork() may lead to deadlocks in the child.
+    import multiprocessing
+
+    multiprocessing.set_start_method("spawn", force=True)
+
+    chunker = WordChunker(tokenizer=tokenizer, chunk_size=512, chunk_overlap=128)
+    chunks = chunker.chunk_batch(sample_batch)
+
+    assert len(chunks) == len(sample_batch)
+    assert all([len(text_chunks) > 0 for text_chunks in chunks])
+    assert all(
+        [type(chunk) is Chunk for text_chunks in chunks for chunk in text_chunks]
+    )
 
 
 def test_word_chunker_repr(tokenizer):
