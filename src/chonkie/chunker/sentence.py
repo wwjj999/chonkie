@@ -353,7 +353,7 @@ class SentenceChunker(BaseChunker):
 
             # Get candidate sentences and verify actual token count
             chunk_sentences = sentences[pos:split_idx]
-            chunk_text = " ".join(s.text for s in chunk_sentences)
+            chunk_text = "".join(s.text for s in chunk_sentences)
             actual = len(self._encode(chunk_text))
 
             # Given the actual token_count and the estimate, get a feedback value for the next loop
@@ -367,7 +367,7 @@ class SentenceChunker(BaseChunker):
             ):
                 split_idx -= 1
                 chunk_sentences = sentences[pos:split_idx]
-                chunk_text = " ".join(s.text for s in chunk_sentences)
+                chunk_text = "".join(s.text for s in chunk_sentences)
                 actual = len(self._encode(chunk_text))
 
             chunks.append(self._create_chunk(chunk_sentences, actual))
