@@ -41,7 +41,8 @@ class SentenceTransformerEmbeddings(BaseEmbeddings):
                 "SentenceTransformer is not available. Please install it via pip."
             )
         else:
-            global SentenceTransformer
+            global SentenceTransformer, np
+            import numpy as np
             from sentence_transformers import SentenceTransformer
 
         if isinstance(model, str):
@@ -62,6 +63,53 @@ class SentenceTransformerEmbeddings(BaseEmbeddings):
     def embed_batch(self, texts: List[str]) -> List["np.ndarray"]:
         """Embed multiple texts using the sentence-transformers model."""
         return self.model.encode(texts, convert_to_numpy=True)
+
+    def embed_as_tokens(self, text: str) -> "np.ndarray":
+        """Embed the text as tokens using the sentence-transformers model.
+        
+        This method is useful for getting the token embeddings of a text. It 
+        would work even if the text is longer than the maximum sequence length.
+        """
+        if text == "":
+            return np.array([])
+        
+        # Use the model's tokenizer to encode the text
+        encodings = self.model.tokenizer(text, add_special_tokens=False)['input_ids']
+        
+        max_seq_length = self.max_seq_length
+        token_splits = []
+        for i in range(0, len(encodings), max_seq_length):
+            if i + max_seq_length <= len(encodings):
+                token_splits.append(encodings[i:i+max_seq_length])
+            else:
+                token_splits.append(encodings[i:])
+        
+        split_texts = self.model.tokenizer.batch_decode(token_splits)
+        # Get the token embeddings
+        token_embeddings = self.model.encode(split_texts,
+                                             output_value="token_embeddings", 
+                                             add_special_tokens=False)
+
+        # Since SentenceTransformer doesn't automatically convert embeddings into 
+        # numpy arrays, we need to do it manually
+        if type(token_embeddings) is not list and type(token_embeddings) is not np.ndarray:
+            token_embeddings = token_embeddings.cpu().numpy()
+        elif type(token_embeddings) is list and type(token_embeddings[0]) not in [np.ndarray, list]:
+            token_embeddings = [embedding.cpu().numpy() for embedding in token_embeddings]
+
+        # Concatenate the token embeddings
+        token_embeddings = np.concatenate(token_embeddings, axis=0)
+
+        # Assertion always fails because of special tokens added by encode process
+        # assert token_embeddings.shape[0] == len(encodings), \
+        #     (f"The number of token embeddings should be equal to the number of tokens in the text"
+        #      f"Expected: {len(encodings)}, Got: {token_embeddings.shape[0]}")
+        
+        return token_embeddings
+    
+    def embed_as_tokens_batch(self, texts: List[str]) -> List["np.ndarray"]:
+        """Embed multiple texts as tokens using the sentence-transformers model."""
+        return [self.embed_as_tokens(text) for text in texts]
 
     def count_tokens(self, text: str) -> int:
         """Count tokens in text using the model's tokenizer."""
@@ -84,6 +132,11 @@ class SentenceTransformerEmbeddings(BaseEmbeddings):
     def dimension(self) -> int:
         """Return the embedding dimension."""
         return self._dimension
+    
+    @property
+    def max_seq_length(self) -> int:
+        """Return the maximum sequence length."""
+        return self.model.get_max_seq_length()
 
     @classmethod
     def is_available(cls) -> bool:

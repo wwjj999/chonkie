@@ -88,6 +88,7 @@ Chonkie provides several chunkers to help you split your text efficiently for RA
 - **SentenceChunker**: Splits text into chunks based on sentences.
 - **SemanticChunker**: Splits text into chunks based on semantic similarity.
 - **SDPMChunker**: Splits text using a Semantic Double-Pass Merge approach.
+- **LateChunker (experimental)**: Embeds text and then splits it to have better chunk embeddings.
 
 More on these methods and the approaches taken inside the [DOCS](https://docs.chonkie.ai)
 
