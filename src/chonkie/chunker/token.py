@@ -48,6 +48,32 @@ class TokenChunker(BaseChunker):
             if isinstance(chunk_overlap, int)
             else int(chunk_overlap * chunk_size)
         )
+    
+    def _create_chunks(
+        self,
+        chunk_texts: List[str],
+        token_counts: List[int],
+        decoded_text: str,
+    ) -> List[Chunk]:
+        """Create chunks from a list of texts."""
+        # package everything as Chunk objects and send out the result
+        chunks = []
+        current_index = 0
+        for chunk_text, token_count in zip(chunk_texts, token_counts):
+            start_index = decoded_text.find(
+                chunk_text, current_index
+            )  # Find needs to be run every single time because of unknown overlap length
+            end_index = start_index + len(chunk_text)
+            chunks.append(
+                Chunk(
+                    text=chunk_text,
+                    start_index=start_index,
+                    end_index=end_index,
+                    token_count=token_count,
+                )
+            )
+            current_index = end_index
+        return chunks
 
     def chunk(self, text: str) -> List[Chunk]:
         """Split text into overlapping chunks of specified token size.
@@ -85,21 +111,7 @@ class TokenChunker(BaseChunker):
             token_groups
         )  # decrease the time by decoding in one go (?)
 
-        # package everything as Chunk objects and send out the result
-        chunks = []
-        for chunk_text, token_count in zip(chunk_texts, token_counts):
-            start_index = decoded_text.find(
-                chunk_text
-            )  # Find needs to be run every single time because of unknown overlap length
-            end_index = start_index + len(chunk_text)
-            chunks.append(
-                Chunk(
-                    text=chunk_text,
-                    start_index=start_index,
-                    end_index=end_index,
-                    token_count=token_count,
-                )
-            )
+        chunks = self._create_chunks(chunk_texts, token_counts, decoded_text)
 
         return chunks
 
