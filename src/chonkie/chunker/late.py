@@ -404,6 +404,13 @@ class LateChunker(BaseChunker):
         chunks = self._get_chunks(text)
         token_counts = [chunk.token_count for chunk in chunks]
 
+        # NOTE: A known issue with the SentenceTransformerEmbeddings is that it doesn't
+        # allow getting the token embeddings without adding special tokens. So the token
+        # embeddings are not exactly the same as the token embeddings of the text
+        # Additionally, token counts are not exactly the same as the token counts of the text
+        # because the tokenizer encodes the text differently if the text is split into chunks
+
+
         # Get the token embeddings for the entire text
         token_embeddings = self.embedding_model.embed_as_tokens(text)  # Shape: (n_tokens, embedding_dim)
         chunk_token_embeddings = self._embedding_split(token_embeddings, token_counts)  # Shape: (n_chunks, n_tokens, embedding_dim)
