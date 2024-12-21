@@ -1,9 +1,12 @@
 """Class definition for Late Chunking."""
 
+import importlib
+from bisect import bisect_left
+from itertools import accumulate
 from typing import TYPE_CHECKING, List, Union
 
-from chonkie.embeddings import BaseEmbeddings
-from chonkie.types import LateChunk
+from chonkie.embeddings import BaseEmbeddings, SentenceTransformerEmbeddings
+from chonkie.types import LateChunk, Sentence
 
 from .base import BaseChunker
 
@@ -39,6 +42,7 @@ class LateChunker(BaseChunker):
                  chunk_size: int = 512, 
                  min_sentences_per_chunk: int = 1, 
                  min_characters_per_sentence: int = 12,
+                 approximate: bool = True,
                  delim: Union[str, List[str]] = ['.', '!', '?', '\n'],
                  **kwargs
                  ) -> None:
@@ -61,6 +65,7 @@ class LateChunker(BaseChunker):
         self.chunk_size = chunk_size
         self.min_sentences_per_chunk = min_sentences_per_chunk
         self.min_characters_per_sentence = min_characters_per_sentence
+        self.approximate = approximate
         self.delim = delim
         self.sep = '🦛'
 
@@ -81,9 +86,17 @@ class LateChunker(BaseChunker):
         if self.embedding_model is None:
             raise ImportError(
                 "embedding_model is not a valid embedding model",
-                "Please install the `semantic` extra to use this feature"
+                "Please install the `st` extra to use this feature"
             )
         
+        if type(self.embedding_model) != SentenceTransformerEmbeddings:
+            raise ValueError("LateChunker (currently) only works with SentenceTransformerEmbeddings", 
+                             "Please install the `st` extra to use this feature")
+        
+        # Import numpy here as to not import it when it's not needed
+        if importlib.util.find_spec('numpy') is not None:
+            global np
+            import numpy as np
 
         # Keeping the tokenizer the same as the sentence model is important 
         # for the semantic meaning to be calculated properly
@@ -153,45 +166,6 @@ class LateChunker(BaseChunker):
         chunks = self._create_token_chunks(chunk_texts, token_counts, decoded_text)
 
         return chunks
-
-    def _split_sentences(self,
-                         text: str, 
-                         ) -> List[str]:
-        """Fast sentence splitting while maintaining accuracy.
-
-        This method is faster than using regex for sentence splitting and is more accurate than using the spaCy sentence tokenizer.
-
-        Args:
-            text: Input text to be split into sentences
-            
-        Returns:
-            List of sentences
-
-        """
-        t = text
-        for c in self.delim:
-            t = t.replace(c, c + self.sep)
-
-        # Initial split
-        splits = [s for s in t.split(self.sep) if s != ""]
-        # print(splits)
-
-        # Combine short splits with previous sentence
-        sentences = []
-        current = ""
-
-        for s in splits:
-            if len(s.strip()) < self.min_characters_in_sentence:
-                current += s
-            else:
-                if current:
-                    sentences.append(current)
-                current = s
-
-        if current:
-            sentences.append(current)
-
-        return sentences
 
 
     def _split_sentences(
@@ -266,9 +240,136 @@ class LateChunker(BaseChunker):
         feedback = 1 - ((estimate - actual) / estimate)
         return feedback
     
+    def _prepare_sentences(self, text: str) -> List[Sentence]:
+        """Split text into sentences and calculate token counts for each sentence.
+
+        Args:
+            text: Input text to be split into sentences
+
+        Returns:
+            List of Sentence objects
+
+        """
+        # Split text into sentences
+        sentence_texts = self._split_sentences(text)
+        if not sentence_texts:
+            return []
+
+        # Calculate positions once
+        positions = []
+        current_pos = 0
+        for sent in sentence_texts:
+            positions.append(current_pos)
+            current_pos += len(sent)  # No +1 space because sentences are already separated by spaces
+
+        if not self.approximate:
+            # Get accurate token counts in batch
+            token_counts = self._get_token_counts(sentence_texts)
+        else:
+            # Estimate token counts using character length
+            token_counts = self._estimate_token_counts(sentence_texts)
+
+        # Create sentence objects
+        return [
+            Sentence(
+                text=sent, start_index=pos, end_index=pos + len(sent), token_count=count
+            )
+            for sent, pos, count in zip(sentence_texts, positions, token_counts)
+        ]
+    
+    def _create_sentence_chunk(self, sentences: List[Sentence], token_count: int) -> LateChunk:
+        """Create a chunk from a list of sentences.
+
+        Args:
+            sentences: List of sentences to create chunk from
+            token_count: Total token count for the chunk
+
+        Returns:
+            Chunk object
+
+        """
+        chunk_text = "".join([sentence.text for sentence in sentences])
+        return LateChunk(
+            text=chunk_text,
+            start_index=sentences[0].start_index,
+            end_index=sentences[-1].end_index,
+            token_count=token_count,
+            sentences=sentences,
+        )
+
     def _sentence_chunk(self, text: str) -> List[LateChunk]:
         """Chunk the text into sentences."""
-        pass
+        """Split text into overlapping chunks based on sentences while respecting token limits.
+
+        Args:
+            text: Input text to be chunked
+
+        Returns:
+            List of Chunk objects containing the chunked text and metadata
+
+        """
+        if not text.strip():
+            return []
+
+        # Get prepared sentences with token counts
+        sentences = self._prepare_sentences(text)  # 28mus
+        if not sentences:
+            return []
+
+        # Pre-calculate cumulative token counts for bisect
+        # Add 1 token for spaces between sentences
+        token_sums = list(
+            accumulate(
+                [s.token_count for s in sentences], lambda a, b: a + b, initial=0
+            )
+        )
+
+        chunks = []
+        feedback = 1.0
+        pos = 0
+
+        while pos < len(sentences):
+            # use updated feedback on the token sums
+            token_sums = [int(s * feedback) for s in token_sums]
+
+            # Use bisect_left to find initial split point
+            target_tokens = token_sums[pos] + self.chunk_size
+            split_idx = bisect_left(token_sums, target_tokens) - 1
+            split_idx = min(split_idx, len(sentences))
+
+            # Ensure we include at least one sentence beyond pos
+            split_idx = max(split_idx, pos + 1)
+
+            # Handle minimum sentences requirement
+            if split_idx - pos < self.min_sentences_per_chunk:
+                split_idx = pos + self.min_sentences_per_chunk
+
+            # Get the estimated token count
+            estimate = token_sums[split_idx] - token_sums[pos]
+
+            # Get candidate sentences and verify actual token count
+            chunk_sentences = sentences[pos:split_idx]
+            chunk_text = "".join(s.text for s in chunk_sentences)
+            actual = len(self._encode(chunk_text))
+
+            # Given the actual token_count and the estimate, get a feedback value for the next loop
+            feedback = self._get_feedback(estimate, actual)
+            # print(f"Estimate: {estimate} Actual: {actual} feedback: {feedback}")
+
+            # Back off one sentence at a time if we exceeded chunk size
+            while (
+                actual > self.chunk_size
+                and len(chunk_sentences) > self.min_sentences_per_chunk
+            ):
+                split_idx -= 1
+                chunk_sentences = sentences[pos:split_idx]
+                chunk_text = "".join(s.text for s in chunk_sentences)
+                actual = len(self._encode(chunk_text))
+
+            chunks.append(self._create_sentence_chunk(chunk_sentences, actual))
+            pos = split_idx
+
+        return chunks
 
     def _get_chunks(self, text: str) -> List[LateChunk]:
         """Get chunks from the text."""
@@ -279,14 +380,22 @@ class LateChunker(BaseChunker):
         else:
             raise ValueError(f"Unknown mode: {self.mode}")
     
-    # TODO: Add the embedding part here, such that we can get token embeddings
-    # for the entire text, and then use the mean of the embeddings to get the chunk embeddings
     def _embedding_split(self, token_embeddings: "np.ndarray", token_counts: List[int]) -> List["np.ndarray"]:
         """Split the embedding into chunks."""
-        pass
-
+        embedding_splits = []
+        current_index = 0
+        for i, token_count in enumerate(token_counts):
+            if i != len(token_counts) - 1:
+                embedding_splits.append(token_embeddings[current_index:current_index+token_count])
+                current_index += token_count
+            else:
+                embedding_splits.append(token_embeddings[current_index:])
+        return embedding_splits
+        
     def _mean_pool(self, embeddings: "np.ndarray") -> "np.ndarray":
         """Mean pool the embeddings."""
+        # Assuming that numpy is installed and imported as np
+        # which is the case for the SentenceTransformerEmbeddings
         return np.mean(embeddings, axis=0)
 
     def chunk(self, text: str) -> List[LateChunk]:
@@ -296,7 +405,7 @@ class LateChunker(BaseChunker):
         token_counts = [chunk.token_count for chunk in chunks]
 
         # Get the token embeddings for the entire text
-        token_embeddings = ...   # Shape: (n_tokens, embedding_dim)
+        token_embeddings = self.embedding_model.embed_as_tokens(text)  # Shape: (n_tokens, embedding_dim)
         chunk_token_embeddings = self._embedding_split(token_embeddings, token_counts)  # Shape: (n_chunks, n_tokens, embedding_dim)
 
         # Get the chunk embeddings by averaging the token embeddings
