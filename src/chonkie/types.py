@@ -171,7 +171,7 @@ class SentenceChunk(Chunk):
 class SemanticSentence(Sentence):
     """Dataclass representing a semantic sentence with metadata.
 
-    All attributes are read-only via slots for performance reasons.
+    This class is used to represent a sentence with an embedding. 
 
     Attributes:
         text: The text content of the sentence
@@ -189,8 +189,6 @@ class SemanticSentence(Sentence):
 class SemanticChunk(SentenceChunk):
     """SemanticChunk dataclass representing a semantic chunk with metadata.
 
-    All attributes are read-only via slots for performance reasons.
-
     Attributes:
         text: The text content of the chunk
         start_index: The starting index of the chunk in the original text
@@ -201,3 +199,39 @@ class SemanticChunk(SentenceChunk):
     """
 
     sentences: List[SemanticSentence] = field(default_factory=list)
+
+@dataclass
+class LateSentence(Sentence):
+    """LateSentence dataclass representing a sentence with an embedding.
+
+    This class is used to represent a sentence with an embedding. 
+
+    Attributes:
+        text: The text content of the sentence
+        start_index: The starting index of the sentence in the original text
+        end_index: The ending index of the sentence in the original text
+        token_count: The number of tokens in the sentence
+        embedding: The sentence embedding
+
+    """
+
+    embedding: Optional["np.ndarray"] = field(default=None)
+
+
+@dataclass
+class LateChunk(Chunk):
+    """LateChunk dataclass representing a chunk with an embedding.
+
+    This class is used to represent a chunk with an embedding. 
+
+    Attributes:
+        text: The text content of the chunk
+        start_index: The starting index of the chunk in the original text
+        end_index: The ending index of the chunk in the original text
+        token_count: The number of tokens in the chunk
+        embedding: The chunk embedding
+
+    """
+
+    sentences: List[LateSentence] = field(default_factory=list)
+    embedding: Optional["np.ndarray"] = field(default=None)
