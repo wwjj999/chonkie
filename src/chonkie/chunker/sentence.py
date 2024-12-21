@@ -29,7 +29,7 @@ class SentenceChunker(BaseChunker):
         chunk_size: int = 512,
         chunk_overlap: int = 128,
         min_sentences_per_chunk: int = 1,
-        min_chunk_size: int = 2,
+        min_characters_per_sentence: int = 12,
         approximate: bool = True,
         delim: Union[str, List[str]] = [".", "!", "?", "\n"],
         **kwargs
@@ -44,8 +44,9 @@ class SentenceChunker(BaseChunker):
             chunk_overlap: Number of tokens to overlap between chunks
             min_sentences_per_chunk: Minimum number of sentences per chunk (defaults to 1)
             min_chunk_size: Minimum number of tokens per sentence (defaults to 2)
+            min_characters_per_sentence: Minimum number of characters per sentence
             approximate: Whether to use approximate token counting (defaults to True)
-
+            delim: Delimiters to split sentences on
         Raises:
             ValueError: If parameters are invalid
 
@@ -58,13 +59,13 @@ class SentenceChunker(BaseChunker):
             raise ValueError("chunk_overlap must be less than chunk_size")
         if min_sentences_per_chunk < 1:
             raise ValueError("min_sentences_per_chunk must be at least 1")
-        if min_chunk_size < 1:
-            raise ValueError("min_chunk_size must be at least 1")
+        if min_characters_per_sentence < 1:
+            raise ValueError("min_characters_per_sentence must be at least 1")
 
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
         self.min_sentences_per_chunk = min_sentences_per_chunk
-        self.min_chunk_size = min_chunk_size
+        self.min_characters_per_sentence = min_characters_per_sentence
         self.approximate = approximate
         self.delim = delim
         self.sep = "🦛"
@@ -173,7 +174,7 @@ class SentenceChunker(BaseChunker):
         current = ""
 
         for s in splits:
-            if len(s.strip()) < (self.min_chunk_size * 6):
+            if len(s.strip()) < self.min_characters_per_sentence:
                 current += s
             else:
                 if current:
@@ -203,9 +204,9 @@ class SentenceChunker(BaseChunker):
         """Estimate token count using character length."""
         CHARS_PER_TOKEN = 6.0  # Avg. char per token for llama3 is b/w 6-7
         if type(text) is str:
-            return max(1, int(len(text) / CHARS_PER_TOKEN))
+            return max(1, len(text) // CHARS_PER_TOKEN)
         elif type(text) is list and type(text[0]) is str:
-            return [max(1, int(len(t) / CHARS_PER_TOKEN)) for t in text]
+            return [max(1, len(t) // CHARS_PER_TOKEN) for t in text]
         else:
             raise ValueError(
                 f"Unknown type passed to _estimate_token_count: {type(text)}"
@@ -213,7 +214,8 @@ class SentenceChunker(BaseChunker):
 
     def _get_feedback(self, estimate: int, actual: int) -> float:
         """Validate against the actual token counts and correct the estimates."""
-        feedback = 1 - ((estimate - actual) / estimate)
+        estimate, actual = max(1, estimate), max(1, actual)
+        feedback = max(0.01, 1 - ((estimate - actual) / estimate))
         return feedback
 
     def _prepare_sentences(self, text: str) -> List[Sentence]:
