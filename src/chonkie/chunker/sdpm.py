@@ -42,6 +42,7 @@ class SDPMChunker(SemanticChunker):
         threshold_step: float = 0.01,
         delim: Union[str, List[str]] = [".", "!", "?", "\n"],
         skip_window: int = 1,
+        **kwargs
     ):
         """Initialize the SDPMChunker.
 
@@ -70,6 +71,7 @@ class SDPMChunker(SemanticChunker):
             min_characters_per_sentence=min_characters_per_sentence,
             threshold_step=threshold_step,
             delim=delim,
+            **kwargs
         )
         self.skip_window = skip_window
 

@@ -51,21 +51,26 @@ class WordChunker(BaseChunker):
         return words
 
     def _create_chunk(
-        self, words: List[str], text: str, token_count: int
+        self,
+        words: List[str],
+        text: str,
+        token_count: int,
+        current_index: int = 0,
     ) -> Tuple[Chunk, int]:
         """Create a chunk from a list of words.
 
         Args:
             words: List of words to create chunk from
-            start_idx: Starting index in original text
-            end_idx: Ending index in original text
+            text: The original text
+            token_count: Number of tokens in the chunk
+            current_index: The index of the first token in the chunk
 
         Returns:
             Tuple of (Chunk object, number of tokens in chunk)
 
         """
         chunk_text = "".join(words)
-        start_index = text.find(chunk_text)
+        start_index = text.find(chunk_text, current_index)
         return Chunk(
             text=chunk_text,
             start_index=start_index,
@@ -110,19 +115,23 @@ class WordChunker(BaseChunker):
         current_chunk = []
         current_chunk_length = 0
 
+        current_index = 0
+
         for i, (word, length) in enumerate(zip(words, lengths)):
             if current_chunk_length + length <= self.chunk_size:
                 current_chunk.append(word)
                 current_chunk_length += length
             else:
-                chunk = self._create_chunk(current_chunk, text, current_chunk_length)
+                chunk = self._create_chunk(
+                    current_chunk,
+                    text,
+                    current_chunk_length,
+                    current_index,
+                )
                 chunks.append(chunk)
-
                 # update the current_chunk and previous chunk
                 previous_chunk_length = current_chunk_length
-
-                current_chunk = []
-                current_chunk_length = 0
+                current_index = chunk.end_index
 
                 overlap = []
                 overlap_length = 0
