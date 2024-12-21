@@ -1,10 +1,11 @@
 """Class definition for Late Chunking."""
 
-from typing import TYPE_CHECKING, Any, Callable, List, Union
-from .base import BaseChunker
-from chonkie.types import LateChunk, LateSentence
-from chonkie.embeddings import BaseEmbeddings
+from typing import TYPE_CHECKING, List, Union
 
+from chonkie.embeddings import BaseEmbeddings
+from chonkie.types import LateChunk
+
+from .base import BaseChunker
 
 if TYPE_CHECKING:
     import numpy as np
