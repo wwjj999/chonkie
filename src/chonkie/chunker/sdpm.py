@@ -58,6 +58,7 @@ class SDPMChunker(SemanticChunker):
             threshold_step: Step size for similarity threshold calculation
             delim: Delimiters to split sentences on
             skip_window: Number of chunks to skip when looking for similarities
+            **kwargs: Additional keyword arguments
 
         """
         super().__init__(
