@@ -56,6 +56,7 @@ class SemanticChunker(BaseChunker):
             min_chunk_size: Minimum number of tokens per chunk (and sentence, defaults to 2)
             threshold_step: Step size for similarity threshold calculation
             delim: Delimiters to split sentences on
+            **kwargs: Additional keyword arguments
 
         Raises:
             ValueError: If parameters are invalid
