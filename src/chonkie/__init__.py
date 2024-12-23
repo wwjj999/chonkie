@@ -7,6 +7,7 @@ from .chunker import (
     SentenceChunker,
     TokenChunker,
     WordChunker,
+    LateChunker,
 )
 from .embeddings import (
     AutoEmbeddings,
@@ -26,6 +27,7 @@ from .types import (
     SemanticSentence,
     Sentence,
     SentenceChunk,
+    LateChunk,
 )
 
 __version__ = "0.3.0"
@@ -47,6 +49,7 @@ __all__ += [
     "SemanticChunk",
     "Sentence",
     "SemanticSentence",
+    "LateChunk",
 ]
 
 # Add all chunker classes to __all__
@@ -57,6 +60,7 @@ __all__ += [
     "SentenceChunker",
     "SemanticChunker",
     "SDPMChunker",
+    "LateChunker",
 ]
 
 # Add all embeddings classes to __all__
