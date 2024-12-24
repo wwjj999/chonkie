@@ -36,17 +36,7 @@ class EmbeddingsRegistry:
             name: Unique identifier for this implementation
             embedding_cls: The embeddings class to register
             pattern: Optional regex pattern string or compiled pattern
-
-        Examples:
-            # Register with exact name
-            EmbeddingsRegistry.register("sentence-transformers", SentenceTransformerEmbeddings)
-
-            # Register with pattern for OpenAI
-            EmbeddingsRegistry.register(
-                "openai",
-                OpenAIEmbeddings,
-                pattern=r"^openai://.+|^text-embedding-ada-\d+$"
-            )
+            supported_types: Optional list of types that the embeddings class supports
 
         """
         if not issubclass(embedding_cls, BaseEmbeddings):
