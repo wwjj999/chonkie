@@ -136,7 +136,7 @@ class OverlapRefinery(BaseRefinery):
         if not hasattr(self, "tokenizer"):
             return None
 
-        # Take 6x context_size characters to ensure enough tokens
+        # Take _AVG_CHAR_PER_TOKEN * context_size characters to ensure enough tokens
         char_window = min(len(chunk.text), int(self.context_size * self._AVG_CHAR_PER_TOKEN))
         text_portion = chunk.text[-char_window:]
 
@@ -170,7 +170,7 @@ class OverlapRefinery(BaseRefinery):
         if not hasattr(self, "tokenizer"):
             return None
 
-        # Take 6x context_size characters to ensure enough tokens
+        # Take _AVG_CHAR_PER_TOKEN * context_size characters to ensure enough tokens
         char_window = min(len(chunk.text), int(self.context_size * self._AVG_CHAR_PER_TOKEN))
         text_portion = chunk.text[:char_window]
 
