@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Union
 
 from chonkie.types import Chunk
 
@@ -23,6 +23,10 @@ class BaseRefinery(ABC):
     def refine(self, chunks: List[Chunk]) -> List[Chunk]:
         """Refine the given list of chunks and return the refined list."""
         pass
+    
+    def refine_batch(self, chunks_batch: List[List[Chunk]]) -> List[List[Chunk]]:
+        """Refine the given list of chunks and return the refined list."""
+        return [self.refine(chunks) for chunks in chunks_batch]
 
     @classmethod
     @abstractmethod
@@ -34,6 +38,29 @@ class BaseRefinery(ABC):
         """Representation of the Refinery."""
         return f"{self.__class__.__name__}(context_size={self.context_size})"
 
-    def __call__(self, chunks: List[Chunk]) -> List[Chunk]:
-        """Call the Refinery."""
-        return self.refine(chunks)
+    def __call__(self, chunks: Union[List[Chunk], List[List[Chunk]]]) -> Union[List[Chunk], List[List[Chunk]]]:
+        """Call the Refinery.
+        
+        Args:
+            chunks: Either a list of Chunks or a list of lists of Chunks
+            
+        Returns:
+            Refined chunks in the same format as input
+            
+        Raises:
+            ValueError: If input type is not a list of Chunks or list of lists of Chunks
+        
+        """
+        # If chunks is not a list or is empty, return chunks
+        if not isinstance(chunks, list) or not chunks:
+            return chunks
+        
+        # Check if it's a list of Chunks
+        if isinstance(chunks[0], Chunk):
+            return self.refine(chunks)
+        
+        # Check if it's a list of lists of Chunks
+        if isinstance(chunks[0], list) and chunks[0] and isinstance(chunks[0][0], Chunk):
+            return self.refine_batch(chunks)
+        
+        raise ValueError("Invalid input type for Refinery: must be List[Chunk] or List[List[Chunk]]")

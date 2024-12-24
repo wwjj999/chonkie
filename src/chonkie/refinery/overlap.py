@@ -50,6 +50,9 @@ class OverlapRefinery(BaseRefinery):
         else:
             # Without tokenizer, must use approximate method
             self.approximate = True
+        
+        # Average number of characters per token
+        self._AVG_CHAR_PER_TOKEN = 7
 
     def _get_refined_chunks(
         self, chunks: List[Chunk], inplace: bool = True
@@ -168,7 +171,7 @@ class OverlapRefinery(BaseRefinery):
             return None
 
         # Take 6x context_size characters to ensure enough tokens
-        char_window = min(len(chunk.text), self.context_size * 6)
+        char_window = min(len(chunk.text), self.context_size * self._AVG_CHAR_PER_TOKEN)
         text_portion = chunk.text[:char_window]
 
         # Get exact token boundaries
