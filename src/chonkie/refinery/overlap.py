@@ -171,7 +171,7 @@ class OverlapRefinery(BaseRefinery):
             return None
 
         # Take 6x context_size characters to ensure enough tokens
-        char_window = min(len(chunk.text), self.context_size * self._AVG_CHAR_PER_TOKEN)
+        char_window = min(len(chunk.text), int(self.context_size * self._AVG_CHAR_PER_TOKEN))
         text_portion = chunk.text[:char_window]
 
         # Get exact token boundaries
