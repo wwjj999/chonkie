@@ -359,7 +359,7 @@ class RecursiveChunker(BaseChunker):
 
     def chunk(self, text: str) -> List[Chunk]:
         """Chunk the text."""
-        return self._recursive_chunk(text)
+        return self._recursive_chunk(text, level=0, full_text=text)
 
 
     def __repr__(self) -> str:
