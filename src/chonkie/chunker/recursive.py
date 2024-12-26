@@ -21,6 +21,12 @@ class RecursiveLevel:
     delimiters: Union[List[str], str, None] = None
     whitespace: bool = False
 
+    def __post_init__(self):
+        """Post-initialize the recursive level."""
+        if self.delimiters is not None and self.whitespace:
+            raise ValueError("Cannot have both delimiters and whitespace. "
+                             "Use two separate levels instead, one for whitespace and one for delimiters.")
+
     def __repr__(self) -> str:
         """Get a string representation of the recursive level."""
         return f"RecursiveLevel(delimiters={self.delimiters}, whitespace={self.whitespace})"
@@ -45,14 +51,41 @@ class RecursiveRules:
             # Second level should be sentences
             sentence_level = RecursiveLevel(delimiters=[".", "?", "!"],
                                             whitespace=False)
-            # Third level should be words
+            
+            # Third level can be sub-sentences, like '...', ',', ';', ':', etc.
+            sub_sentence_level = RecursiveLevel(delimiters=[',',
+                                                             ';',
+                                                             ':',
+                                                             '...',
+                                                             '-',
+                                                             '(',
+                                                             ')',
+                                                             '[',
+                                                             ']',
+                                                             '{',
+                                                             '}',
+                                                             '<',
+                                                             '>',
+                                                             '|',
+                                                             '~',
+                                                             '`',
+                                                             '\'',
+                                                             '\"'
+                                                             ],
+                                                 whitespace=False)
+
+            # Fourth level should be words
             word_level = RecursiveLevel(delimiters=None,
                                         whitespace=True)
-            # Fourth level should be tokens
+            # Fifth level should be tokens
             # NOTE: When delimiters is None, the level will use tokens to determine chunk boundaries.
             token_level = RecursiveLevel(delimiters=None,
                                         whitespace=False)
-            self.levels = [paragraph_level, sentence_level, word_level, token_level]
+            self.levels = [paragraph_level,
+                            sentence_level,
+                            sub_sentence_level,
+                            word_level,
+                            token_level]
     
     def __iter__(self):
         """Iterate over the levels."""
@@ -161,7 +194,7 @@ class RecursiveChunker(BaseChunker):
     def _split_at_whitespace(self,
                              text: str) -> List[str]:
         """Split the text at whitespace."""
-        return text.split()
+        return text.split(' ')
     
     def _split_at_tokens(self,
                          text: str) -> List[str]:
@@ -213,6 +246,10 @@ class RecursiveChunker(BaseChunker):
             # Find the index to merge at
             index = min(bisect_left(cumulative_token_counts, required_token_count, lo=current_index) - 1, len(splits))
             # print(f"index: {index}\n")
+            
+            # If the index is the same as the current index, we need to merge the next split
+            if index == current_index:
+                index += 1
 
             # Merge the splits at the index
             if combine_with_whitespace:
@@ -233,7 +270,7 @@ class RecursiveChunker(BaseChunker):
     def _get_token_count(self,
                          text: str) -> int:
         """Get the token count of the text."""
-        CHARS_PER_TOKEN = 6.0  # Avg. char per token for llama3 is b/w 6-7
+        CHARS_PER_TOKEN = 6.5  # Avg. char per token for llama3 is b/w 6-7
         estimate = max(1, len(text) // CHARS_PER_TOKEN)
         if estimate > self.chunk_size:
             return self.chunk_size + 1
@@ -248,14 +285,21 @@ class RecursiveChunker(BaseChunker):
         """Create a chunk."""
         if full_text is None:
             full_text = text
-
-        start_index = full_text.index(text)
-        end_index = start_index + len(text)
+        try:
+            start_index = full_text.index(text)
+            end_index = start_index + len(text)
+        except Exception as e:
+            print(f"Error getting start_index and end_index: {e}"
+                  f"text: {text}\n"
+                  f"full_text: {full_text}\n")
+            start_index = 0
+            end_index = 0
+            
         return RecursiveChunk(text=text,
-                     start_index=start_index,
-                     end_index=end_index,
-                     token_count=token_count,
-                     level=level)
+                              start_index=start_index,
+                              end_index=end_index,
+                              token_count=token_count,
+                              level=level)
 
     def _recursive_chunk(self, 
                         text: str,
@@ -302,7 +346,9 @@ class RecursiveChunker(BaseChunker):
                 chunks.extend(self._recursive_chunk(split, level + 1, full_text))
             else:
                 if rule.delimiters is None and not rule.whitespace:
-                    decoded_text = self._decode(self._encode(full_text))
+                    # NOTE: This is a hack to get the decoded text, since merged = splits = token_splits
+                    # And we don't want to encode/decode the text again, that would be inefficient
+                    decoded_text = "".join(merged)
                     chunks.append(self._create_chunk(split, token_count, level, decoded_text))
                 else:
                     chunks.append(self._create_chunk(split, token_count, level, full_text))
