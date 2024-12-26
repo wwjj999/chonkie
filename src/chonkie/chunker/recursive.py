@@ -8,6 +8,7 @@ from typing import Any, List, Optional, Union
 from chonkie.chunker.base import BaseChunker
 from chonkie.types import Chunk
 
+
 @dataclass
 class RecursiveLevel:
     """Configuration for a single level of recursive chunking.
@@ -359,3 +360,16 @@ class RecursiveChunker(BaseChunker):
     def chunk(self, text: str) -> List[Chunk]:
         """Chunk the text."""
         return self._recursive_chunk(text)
+
+
+    def __repr__(self) -> str:
+        """Get a string representation of the recursive chunker."""
+        return (f"RecursiveChunker(rules={self.rules}, "
+                f"chunk_size={self.chunk_size}, "
+                f"min_characters_per_chunk={self.min_characters_per_chunk})")
+    
+    def __str__(self) -> str:
+        """Get a string representation of the recursive chunker."""
+        return (f"RecursiveChunker(rules={self.rules}, "
+                f"chunk_size={self.chunk_size}, "
+                f"min_characters_per_chunk={self.min_characters_per_chunk})")
