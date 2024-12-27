@@ -126,7 +126,7 @@ And of course, special thanks to [Moto Moto](https://www.youtube.com/watch?v=I0z
 
 If you use Chonkie in your research, please cite it as follows:
 
-```
+```bibtex
 @misc{chonkie2024,
   author = {Minhas, Bhavnick},
   title = {Chonkie: A Fast Feature-full Chunking Library for RAG Bots},
