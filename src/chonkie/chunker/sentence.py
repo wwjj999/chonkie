@@ -1,3 +1,4 @@
+"""Sentence chunker."""
 from bisect import bisect_left
 from itertools import accumulate
 from typing import Any, List, Union
@@ -200,16 +201,16 @@ class SentenceChunker(BaseChunker):
         encoded_sentences = self._encode_batch(sentences)
         return [len(encoded) for encoded in encoded_sentences]
 
-    def _estimate_token_counts(self, text: str) -> int:
+    def _estimate_token_counts(self, sentences: List[str]) -> int:
         """Estimate token count using character length."""
         CHARS_PER_TOKEN = 6.0  # Avg. char per token for llama3 is b/w 6-7
-        if type(text) is str:
-            return max(1, len(text) // CHARS_PER_TOKEN)
-        elif type(text) is list and type(text[0]) is str:
-            return [max(1, len(t) // CHARS_PER_TOKEN) for t in text]
+        if type(sentences) is str:
+            return max(1, len(sentences) // CHARS_PER_TOKEN)
+        elif type(sentences) is list and type(sentences[0]) is str:
+            return [max(1, len(t) // CHARS_PER_TOKEN) for t in sentences]
         else:
             raise ValueError(
-                f"Unknown type passed to _estimate_token_count: {type(text)}"
+                f"Unknown type passed to _estimate_token_count: {type(sentences)}"
             )
 
     def _get_feedback(self, estimate: int, actual: int) -> float:
