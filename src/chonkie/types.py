@@ -251,10 +251,23 @@ class RecursiveLevel:
 
     def __post_init__(self):
         """Post-initialize the recursive level."""
+        self.validate()
+    
+    def validate(self):
+        """Validate the recursive level."""
         if self.delimiters is not None and self.whitespace:
             raise ValueError("Cannot have both delimiters and whitespace. "
                              "Use two separate levels instead, one for whitespace and one for delimiters.")
-
+        if self.delimiters is not None:
+            for delimiter in self.delimiters:
+                if not isinstance(delimiter, str):
+                    raise ValueError("All delimiters must be strings")
+                if len(delimiter) == 0:
+                    raise ValueError("All delimiters must be non-empty strings")
+                if delimiter == " ":
+                    raise ValueError("Cannot use whitespace as a delimiter",
+                                     "Use whitespace=True instead")
+                
     def __repr__(self) -> str:
         """Get a string representation of the recursive level."""
         return f"RecursiveLevel(delimiters={self.delimiters}, whitespace={self.whitespace})"
@@ -314,7 +327,13 @@ class RecursiveRules:
                             sub_sentence_level,
                             word_level,
                             token_level]
-    
+        else:
+            if isinstance(self.levels, RecursiveLevel):
+                self.levels.validate()
+            elif isinstance(self.levels, list) and all(isinstance(level, RecursiveLevel) for level in self.levels):
+                for level in self.levels:
+                    level.validate()
+            
     def __iter__(self):
         """Iterate over the levels."""
         return iter(self.levels)
