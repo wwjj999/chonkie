@@ -50,6 +50,9 @@ class OverlapRefinery(BaseRefinery):
         else:
             # Without tokenizer, must use approximate method
             self.approximate = True
+        
+        # Average number of characters per token
+        self._AVG_CHAR_PER_TOKEN = 7
 
     def _get_refined_chunks(
         self, chunks: List[Chunk], inplace: bool = True
@@ -133,15 +136,15 @@ class OverlapRefinery(BaseRefinery):
         if not hasattr(self, "tokenizer"):
             return None
 
-        # Take 6x context_size characters to ensure enough tokens
-        char_window = min(len(chunk.text), self.context_size * 6)
+        # Take _AVG_CHAR_PER_TOKEN * context_size characters to ensure enough tokens
+        char_window = min(len(chunk.text), int(self.context_size * self._AVG_CHAR_PER_TOKEN))
         text_portion = chunk.text[-char_window:]
 
         # Get exact token boundaries
-        tokens = self.tokenizer.encode(text_portion)
+        tokens = self.tokenizer.encode(text_portion) #TODO: should be self._encode; need a unified tokenizer interface
         context_tokens = min(self.context_size, len(tokens))
         context_tokens_ids = tokens[-context_tokens:]
-        context_text = self.tokenizer.decode(context_tokens_ids)
+        context_text = self.tokenizer.decode(context_tokens_ids) #TODO: should be self._decode; need a unified tokenizer interface
 
         # Find where context text starts in chunk
         try:
@@ -167,8 +170,8 @@ class OverlapRefinery(BaseRefinery):
         if not hasattr(self, "tokenizer"):
             return None
 
-        # Take 6x context_size characters to ensure enough tokens
-        char_window = min(len(chunk.text), self.context_size * 6)
+        # Take _AVG_CHAR_PER_TOKEN * context_size characters to ensure enough tokens
+        char_window = min(len(chunk.text), int(self.context_size * self._AVG_CHAR_PER_TOKEN))
         text_portion = chunk.text[:char_window]
 
         # Get exact token boundaries
@@ -405,7 +408,7 @@ class OverlapRefinery(BaseRefinery):
                 else:
                     # Otherwise use approximate by adding context tokens plus one for space
                     refined_chunks[i].token_count = (
-                        refined_chunks[i].token_count + context.token_count + 1
+                        refined_chunks[i].token_count + context.token_count
                     )
 
         return refined_chunks
