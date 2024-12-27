@@ -1,5 +1,6 @@
 """Token-based chunking."""
 
+from itertools import accumulate
 from typing import Any, Generator, List, Tuple, Union
 
 from chonkie.types import Chunk
@@ -126,22 +127,33 @@ class TokenChunker(BaseChunker):
             if end == len(tokens):
                 break
 
-    def _process_batch(self, chunks: List[Tuple[List[int], int, int]]) -> List[Chunk]:
+    def _process_batch(self,
+                       chunks: List[Tuple[List[int], int, int]],
+                       full_text: str) -> List[Chunk]:
         """Process a batch of chunks."""
         token_lists = [tokens for tokens, _, _ in chunks]
         texts = self._decode_batch(token_lists)
 
+        index_pairs = []
+        current_index = 0
+        for text in texts:
+            start_index = full_text.find(text, current_index)
+            end_index = start_index + len(text)
+            index_pairs.append((start_index, end_index))
+            current_index = end_index
+            
         return [
-            Chunk(text=text, start_index=start, end_index=end, token_count=end - start)
-            for text, (_, start, end) in zip(texts, chunks)
+            Chunk(text=text, start_index=start, end_index=end, token_count=len(tokens))
+            for text, (start, end), tokens in zip(texts, index_pairs, token_lists)
         ]
 
     def _process_text_batch(self, texts: List[str]) -> List[List[Chunk]]:
         """Process a batch of texts."""
         tokens_list = self._encode_batch(texts)
+        decoded_texts = self._decode_batch(tokens_list)
         result = []
 
-        for tokens in tokens_list:
+        for tokens, text in zip(tokens_list, decoded_texts):
             if not tokens:
                 result.append([])
                 continue
@@ -152,13 +164,13 @@ class TokenChunker(BaseChunker):
             for chunk_data in self._chunk_generator(tokens):
                 chunk_batch.append(chunk_data)
 
-            chunks.extend(self._process_batch(chunk_batch))
+            chunks.extend(self._process_batch(chunk_batch, text))
             result.append(chunks)
 
         return result
 
     def chunk_batch(
-        self, texts: List[str], batch_size: int = None
+        self, texts: List[str], batch_size: Union[int, None] = None
     ) -> List[List[Chunk]]:
         """Split a batch of texts into their respective chunks.
 
