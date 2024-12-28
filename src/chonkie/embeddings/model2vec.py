@@ -67,10 +67,10 @@ class Model2VecEmbeddings(BaseEmbeddings):
         encodings = self.model.tokenizer.encode_batch(texts)
         return [len(enc) for enc in encodings]
 
-    def similarity(self, u: "np.ndarray", v: "np.ndarray") -> float:
+    def similarity(self, u: "np.ndarray", v: "np.ndarray") -> np.float32:
         """Compute cosine similarity of two embeddings."""
         return np.divide(
-            np.dot(u, v), np.linalg.norm(u) * np.linalg.norm(v), dtype=float
+            np.dot(u, v), np.linalg.norm(u) * np.linalg.norm(v), dtype=np.float32
         )
 
     def get_tokenizer_or_token_counter(self):

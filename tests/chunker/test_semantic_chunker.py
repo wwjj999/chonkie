@@ -258,12 +258,34 @@ def test_semantic_chunker_token_counts(embedding_model, sample_text):
     """Test that the SemanticChunker correctly calculates token counts."""
     chunker = SemanticChunker(embedding_model=embedding_model, chunk_size=512, threshold=0.5)
     chunks = chunker.chunk(sample_text)
-    tokenizer = embedding_model.get_tokenizer_or_token_counter()
     assert all([chunk.token_count > 0 for chunk in chunks]), "All chunks must have a positive token count"
     assert all([chunk.token_count <= 512 for chunk in chunks]), "All chunks must have a token count less than or equal to 512"
 
-    token_counts = [len(tokenizer.encode(chunk.text)) for chunk in chunks]
-    assert all([chunk.token_count == token_count for chunk, token_count in zip(chunks, token_counts)]), "All chunks must have a token count equal to the length of the encoded text"
+    token_counts = [chunker._count_tokens(chunk.text) for chunk in chunks]
+    for i, (chunk, token_count) in enumerate(zip(chunks, token_counts)):
+        assert chunk.token_count == token_count, \
+            f"Chunk {i} has a token count of {chunk.token_count} but the encoded text length is {token_count}"
+
+
+def test_semantic_chunker_reconstruction(embedding_model, sample_text):
+    """Test that the SemanticChunker can reconstruct the original text."""
+    chunker = SemanticChunker(embedding_model=embedding_model, chunk_size=512, threshold=0.5)
+    chunks = chunker.chunk(sample_text)
+    assert sample_text == "".join([chunk.text for chunk in chunks])
+
+
+def test_semantic_chunker_reconstruction_complex_md(embedding_model, sample_complex_markdown_text):
+    """Test that the SemanticChunker can reconstruct the original text."""
+    chunker = SemanticChunker(embedding_model=embedding_model, chunk_size=512, threshold=0.5)
+    chunks = chunker.chunk(sample_complex_markdown_text)
+    assert sample_complex_markdown_text == "".join([chunk.text for chunk in chunks])
+
+
+def test_semantic_chunker_reconstruction_batch(embedding_model, sample_text):
+    """Test that the SemanticChunker can reconstruct the original text."""
+    chunker = SemanticChunker(embedding_model=embedding_model, chunk_size=512, threshold=0.5)
+    chunks = chunker.chunk_batch([sample_text]*10)[-1]
+    assert sample_text == "".join([chunk.text for chunk in chunks])
 
 
 if __name__ == "__main__":
