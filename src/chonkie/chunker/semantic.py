@@ -382,10 +382,10 @@ class SemanticChunker(BaseChunker):
 
         """
         groups = []
-        current_group = sentences[: self.initial_sentences]
+        current_group = sentences[: self.min_sentences]
         current_embedding = self._compute_group_embedding(current_group)
 
-        for sentence in sentences[self.initial_sentences :]:
+        for sentence in sentences[self.min_sentences :]:
             # Compare new sentence against mean embedding of entire current group
             similarity = self._get_semantic_similarity(
                 current_embedding, sentence.embedding
