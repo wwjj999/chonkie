@@ -413,7 +413,7 @@ class SemanticChunker(BaseChunker):
         self, sentences: List[Sentence]
     ) -> List[List[Sentence]]:
         """Group sentences based on semantic similarity, respecting the similarity window."""
-        similarities = self._compute_pairwise_similarities(sentences)
+        similarities = self._compute_pairwise_similarities(sentences) # NOTE: This is calculating pairwise, but not window. 
         split_indices = self._get_split_indices(similarities, self.similarity_threshold)
         groups = [
             sentences[split_indices[i] : split_indices[i + 1]]
