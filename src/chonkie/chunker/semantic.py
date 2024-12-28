@@ -89,7 +89,7 @@ class SemanticChunker(BaseChunker):
         self.mode = mode
         self.chunk_size = chunk_size
         self.threshold = threshold
-        self.similarity_window = similarity_window
+        self.similarity_window = similarity_window if mode == "window" else 1
         self.min_sentences = min_sentences
         self.min_chunk_size = min_chunk_size
         self.min_characters_per_sentence = min_characters_per_sentence
@@ -247,20 +247,38 @@ class SemanticChunker(BaseChunker):
 
     def _compute_group_embedding(self, sentences: List[Sentence]) -> np.ndarray:
         """Compute mean embedding for a group of sentences."""
-        return np.divide(
-            np.sum([(sent.embedding * sent.token_count) for sent in sentences], axis=0),
-            np.sum([sent.token_count for sent in sentences]),
-            dtype=np.float32,
-        )
+        if len(sentences) == 1:
+            return sentences[0].embedding
+        else:
+            #NOTE: There's a known issue, where while calculating the sentence embeddings special tokens are added
+            # but when taking the token count the special tokens are not being counted, which causes a mismatch here. 
+            # This is a known issue and we're working on a fix. At the moment, the error is minimal and doesn't affect the chunking as much. 
 
-    def _compute_pairwise_similarities(self, sentences: List[Sentence]) -> List[float]:
-        """Compute all pairwise similarities between sentences."""
-        return [
-            self._get_semantic_similarity(
-                sentences[i].embedding, sentences[i + 1].embedding
+            #TODO: Account for embedding model truncating to max_seq_length, which causes a mismatch in the token count.
+            return np.divide(
+                np.sum([(sent.embedding * sent.token_count) for sent in sentences], axis=0),
+                np.sum([sent.token_count for sent in sentences]),
+                dtype=np.float32,
             )
-            for i in range(len(sentences) - 1)
-        ]
+
+    def _compute_window_similarities(self, sentences: List[Sentence]) -> List[float]:
+        """Compute all pairwise similarities between sentences."""
+        similarities = [1.0]
+        current_sentence_window = [sentences[0]]
+        window_embedding = sentences[0].embedding
+        for i in range(1, len(sentences)):
+            similarities.append(self._get_semantic_similarity(window_embedding, sentences[i].embedding))
+            
+            # Update the window embedding
+            if len(current_sentence_window) < self.similarity_window:
+                current_sentence_window.append(sentences[i])
+                window_embedding = self._compute_group_embedding(current_sentence_window)
+            else:
+                current_sentence_window.pop(0)
+                current_sentence_window.append(sentences[i])
+                window_embedding = self._compute_group_embedding(current_sentence_window)
+            
+        return similarities
 
     def _get_split_indices(
         self, similarities: List[float], threshold: float = None
@@ -296,10 +314,10 @@ class SemanticChunker(BaseChunker):
         """Calculate similarity threshold via binary search."""
         # Get the token counts and cumulative token counts
         token_counts = [sent.token_count for sent in sentences]
-        cumulative_token_counts = np.cumsum(token_counts)
+        cumulative_token_counts = np.cumsum([0] + token_counts)
 
         # Compute all pairwise similarities
-        similarities = self._compute_pairwise_similarities(sentences)
+        similarities = self._compute_window_similarities(sentences)
 
         # get the median and the std for the similarities
         median = np.median(similarities)
@@ -319,8 +337,11 @@ class SemanticChunker(BaseChunker):
             threshold = (low + high) / 2
             # Get the split indices
             split_indices = self._get_split_indices(similarities, threshold)
-            # Get the cumulative token counts at the split indices
+            
+            # Get the cumulative token count`s at the split indices
+
             split_token_counts = np.diff(cumulative_token_counts[split_indices])
+            
             # Get the median of the split token counts
             # median_split_token_count = np.median(split_token_counts)
             # Check if the split respects the chunk size
@@ -357,7 +378,7 @@ class SemanticChunker(BaseChunker):
         """Calculate similarity threshold via percentile."""
         # Compute all pairwise similarities, since the embeddings are already computed
         # The embeddings are computed assuming a similarity window is applied
-        all_similarities = self._compute_pairwise_similarities(sentences)
+        all_similarities = self._compute_window_similarities(sentences)
         return float(np.percentile(all_similarities, 100 - self.similarity_percentile))
 
     def _calculate_similarity_threshold(self, sentences: List[Sentence]) -> float:
@@ -413,7 +434,7 @@ class SemanticChunker(BaseChunker):
         self, sentences: List[Sentence]
     ) -> List[List[Sentence]]:
         """Group sentences based on semantic similarity, respecting the similarity window."""
-        similarities = self._compute_pairwise_similarities(sentences) # NOTE: This is calculating pairwise, but not window. 
+        similarities = self._compute_window_similarities(sentences) # NOTE: This is calculating pairwise, but not window. 
         split_indices = self._get_split_indices(similarities, self.similarity_threshold)
         groups = [
             sentences[split_indices[i] : split_indices[i + 1]]
@@ -437,9 +458,7 @@ class SemanticChunker(BaseChunker):
 
         # Compute chunk text and token count from sentences
         text = "".join(sent.text for sent in sentences)
-        token_count = sum(sent.token_count for sent in sentences) + (
-            len(sentences) - 1
-        )  # Add spaces
+        token_count = sum(sent.token_count for sent in sentences)
 
         return SemanticChunk(
             text=text,
