@@ -34,7 +34,7 @@ from .types import (
     SentenceChunk,
 )
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 __name__ = "chonkie"
 __author__ = "Bhavnick Minhas"
 
