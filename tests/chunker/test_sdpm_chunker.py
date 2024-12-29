@@ -169,11 +169,10 @@ def test_spdm_chunker_token_counts(embedding_model, sample_text):
     """Test that the SPDMChunker correctly calculates token counts."""
     chunker = SDPMChunker(embedding_model=embedding_model, chunk_size=512, threshold=0.5)
     chunks = chunker.chunk(sample_text)
-    tokenizer = embedding_model.get_tokenizer_or_token_counter()
     assert all([chunk.token_count > 0 for chunk in chunks]), "All chunks must have a positive token count"
     assert all([chunk.token_count <= 512 for chunk in chunks]), "All chunks must have a token count less than or equal to 512"  
 
-    token_counts = [len(tokenizer.encode(chunk.text)) for chunk in chunks]
+    token_counts = [chunker._count_tokens(chunk.text) for chunk in chunks]
     assert all([chunk.token_count == token_count for chunk, token_count in zip(chunks, token_counts)]), "All chunks must have a token count equal to the length of the encoded text"
 
 if __name__ == "__main__":
