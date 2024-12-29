@@ -31,7 +31,8 @@ classifiers = [
     "Topic :: Text Processing :: Linguistic"
 ]
 dependencies = [
-    "autotiktokenizer>=0.2.0"
+    "autotiktokenizer>=0.2.0", 
+    "tqdm>=4.64.0"
 ]
 
 [project.urls]
