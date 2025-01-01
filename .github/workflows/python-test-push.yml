@@ -27,12 +27,13 @@ jobs:
 
       - name: Install the project
         run: |
+          uv venv
           uv pip install pytest pytest-cov coverage
           uv sync --all-extras --dev
 
       - name: Run tests
         run: |
-          uv run pytest --cov-branch --cov-report=xml
+          uv run pytest --cov-branch --cov-report=xml --cov-report=term-missing
 
       - name: Upload coverage report to Codecov
         uses: codecov/codecov-action@v5
