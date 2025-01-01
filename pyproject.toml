@@ -31,7 +31,8 @@ classifiers = [
     "Topic :: Text Processing :: Linguistic"
 ]
 dependencies = [
-    "autotiktokenizer>=0.2.0"
+    "autotiktokenizer>=0.2.0", 
+    "tqdm>=4.64.0"
 ]
 
 [project.urls]
@@ -45,6 +46,7 @@ semantic = ["model2vec>=0.1.0", "numpy>=1.23.0, <2.2"]
 all = ["sentence-transformers>=3.0.0", "numpy>=1.23.0, <2.2", "openai>=1.0.0", "model2vec>=0.1.0"]
 dev = [
     "pytest>=6.2.0", 
+    "pytest-cov>=4.0.0",
     "datasets>=1.14.0",
     "transformers>=4.0.0",
     "ruff>=0.0.265"

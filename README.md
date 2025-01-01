@@ -7,7 +7,7 @@
 [![PyPI version](https://img.shields.io/pypi/v/chonkie.svg)](https://pypi.org/project/chonkie/)
 [![License](https://img.shields.io/github/license/bhavnicksm/chonkie.svg)](https://github.com/bhavnicksm/chonkie/blob/main/LICENSE)
 [![Documentation](https://img.shields.io/badge/docs-chonkie.ai-blue.svg)](https://docs.chonkie.ai)
-![Package size](https://img.shields.io/badge/size-9.7MB-blue)
+![Package size](https://img.shields.io/badge/size-11.2MB-blue)
 [![Downloads](https://static.pepy.tech/badge/chonkie)](https://pepy.tech/project/chonkie)
 [![Discord](https://dcbadge.limes.pink/api/server/https://discord.gg/nMYNVyuB5Y?style=flat)](https://discord.gg/nMYNVyuB5Y)
 [![GitHub stars](https://img.shields.io/github/stars/bhavnicksm/chonkie.svg)](https://github.com/bhavnicksm/chonkie/stargazers)
@@ -19,7 +19,7 @@ _The no-nonsense RAG chunking library that's lightweight, lightning-fast, and re
 [Supported Methods](#supported-methods) •
 [Benchmarks](#benchmarks-️) •
 [Documentation](https://docs.chonkie.ai) •
-[Citation](#citation)
+[Contributing](#contributing)
 
 </div>
 
@@ -102,7 +102,7 @@ Here's a quick peek at how Chonkie performs:
 
 **Size**📦
 
-- **Default Install:** 9.7MB (vs 80-171MB for alternatives)
+- **Default Install:** 11.2MB (vs 80-171MB for alternatives)
 - **With Semantic:** Still lighter than the competition!
 
 **Speed**⚡
@@ -112,6 +112,12 @@ Here's a quick peek at how Chonkie performs:
 - **Semantic Chunking:** Up to 2.5x faster than others
 
 Check out our detailed [benchmarks](https://docs.chonkie.ai/benchmarks) to see how Chonkie races past the competition! 🏃‍♂️💨
+
+# Contributing
+
+Want to help make Chonkie even better? Check out our [CONTRIBUTING.md](CONTRIBUTING.md) guide! Whether you're fixing bugs, adding features, or improving docs, every contribution helps make Chonkie a better CHONK for everyone.
+
+Remember: No contribution is too small for this tiny hippo! 🦛
 
 # Acknowledgements
 
