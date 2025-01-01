@@ -1,20 +1,31 @@
 ---
-name: Feature request
-about: Suggest an idea for this project
-title: "[FEAT]"
+name: ✨ Feature Request
+about: Suggest a new feature for Chonkie
+title: "[FEAT] "
 labels: enhancement
 assignees: bhavnicksm
 
 ---
 
-**Checklist**
-Before you begin, please make sure of the following points:
-- [ ] This feature is not implemented yet in the library in any form
-- [ ] This feature has not been suggested previously
-- [ ] This feature is relevant to the library
+## 📋 Quick Check
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+- [ ] I've checked this feature isn't already implemented or proposed
+- [ ] This feature is relevant to Chonkie's purpose (text chunking for RAG)
 
-**Additional context**
-Add any other context or screenshots about the feature request here.
+## 💡 Feature Description
+<!-- What would you like Chonkie to do? -->
+
+## 🛠️ Implementation Approach
+<!-- How do you think this could be implemented? Code sketches welcome! -->
+```python
+# Example of how this feature might work
+from chonkie import ...
+
+# Your implementation idea
+```
+
+## 🎯 Why is this needed?
+<!-- What problem does this solve? -->
+
+
+<!-- Thank you for helping make Chonkie CHONKier! 🦛 -->
