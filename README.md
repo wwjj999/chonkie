@@ -19,7 +19,7 @@ _The no-nonsense RAG chunking library that's lightweight, lightning-fast, and re
 [Supported Methods](#supported-methods) •
 [Benchmarks](#benchmarks-️) •
 [Documentation](https://docs.chonkie.ai) •
-[Citation](#citation)
+[Contributing](#contributing)
 
 </div>
 
@@ -112,6 +112,12 @@ Here's a quick peek at how Chonkie performs:
 - **Semantic Chunking:** Up to 2.5x faster than others
 
 Check out our detailed [benchmarks](https://docs.chonkie.ai/benchmarks) to see how Chonkie races past the competition! 🏃‍♂️💨
+
+# Contributing
+
+Want to help make Chonkie even better? Check out our [CONTRIBUTING.md](CONTRIBUTING.md) guide! Whether you're fixing bugs, adding features, or improving docs, every contribution helps make Chonkie a better CHONK for everyone.
+
+Remember: No contribution is too small for this tiny hippo! 🦛
 
 # Acknowledgements
 
