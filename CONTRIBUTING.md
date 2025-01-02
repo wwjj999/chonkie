@@ -19,7 +19,7 @@ git clone https://github.com/your-username/chonkie.git
 cd chonkie
 ```
 
-1. Create a virtual environment and install dependencies:
+2. Create a virtual environment and install dependencies:
 
 ```bash
 python -m venv venv
@@ -105,7 +105,7 @@ feat: add batch processing to WordChunker
 - Update documentation
 ```
 
-1. **Dependencies**: If adding new dependencies:
+3. **Dependencies**: If adding new dependencies:
    - Core dependencies go in `project.dependencies`
    - Optional features go in `project.optional-dependencies`
    - Development tools go in the `dev` optional dependency group
@@ -125,7 +125,7 @@ src/
 
 ### 1. Good First Issues
 
-Look for issues labeled `good-first-issue`. These are great starting points for new contributors.
+Look for issues labeled [`good-first-issue`](https://github.com/chonkie-ai/chonkie/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22). These are great starting points for new contributors.
 
 ### 2. Documentation
 
