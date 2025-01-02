@@ -13,7 +13,7 @@ import pytest
 
 from chonkie.embeddings.base import BaseEmbeddings
 
-# 1. Define a custom embeddings class implementing the abstract methods.
+
 class CustomEmbeddings(BaseEmbeddings):
     """Custom embeddings class."""
 
@@ -26,11 +26,6 @@ class CustomEmbeddings(BaseEmbeddings):
         """Embed a single text string into a vector representation."""
         # For demonstration, returns a random vector
         return np.random.rand(self._dimension)
-
-    def embed_batch(self, texts):
-        """Embed a batch of text strings into a list of vector representations."""
-        # Reuse the single-text embed for batch embeddings
-        return [self.embed(text) for text in texts]
 
     def count_tokens(self, text: str) -> int:
         """Count the number of tokens in a text string."""
@@ -46,8 +41,6 @@ class CustomEmbeddings(BaseEmbeddings):
         """Return the dimension of the embeddings."""
         return self._dimension
 
-
-# 2. Write tests to validate the custom embeddings.
 def test_custom_embeddings_initialization():
     """Test the initialization of the CustomEmbeddings class."""
     embeddings = CustomEmbeddings(dimension=4)
