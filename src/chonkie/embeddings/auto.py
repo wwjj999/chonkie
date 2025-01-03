@@ -25,6 +25,9 @@ class AutoEmbeddings:
         # Get Anthropic embeddings
         embeddings = AutoEmbeddings.get_embeddings("anthropic://claude-v1", api_key="...")
 
+         # Get Cohere embeddings
+        embeddings = AutoEmbeddings.get_embeddings("cohere://embed-english-light-v3.0", api_key="...")
+
     """
 
     @classmethod
@@ -52,6 +55,9 @@ class AutoEmbeddings:
 
             # Get Anthropic embeddings
             embeddings = AutoEmbeddings.get_embeddings("anthropic://claude-v1", api_key="...")
+
+            # Get Cohere embeddings
+            embeddings = AutoEmbeddings.get_embeddings("cohere://embed-english-light-v3.0", api_key="...")
 
         """
         # Load embeddings instance if already provided
