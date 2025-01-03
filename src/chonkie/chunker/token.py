@@ -70,9 +70,11 @@ class TokenChunker(BaseChunker):
                     token_count=token_count,
                 )
             )
+            
             # we subtract the space taken by the overlapping text, that gives you the start_index for the next chunk
             overlap_tokens = self.chunk_overlap - (self.chunk_size - len(token_group))
-            current_index = end_index - len(self._decode(token_group[-overlap_tokens:]))
+            current_index = end_index - len(self._decode(token_group[-overlap_tokens:] if overlap_tokens > 0 else []))
+        
         return chunks
 
     def chunk(self, text: str) -> List[Chunk]:
