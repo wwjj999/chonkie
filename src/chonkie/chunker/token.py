@@ -60,7 +60,16 @@ class TokenChunker(BaseChunker):
         chunk_texts = self._decode_batch(token_groups)
         chunks = []
         current_index = 0
-        for chunk_text, token_count, token_group in zip(chunk_texts, token_counts, token_groups):
+
+        if (self.chunk_overlap > 0):
+            overlap_tokens_space = [
+                # we get the space taken by the overlapping text, that gives you the start_index for the next chunk
+                len(overlap_text)
+                for overlap_text in self._decode_batch([token_group[-(self.chunk_overlap - (self.chunk_size - len(token_group))):]
+                                                        for token_group in token_groups])
+            ]
+
+        for i, (chunk_text, token_count) in enumerate(zip(chunk_texts, token_counts)):
             end_index = current_index + len(chunk_text)
             chunks.append(
                 Chunk(
@@ -71,9 +80,7 @@ class TokenChunker(BaseChunker):
                 )
             )
             
-            # we subtract the space taken by the overlapping text, that gives you the start_index for the next chunk
-            overlap_tokens = self.chunk_overlap - (self.chunk_size - len(token_group))
-            current_index = end_index - len(self._decode(token_group[-overlap_tokens:] if overlap_tokens > 0 else []))
+            current_index = end_index - (overlap_tokens_space[i] if self.chunk_overlap > 0 else 0)
         
         return chunks
 
