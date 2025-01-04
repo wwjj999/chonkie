@@ -7,7 +7,7 @@ name = "chonkie"
 version = "0.4.0"
 description = "🦛 CHONK your texts with Chonkie ✨ - The no-nonsense RAG chunking library"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = {file = "LICENSE"}
 keywords = ["chunking", "rag", "nlp", "text-processing"]
 authors = [
@@ -17,7 +17,6 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8"
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -41,11 +40,11 @@ Homepage = "https://github.com/bhavnicksm/chonkie"
 Documentation = "https://docs.chonkie.ai"
 
 [project.optional-dependencies]
-model2vec = ["model2vec>=0.1.0", "numpy>=1.23.0, <2.2"]
+model2vec = ["model2vec>=0.3.0", "numpy>=1.23.0, <2.2"]
 st = ["sentence-transformers>=3.0.0", "numpy>=1.23.0, <2.2"]
 openai = ["openai>=1.0.0", "numpy>=1.23.0, <2.2"]
-semantic = ["model2vec>=0.1.0", "numpy>=1.23.0, <2.2"]
-all = ["sentence-transformers>=3.0.0", "numpy>=1.23.0, <2.2", "openai>=1.0.0", "model2vec>=0.1.0"]
+semantic = ["model2vec>=0.3.0", "numpy>=1.23.0, <2.2"]
+all = ["sentence-transformers>=3.0.0", "numpy>=1.23.0, <2.2", "openai>=1.0.0", "model2vec>=0.3.0"]
 dev = [
     "pytest>=6.2.0", 
     "pytest-cov>=4.0.0",
