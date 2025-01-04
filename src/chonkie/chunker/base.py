@@ -183,11 +183,11 @@ class BaseChunker(ABC):
     def _decode_batch(self, token_lists: List[List[int]]) -> List[str]:
         """Decode a batch of token lists using the backend tokenizer."""
         if self._tokenizer_backend == "transformers":
-            return [self.tokenizer.decode(tokens) for tokens in token_lists]
+            return self.tokenizer.batch_decode(token_lists, skip_special_tokens=True)
         elif self._tokenizer_backend == "tokenizers":
-            return [self.tokenizer.decode(tokens) for tokens in token_lists]
+            return self.tokenizer.decode_batch(token_lists)
         elif self._tokenizer_backend == "tiktoken":
-            return [self.tokenizer.decode(tokens) for tokens in token_lists]
+            return self.tokenizer.decode_batch(token_lists)
         elif self._tokenizer_backend == "callable":
             raise NotImplementedError(
                 "Callable tokenizer backend does not support batch decoding."
