@@ -115,7 +115,7 @@ class TokenChunker(BaseChunker):
 
         return chunks
 
-    def _token_group_generator(self, tokens: List[int]) -> Generator[List[int]]:
+    def _token_group_generator(self, tokens: List[int]) -> Generator[List[int], None, None]:
         """Generate chunks from a list of tokens."""
         for start in range(0, len(tokens), self.chunk_size - self.chunk_overlap):
             end = min(start + self.chunk_size, len(tokens))
