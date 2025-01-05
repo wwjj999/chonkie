@@ -53,9 +53,13 @@ class RecursiveChunker(BaseChunker):
             # Usually a good idea to check if there are any splits that are too short in characters
             # and then merge them
             merged_splits = []
-            for split in splits:
+            for i, split in enumerate(splits):
                 if len(split) < self.min_characters_per_chunk:
-                    merged_splits[-1] += split
+                    if merged_splits:
+                        merged_splits[-1] += split
+                    else:
+                        splits[i+1] = split + splits[i+1] # When merge splits is empty, we merge the current split with the next split
+                    continue
                 else:
                     merged_splits.append(split)
             splits = merged_splits
