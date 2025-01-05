@@ -23,7 +23,7 @@ _The no-nonsense RAG chunking library that's lightweight, lightning-fast, and re
 
 </div>
 
-Ever found yourself building yet another RAG bot (your 2,342,148th, but who's counting?), only to hit that all-too-familiar wall? You know the one - where you're stuck choosing between:
+Ever found yourself building yet another RAG bot (your 2,342,148th one, but who's counting?), only to hit that all-too-familiar wall? You know the one - where you're stuck choosing between:
 
 - Library X: A behemoth that takes forever to install and probably includes three different kitchen sinks
 - Library Y: So bare-bones it might as well be a "Hello World" program
