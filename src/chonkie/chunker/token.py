@@ -85,6 +85,14 @@ class TokenChunker(BaseChunker):
             current_index = end_index - overlap_length
         
         return chunks
+    
+    def _token_group_generator(self, tokens: List[int]) -> Generator[List[int], None, None]:
+        """Generate chunks from a list of tokens."""
+        for start in range(0, len(tokens), self.chunk_size - self.chunk_overlap):
+            end = min(start + self.chunk_size, len(tokens))
+            yield tokens[start:end]
+            if end == len(tokens):
+                break
 
     def chunk(self, text: str) -> List[Chunk]:
         """Split text into overlapping chunks of specified token size.
@@ -102,9 +110,8 @@ class TokenChunker(BaseChunker):
         # Encode full text
         text_tokens = self._encode(text)
 
-        # Calculate chunk positions
-        token_groups = [text_tokens[start_index : min(start_index + self.chunk_size, len(text_tokens))]
-            for start_index in range(0, len(text_tokens), self.chunk_size - self.chunk_overlap)]
+        # Calculate token groups and counts
+        token_groups = list(self._token_group_generator(text_tokens))
         token_counts = [len(toks) for toks in token_groups]
 
         # decode the token groups into the chunk texts
@@ -114,12 +121,6 @@ class TokenChunker(BaseChunker):
         chunks = self._create_chunks(chunk_texts, token_groups, token_counts)
 
         return chunks
-
-    def _token_group_generator(self, tokens: List[int]) -> Generator[List[int], None, None]:
-        """Generate chunks from a list of tokens."""
-        for start in range(0, len(tokens), self.chunk_size - self.chunk_overlap):
-            end = min(start + self.chunk_size, len(tokens))
-            yield tokens[start:end]
 
     def _process_batch(self,
                        chunks: List[Tuple[List[int], int, int]],
@@ -153,9 +154,7 @@ class TokenChunker(BaseChunker):
                 continue
 
             # get the token groups
-            token_groups = []
-            for token_group in self._token_group_generator(tokens):
-                token_groups.append(token_group)
+            token_groups = list(self._token_group_generator(tokens))
             
             # get the token counts
             token_counts = [len(token_group) for token_group in token_groups]
