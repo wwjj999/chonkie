@@ -23,11 +23,13 @@ _The no-nonsense RAG chunking library that's lightweight, lightning-fast, and re
 
 </div>
 
-so i found myself making another RAG bot (for the 2342148th time) and meanwhile, explaining to my juniors about why we should use chunking in our RAG bots, only to realise that i would have to write chunking all over again unless i use the bloated software library X or the extremely feature-less library Y. _WHY CAN I NOT HAVE SOMETHING JUST RIGHT, UGH?_
+Ever found yourself making a RAG bot yet again (your 2,342,148th one), 
+only to realize you’re stuck having to write chunking with bloated software library X or the painfully feature-less library Y?
+_WHY CAN'T THIS JUST BE SIMPLE, UGH?_
 
-Can't i just install, import and run chunking and not have to worry about dependencies, bloat, speed or other factors?
+What if all you had to do was install, import and run chunking?  
 
-Well, with chonkie you can! (chonkie boi is a gud boi)
+Well, look no further than Chonkie! (chonkie boi is a gud boi)
 
 **🚀 Feature-rich**: All the CHONKs you'd ever need </br>
 **✨ Easy to use**: Install, Import, CHONK </br>
