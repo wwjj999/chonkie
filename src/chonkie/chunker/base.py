@@ -248,7 +248,7 @@ class BaseChunker(ABC):
                     texts,
                     desc="🦛 CHONKING",
                     disable=not show_progress_bar,
-                    unit="texts",
+                    unit="text",
                     bar_format="{desc}: [{bar:20}] {percentage:3.0f}% • {n_fmt}/{total_fmt} texts chunked [{elapsed}<{remaining}, {rate_fmt}] 🌱", 
                     ascii=' >=')
         ]
