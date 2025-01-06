@@ -1,3 +1,5 @@
+"""AutoEmbeddings is a factory class for automatically loading embeddings."""
+
 import warnings
 from typing import Any, Union
 
@@ -63,7 +65,7 @@ class AutoEmbeddings:
                     try:
                         return embeddings_cls(model, **kwargs)
                     except Exception as e:
-                        warnings.warn(f"Failed to load {embeddings_cls.__name__}: {e}")
+                        raise ValueError(f"Failed to load {embeddings_cls.__name__}: {e}")
             except Exception:
                 # Fall back to SentenceTransformerEmbeddings if no matching implementation is found
                 from .sentence_transformer import SentenceTransformerEmbeddings
