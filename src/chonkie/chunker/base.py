@@ -9,7 +9,7 @@ from typing import Any, Callable, List, Union
 
 from chonkie.types import Chunk
 
-
+from tqdm import tqdm
 class BaseChunker(ABC):
     """Abstract base class for all chunker implementations.
 
@@ -236,24 +236,24 @@ class BaseChunker(ABC):
             )
             return 1
 
-    def chunk_batch(self, text: List[str]) -> List[List[Chunk]]:
+    def chunk_batch(
+        self,
+        text: List[str],
+        show_progress_bar: bool = True,
+    ) -> List[List[Chunk]]:
         """Split a List of texts into their respective chunks.
 
         By default, this method uses multiprocessing to parallelize the chunking process.
 
         Args:
             text: List of input texts to be chunked.
-
+            show_progress_bar: Whether to show a progress bar.
+        
         Returns:
             List of lists of Chunk objects containing the chunked text and metadata
 
         """
-        workers = self._determine_optimal_workers()
-        if workers > 1:
-            with Pool(workers) as pool:
-                return pool.map(self.chunk, text)
-        else:
-            return [self.chunk(t) for t in text]
+        return [self.chunk(t) for t in tqdm(text, desc="Chunking Texts", disable=not show_progress_bar)]
 
     def __call__(
         self, text: Union[str, List[str]]

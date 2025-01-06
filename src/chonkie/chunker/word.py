@@ -1,3 +1,4 @@
+"""Word-based chunker."""
 import re
 from typing import Any, List, Tuple, Union
 
@@ -7,6 +8,18 @@ from .base import BaseChunker
 
 
 class WordChunker(BaseChunker):
+    """Chunker that splits text into overlapping chunks based on words.
+
+    Args:
+        tokenizer: The tokenizer instance to use for encoding/decoding
+        chunk_size: Maximum number of tokens per chunk
+        chunk_overlap: Maximum number of tokens to overlap between chunks
+
+    Raises:
+        ValueError: If chunk_size <= 0 or chunk_overlap >= chunk_size
+    
+    """
+
     def __init__(
         self,
         tokenizer: Union[str, Any] = "gpt2",
@@ -159,6 +172,7 @@ class WordChunker(BaseChunker):
         return chunks
 
     def __repr__(self) -> str:
+        """Return a string representation of the WordChunker."""
         return (
             f"WordChunker(chunk_size={self.chunk_size}, "
             f"chunk_overlap={self.chunk_overlap})"
