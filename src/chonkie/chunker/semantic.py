@@ -129,6 +129,9 @@ class SemanticChunker(BaseChunker):
         # for the group semantic meaning to be calculated properly
         super().__init__(self.embedding_model.get_tokenizer_or_token_counter())
 
+        # Remove the multiprocessing flag from the base class
+        self._use_multiprocessing = False
+
     def _split_sentences(
         self,
         text: str,

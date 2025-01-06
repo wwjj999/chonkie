@@ -9,7 +9,7 @@ from typing import Any, Callable, List, Union
 
 from chonkie.types import Chunk
 
-
+from tqdm import tqdm
 class BaseChunker(ABC):
     """Abstract base class for all chunker implementations.
 
@@ -34,6 +34,9 @@ class BaseChunker(ABC):
             self.tokenizer = tokenizer_or_token_counter
             self._tokenizer_backend = self._get_tokenizer_backend()
             self.token_counter = self._get_tokenizer_counter()
+        
+        # Set whether to use multiprocessing or not
+        self._use_multiprocessing = True
 
     def _get_tokenizer_backend(self):
         """Return the backend tokenizer object."""
@@ -235,33 +238,72 @@ class BaseChunker(ABC):
                 f"Error determining optimal workers: {e}. Using single process."
             )
             return 1
-
-    def chunk_batch(self, text: List[str]) -> List[List[Chunk]]:
+    
+    def _process_batch_sequential(self,
+                                  texts: List[str],
+                                  show_progress_bar: bool = True) -> List[List[Chunk]]:
+        """Process a batch of texts sequentially."""
+        return [
+                self.chunk(t) for t in tqdm(
+                    texts,
+                    desc="🦛 CHONKING",
+                    disable=not show_progress_bar,
+                    unit="texts",
+                    bar_format="{desc}: [{bar:20}] {percentage:3.0f}% • {n_fmt}/{total_fmt} texts chunked [{elapsed}<{remaining}, {rate_fmt}] 🌱", 
+                    ascii=' >=')
+        ]
+    
+    def _process_batch_multiprocessing(self,
+                                     texts: List[str],
+                                     show_progress_bar: bool = True) -> List[List[Chunk]]:
+        """Process a batch of texts using multiprocessing."""
+        num_workers = self._determine_optimal_workers()
+        total = len(texts)
+        chunksize = max(1, min(total // (num_workers * 16), 10)) # Optimize chunk size
+        
+        with Pool(processes=num_workers) as pool:
+            results = []
+            with tqdm(total=total,
+                     desc="🦛 CHONKING",
+                     disable=not show_progress_bar,
+                     unit="texts",
+                     bar_format="{desc}: [{bar:20}] {percentage:3.0f}% • {n_fmt}/{total_fmt} texts chunked [{elapsed}<{remaining}, {rate_fmt}] 🌱",
+                     ascii=' >=') as pbar:
+                for result in pool.imap_unordered(self.chunk, texts, chunksize=chunksize):
+                    results.append(result)
+                    pbar.update()
+            return results
+        
+    def chunk_batch(
+        self,
+        texts: List[str],
+        show_progress_bar: bool = True,
+    ) -> List[List[Chunk]]:
         """Split a List of texts into their respective chunks.
 
         By default, this method uses multiprocessing to parallelize the chunking process.
 
         Args:
-            text: List of input texts to be chunked.
-
+            texts: List of input texts to be chunked.
+            show_progress_bar: Whether to show a progress bar.
+        
         Returns:
             List of lists of Chunk objects containing the chunked text and metadata
 
         """
-        workers = self._determine_optimal_workers()
-        if workers > 1:
-            with Pool(workers) as pool:
-                return pool.map(self.chunk, text)
+        if self._use_multiprocessing:
+            return self._process_batch_multiprocessing(texts, show_progress_bar)
         else:
-            return [self.chunk(t) for t in text]
+            return self._process_batch_sequential(texts, show_progress_bar)
 
     def __call__(
-        self, text: Union[str, List[str]]
+        self, text: Union[str, List[str]], show_progress_bar: bool = True
     ) -> Union[List[Chunk], List[List[Chunk]]]:
         """Make the chunker callable directly.
 
         Args:
             text: Input text or list of texts to be chunked
+            show_progress_bar: Whether to show a progress bar (for batch chunking)
 
         Returns:
             List of Chunk objects or list of lists of Chunk
@@ -270,7 +312,7 @@ class BaseChunker(ABC):
         if isinstance(text, str):
             return self.chunk(text)
         elif isinstance(text, list):
-            return self.chunk_batch(text)
+            return self.chunk_batch(text, show_progress_bar)
         else:
             raise ValueError("Input must be a string or a list of strings.")
 

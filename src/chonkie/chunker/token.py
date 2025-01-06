@@ -6,7 +6,7 @@ from chonkie.types import Chunk
 
 from .base import BaseChunker
 
-
+from tqdm import trange
 class TokenChunker(BaseChunker):
     """Chunker that splits text into chunks of a specified token size.
 
@@ -48,6 +48,8 @@ class TokenChunker(BaseChunker):
             if isinstance(chunk_overlap, int)
             else int(chunk_overlap * chunk_size)
         )
+
+        self._use_multiprocessing = False
     
     def _create_chunks(
         self,
@@ -169,27 +171,56 @@ class TokenChunker(BaseChunker):
         return result
 
     def chunk_batch(
-        self, texts: List[str], batch_size: Union[int, None] = None
+        self,
+        texts: List[str],
+        batch_size: int = 1,
+        show_progress_bar: bool = True
     ) -> List[List[Chunk]]:
         """Split a batch of texts into their respective chunks.
 
         Args:
             texts: List of input texts to be chunked
             batch_size: Number of texts to process in a single batch
+            show_progress_bar: Whether to show a progress bar
 
         Returns:
             List of lists of Chunk objects containing the chunked text and metadata
 
         """
-        # if batch_size is not None, we process the texts in mini-batches to avoid memory issues
-        if batch_size is not None:
-            chunks = []
-            for i in range(0, len(texts), batch_size):
-                batch_texts = texts[i : min(i + batch_size, len(texts))]
-                chunks.extend(self._process_text_batch(batch_texts))
-            return chunks
+        chunks = []
+        for i in trange(0,
+                        len(texts),
+                        batch_size,
+                        desc="🦛 CHONKING",
+                        disable=not show_progress_bar, 
+                        unit="batches",
+                        bar_format="{desc}: [{bar:20}] {percentage:3.0f}% • {n_fmt}/{total_fmt} batches chunked [{elapsed}<{remaining}, {rate_fmt}] 🌱",
+                        ascii=' >='):
+            batch_texts = texts[i : min(i + batch_size, len(texts))]
+            chunks.extend(self._process_text_batch(batch_texts))
+        return chunks
+    
+    def __call__(self,
+                text: Union[str, List[str]],
+                batch_size: int = 1,
+                show_progress_bar: bool = True) -> Union[List[Chunk], List[List[Chunk]]]:
+        """Make the TokenChunker callable directly.
+        
+        Args:
+            text: Input text or list of texts to be chunked
+            batch_size: Number of texts to process in a single batch
+            show_progress_bar: Whether to show a progress bar (for batch chunking)
+        
+        Returns:
+            List of Chunk objects or list of lists of Chunk
+
+        """
+        if isinstance(text, str):
+            return self.chunk(text)
+        elif isinstance(text, list) and isinstance(text[0], str):
+            return self.chunk_batch(text, batch_size, show_progress_bar)
         else:
-            return self._process_text_batch(texts)
+            raise ValueError("Invalid input type. Expected a string or a list of strings.")
 
     def __repr__(self) -> str:
         """Return a string representation of the TokenChunker."""
