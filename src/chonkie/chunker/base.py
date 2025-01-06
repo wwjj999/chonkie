@@ -249,24 +249,31 @@ class BaseChunker(ABC):
                     desc="🦛 CHONKING",
                     disable=not show_progress_bar,
                     unit="texts",
-                    bar_format="{desc}: |{bar:20}| {percentage:3.0f}% • {n_fmt}/{total_fmt} texts chunked [{elapsed}<{remaining}, {rate_fmt}] 🌱",
-                    ascii=' ▏▎▍▌▋▊▉'
-                )
-            ]
+                    bar_format="{desc}: [{bar:20}] {percentage:3.0f}% • {n_fmt}/{total_fmt} texts chunked [{elapsed}<{remaining}, {rate_fmt}] 🌱", 
+                    ascii=' >=')
+        ]
     
     def _process_batch_multiprocessing(self,
                                      texts: List[str],
                                      show_progress_bar: bool = True) -> List[List[Chunk]]:
         """Process a batch of texts using multiprocessing."""
         num_workers = self._determine_optimal_workers()
+        total = len(texts)
+        chunksize = max(1, min(total // (num_workers * 16), 10)) # Optimize chunk size
+        
         with Pool(processes=num_workers) as pool:
-            return list(tqdm(pool.imap(self.chunk, texts),
-                             desc="🦛 CHONKING",
-                             disable=not show_progress_bar,
-                             unit="texts",
-                             bar_format="{desc}: |{bar:20}| {percentage:3.0f}% • {n_fmt}/{total_fmt} texts chunked [{elapsed}<{remaining}, {rate_fmt}] 🌱",
-                             ascii=' ▏▎▍▌▋▊▉'))
-    
+            results = []
+            with tqdm(total=total,
+                     desc="🦛 CHONKING",
+                     disable=not show_progress_bar,
+                     unit="texts",
+                     bar_format="{desc}: [{bar:20}] {percentage:3.0f}% • {n_fmt}/{total_fmt} texts chunked [{elapsed}<{remaining}, {rate_fmt}] 🌱",
+                     ascii=' >=') as pbar:
+                for result in pool.imap_unordered(self.chunk, texts, chunksize=chunksize):
+                    results.append(result)
+                    pbar.update()
+            return results
+        
     def chunk_batch(
         self,
         texts: List[str],

@@ -194,8 +194,8 @@ class TokenChunker(BaseChunker):
                         desc="🦛 CHONKING",
                         disable=not show_progress_bar, 
                         unit="batches",
-                        ascii=" ▏▎▍▌▋▊▉",
-                        bar_format="{desc}: |{bar:20}| {percentage:3.0f}% • {n_fmt}/{total_fmt} batches chunked [{elapsed}<{remaining}, {rate_fmt}] 🌱"):
+                        bar_format="{desc}: [{bar:20}] {percentage:3.0f}% • {n_fmt}/{total_fmt} batches chunked [{elapsed}<{remaining}, {rate_fmt}] 🌱",
+                        ascii=' >='):
             batch_texts = texts[i : min(i + batch_size, len(texts))]
             chunks.extend(self._process_text_batch(batch_texts))
         return chunks
