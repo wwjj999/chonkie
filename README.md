@@ -23,11 +23,11 @@ _The no-nonsense RAG chunking library that's lightweight, lightning-fast, and re
 
 </div>
 
-Ever found yourself building yet another RAG bot (your 2,342,148th one, but who's counting?), only to hit that all-too-familiar wall? You know the one - where you're stuck choosing between:
+Ever found yourself building yet another RAG bot (your 2,342,148th one), only to hit that all-too-familiar wall? You know the one —— where you're stuck choosing between:
 
 - Library X: A behemoth that takes forever to install and probably includes three different kitchen sinks
 - Library Y: So bare-bones it might as well be a "Hello World" program
-- Writing it yourself? For the 2,342,149th time... sigh
+- Writing it yourself? For the 2,342,149th time, _sigh_
 
 And you think to yourself:
 
@@ -35,7 +35,7 @@ And you think to yourself:
 > "Why do I need to choose between bloated and bare-bones?" </br>
 > "Why can't I just install, import, and CHONK?!" </br>
 
-Well, look no further than Chonkie! (a chonkie boi is a gud boi 🦛💕)
+Well, look no further than Chonkie! (chonkie boi is a gud boi 🦛💕)
 
 **🚀 Feature-rich**: All the CHONKs you'd ever need </br>
 **✨ Easy to use**: Install, Import, CHONK </br>
@@ -45,7 +45,7 @@ Well, look no further than Chonkie! (a chonkie boi is a gud boi 🦛💕)
 **🦛 Cute CHONK mascot**: psst it's a pygmy hippo btw </br>
 **❤️ [Moto Moto](#acknowledgements)'s favorite python library** </br>
 
-**Chonkie** is a chunking library that "**just works™**". So what're you waiting for, **just CHONK it**!
+**Chonkie** is a chunking library that "**just works™**".
 
 # Installation
 
