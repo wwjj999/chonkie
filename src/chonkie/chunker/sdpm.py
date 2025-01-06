@@ -76,6 +76,9 @@ class SDPMChunker(SemanticChunker):
         )
         self.skip_window = skip_window
 
+        # Remove the multiprocessing flag from the base class
+        self._use_multiprocessing = False
+
     def _merge_groups(self, groups: List[List[Sentence]]) -> List[Sentence]:
         """Merge the groups together."""
         merged_group = []
