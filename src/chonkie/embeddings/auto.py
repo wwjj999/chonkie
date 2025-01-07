@@ -1,6 +1,5 @@
 """AutoEmbeddings is a factory class for automatically loading embeddings."""
 
-import warnings
 from typing import Any, Union
 
 from .base import BaseEmbeddings
