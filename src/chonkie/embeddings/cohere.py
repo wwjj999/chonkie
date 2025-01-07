@@ -32,7 +32,7 @@ class CohereEmbeddings(BaseEmbeddings):
         client_name: Optional[str] = None,
         max_retries: int = 3,
         timeout: float = 60.0,
-        batch_size: int = 128,
+        batch_size: int = 96,
         show_warnings: bool = True
     ):
         """Initialize Cohere embeddings.
