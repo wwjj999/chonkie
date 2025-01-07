@@ -40,7 +40,7 @@ class CohereEmbeddings(BaseEmbeddings):
         Args:
             model: name of the Cohere embedding model to use
             api_key: (optional) Cohere API key (if not provided, looks for COHERE_API_KEY environment variable)
-            organization: (optional) client name for API requests
+            client_name: (optional) client name for API requests
             max_retries: maximum number of retries for failed requests
             timeout: timeout in seconds for API requests
             batch_size: maximum number of texts to embed in one API call (maximum allowed by Cohere is 96)
