@@ -2,11 +2,13 @@
 
 from typing import Any, Generator, List, Tuple, Union
 
+from tqdm import trange
+
 from chonkie.types import Chunk
 
 from .base import BaseChunker
 
-from tqdm import trange
+
 class TokenChunker(BaseChunker):
     """Chunker that splits text into chunks of a specified token size.
 

@@ -7,9 +7,11 @@ from abc import ABC, abstractmethod
 from multiprocessing import Pool, cpu_count
 from typing import Any, Callable, List, Union
 
+from tqdm import tqdm
+
 from chonkie.types import Chunk
 
-from tqdm import tqdm
+
 class BaseChunker(ABC):
     """Abstract base class for all chunker implementations.
 
