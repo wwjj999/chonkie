@@ -1,7 +1,7 @@
 """Sentence chunker."""
 from bisect import bisect_left
 from itertools import accumulate
-from typing import Any, List, Union
+from typing import Any, List, Union, Literal
 
 from chonkie.types import Chunk, Sentence, SentenceChunk
 
@@ -33,6 +33,7 @@ class SentenceChunker(BaseChunker):
         min_characters_per_sentence: int = 12,
         approximate: bool = True,
         delim: Union[str, List[str]] = [".", "!", "?", "\n"],
+        return_type: Literal["chunks", "texts"] = "chunks",
         **kwargs
     ):
         """Initialize the SentenceChunker with configuration parameters.
@@ -48,6 +49,8 @@ class SentenceChunker(BaseChunker):
             min_characters_per_sentence: Minimum number of characters per sentence
             approximate: Whether to use approximate token counting (defaults to True)
             delim: Delimiters to split sentences on
+            return_type: Whether to return chunks or texts
+
         Raises:
             ValueError: If parameters are invalid
 
@@ -62,6 +65,8 @@ class SentenceChunker(BaseChunker):
             raise ValueError("min_sentences_per_chunk must be at least 1")
         if min_characters_per_sentence < 1:
             raise ValueError("min_characters_per_sentence must be at least 1")
+        if return_type not in ["chunks", "texts"]:
+            raise ValueError("Invalid return_type. Must be either 'chunks' or 'texts'.")
 
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
@@ -70,6 +75,7 @@ class SentenceChunker(BaseChunker):
         self.approximate = approximate
         self.delim = delim
         self.sep = "🦛"
+        self.return_type = return_type
 
     # TODO: This is a older method of sentence splitting that uses Regex
     # but since Regex in python via re is super slooooow we use a different method
@@ -372,8 +378,13 @@ class SentenceChunker(BaseChunker):
                 chunk_sentences = sentences[pos:split_idx]
                 chunk_text = "".join(s.text for s in chunk_sentences)
                 actual = len(self._encode(chunk_text))
-
-            chunks.append(self._create_chunk(chunk_sentences, actual))
+    
+            if self.return_type == "chunks":
+                chunks.append(self._create_chunk(chunk_sentences, actual))
+            elif self.return_type == "texts":
+                chunks.append("".join(chunk_sentences))
+            else:
+                raise ValueError("Invalid return_type. Must be either 'chunks' or 'texts'.")
 
             # Calculate next position with overlap
             if self.chunk_overlap > 0 and split_idx < len(sentences):
