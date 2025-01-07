@@ -269,7 +269,7 @@ class BaseChunker(ABC):
                      unit="texts",
                      bar_format="{desc}: [{bar:20}] {percentage:3.0f}% • {n_fmt}/{total_fmt} texts chunked [{elapsed}<{remaining}, {rate_fmt}] 🌱",
                      ascii=' >=') as pbar:
-                for result in pool.imap_unordered(self.chunk, texts, chunksize=chunksize):
+                for result in pool.imap(self.chunk, texts, chunksize=chunksize):
                     results.append(result)
                     pbar.update()
             return results
