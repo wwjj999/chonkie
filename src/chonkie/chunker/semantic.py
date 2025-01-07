@@ -115,13 +115,13 @@ class SemanticChunker(BaseChunker):
             self.embedding_model = AutoEmbeddings.get_embeddings(embedding_model, **kwargs)
         else:
             raise ValueError(
-                "embedding_model must be a string or BaseEmbeddings instance"
+                f"{embedding_model} is not a valid embedding model"
             )
 
         # Probably the dependency is not installed
         if self.embedding_model is None:
             raise ImportError(
-                "embedding_model is not a valid embedding model",
+                f"{embedding_model} is not a valid embedding model",
                 "Please install the `semantic` extra to use this feature",
             )
 
