@@ -33,8 +33,7 @@ class SentenceChunker(BaseChunker):
         min_characters_per_sentence: int = 12,
         approximate: bool = True,
         delim: Union[str, List[str]] = [".", "!", "?", "\n"],
-        return_type: Literal["chunks", "texts"] = "chunks",
-        **kwargs
+        return_type: Literal["chunks", "texts"] = "chunks"
     ):
         """Initialize the SentenceChunker with configuration parameters.
 
@@ -303,13 +302,16 @@ class SentenceChunker(BaseChunker):
 
         """
         chunk_text = "".join([sentence.text for sentence in sentences])
-        return SentenceChunk(
-            text=chunk_text,
-            start_index=sentences[0].start_index,
-            end_index=sentences[-1].end_index,
-            token_count=token_count,
-            sentences=sentences,
-        )
+        if self.return_type == "texts":
+            return chunk_text
+        else:
+            return SentenceChunk(
+                text=chunk_text,
+                start_index=sentences[0].start_index,
+                end_index=sentences[-1].end_index,
+                token_count=token_count,
+                sentences=sentences,
+            )
 
     def chunk(self, text: str) -> List[Chunk]:
         """Split text into overlapping chunks based on sentences while respecting token limits.
@@ -379,12 +381,7 @@ class SentenceChunker(BaseChunker):
                 chunk_text = "".join(s.text for s in chunk_sentences)
                 actual = len(self._encode(chunk_text))
     
-            if self.return_type == "chunks":
-                chunks.append(self._create_chunk(chunk_sentences, actual))
-            elif self.return_type == "texts":
-                chunks.append("".join(chunk_sentences))
-            else:
-                raise ValueError("Invalid return_type. Must be either 'chunks' or 'texts'.")
+            chunks.append(self._create_chunk(chunk_sentences, actual))
 
             # Calculate next position with overlap
             if self.chunk_overlap > 0 and split_idx < len(sentences):
