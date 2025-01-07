@@ -246,11 +246,11 @@ class BaseChunker(ABC):
         return [
                 self.chunk(t) for t in tqdm(
                     texts,
-                    desc="🦛 CHONKING",
+                    desc="🦛",
                     disable=not show_progress_bar,
-                    unit="text",
-                    bar_format="{desc}: [{bar:20}] {percentage:3.0f}% • {n_fmt}/{total_fmt} texts chunked [{elapsed}<{remaining}, {rate_fmt}] 🌱", 
-                    ascii=' >=')
+                        unit="doc",
+                    bar_format="{desc} ch{bar:20}nk {percentage:3.0f}% • {n_fmt}/{total_fmt} docs chunked [{elapsed}<{remaining}, {rate_fmt}] 🌱", 
+                    ascii=' o')
         ]
     
     def _process_batch_multiprocessing(self,
@@ -264,11 +264,11 @@ class BaseChunker(ABC):
         with Pool(processes=num_workers) as pool:
             results = []
             with tqdm(total=total,
-                     desc="🦛 CHONKING",
+                     desc="🦛",
                      disable=not show_progress_bar,
-                     unit="texts",
-                     bar_format="{desc}: [{bar:20}] {percentage:3.0f}% • {n_fmt}/{total_fmt} texts chunked [{elapsed}<{remaining}, {rate_fmt}] 🌱",
-                     ascii=' >=') as pbar:
+                     unit="doc",
+                     bar_format="{desc} ch{bar:20}nk {percentage:3.0f}% • {n_fmt}/{total_fmt} docs chunked [{elapsed}<{remaining}, {rate_fmt}] 🌱",
+                     ascii=' o') as pbar:
                 for result in pool.imap(self.chunk, texts, chunksize=chunksize):
                     results.append(result)
                     pbar.update()
