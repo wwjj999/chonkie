@@ -1,6 +1,6 @@
 """Word-based chunker."""
 import re
-from typing import Any, List, Tuple, Union
+from typing import Any, List, Tuple, Union, Literal
 
 from chonkie.types import Chunk
 
@@ -25,6 +25,7 @@ class WordChunker(BaseChunker):
         tokenizer: Union[str, Any] = "gpt2",
         chunk_size: int = 512,
         chunk_overlap: int = 128,
+        return_type: Literal["chunks", "texts"] = "chunks"
     ):
         """Initialize the WordChunker with configuration parameters.
 
@@ -32,10 +33,10 @@ class WordChunker(BaseChunker):
             tokenizer: The tokenizer instance to use for encoding/decoding
             chunk_size: Maximum number of tokens per chunk
             chunk_overlap: Maximum number of tokens to overlap between chunks
-            mode: Tokenization mode - "heuristic" (space-based) or "advanced" (handles punctuation)
+            return_type: Whether to return chunks or texts
 
         Raises:
-            ValueError: If chunk_size <= 0 or chunk_overlap >= chunk_size or invalid mode
+            ValueError: If chunk_size <= 0 or chunk_overlap >= chunk_size or invalid return_type
 
         """
         super().__init__(tokenizer)
@@ -44,9 +45,12 @@ class WordChunker(BaseChunker):
             raise ValueError("chunk_size must be positive")
         if chunk_overlap >= chunk_size:
             raise ValueError("chunk_overlap must be less than chunk_size")
+        if return_type not in ["chunks", "texts"]:
+            raise ValueError("Invalid return_type. Must be either 'chunks' or 'texts'.")    
 
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
+        self.return_type = return_type
 
     def _split_into_words(self, text: str) -> List[str]:
         """Split text into words while preserving whitespace."""
@@ -135,13 +139,18 @@ class WordChunker(BaseChunker):
                 current_chunk.append(word)
                 current_chunk_length += length
             else:
-                chunk = self._create_chunk(
-                    current_chunk,
-                    text,
-                    current_chunk_length,
-                    current_index,
-                )
-                chunks.append(chunk)
+                if self.return_type == "chunks":
+                    chunk = self._create_chunk(
+                        current_chunk,
+                        text,
+                        current_chunk_length,
+                        current_index,
+                    )
+                    chunks.append(chunk)
+                elif self.return_type == "texts":
+                    chunks.append("".join(current_chunk))
+                
+                
                 # update the current_chunk and previous chunk
                 previous_chunk_length = current_chunk_length
                 current_index = chunk.end_index
@@ -167,8 +176,11 @@ class WordChunker(BaseChunker):
 
         # Add the final chunk if it has any words
         if current_chunk:
-            chunk = self._create_chunk(current_chunk, text, current_chunk_length)
-            chunks.append(chunk)
+            if self.return_type == "chunks":
+                chunk = self._create_chunk(current_chunk, text, current_chunk_length)
+                chunks.append(chunk)
+            elif self.return_type == "texts":
+                chunks.append("".join(current_chunk))
         return chunks
 
     def __repr__(self) -> str:
