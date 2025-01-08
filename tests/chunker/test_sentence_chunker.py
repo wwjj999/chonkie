@@ -171,6 +171,12 @@ def test_sentence_chunker_token_counts(tokenizer, sample_text):
     token_counts = [len(tokenizer.encode(chunk.text)) for chunk in chunks]
     assert all([chunk.token_count == token_count for chunk, token_count in zip(chunks, token_counts)]), "All chunks must have a token count equal to the length of the encoded text"
 
+def test_sentence_chunker_return_type(tokenizer, sample_text):
+    """Test that SentenceChunker's return type is correctly set."""
+    chunker = SentenceChunker(tokenizer=tokenizer, chunk_size=512, chunk_overlap=128, return_type="texts")
+    chunks = chunker.chunk(sample_text)
+    assert all([type(chunk) is str for chunk in chunks])
+    assert all([len(tokenizer.encode(chunk)) <= 512 for chunk in chunks])
 
 if __name__ == "__main__":
     pytest.main()
