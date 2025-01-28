@@ -45,7 +45,7 @@ class BaseChef(ABC):
     
     def fetch(self,
              files: Optional[Union[str, List[str]]] = None,
-             dir: Optional[str] = None) -> Union[str, List[str]]:
+             directory: Optional[str] = None) -> Union[str, List[str]]:
         """Fetch the files from the given directory or file paths.
 
         Reads the file or files from the given directory or file paths and
@@ -53,26 +53,26 @@ class BaseChef(ABC):
         
         Args:
             files: The files to fetch.
-            dir: The directory to fetch the files from.
+            directory: The directory to fetch the files from.
 
         Returns:
             The content of the file or files.
 
         """
-        if files is None and dir is None:
-            raise ValueError("Either files or dir must be provided")
-        if files is not None and dir is not None:
-            raise ValueError("Only one of files or dir can be provided")
+        if files is None and directory is None:
+            raise ValueError("Either files or directory must be provided")
+        if files is not None and directory is not None:
+            raise ValueError("Only one of files or directory can be provided")
         
         # If dir is provided, fetch all the files in the supported extensions
         # If supported extensions are not provided, fetch all the files
-        if dir is not None:
-            if not os.path.isdir(dir):
-                raise FileNotFoundError(f"Directory not found: {dir}")
+        if directory is not None:
+            if not os.path.isdir(directory):
+                raise FileNotFoundError(f"Directory not found: {directory}")
             
             # Get all files from directory which are supported extensions
-            all_files = [os.path.join(dir, f) for f in os.listdir(dir)
-                        if os.path.isfile(os.path.join(dir, f)) and 
+            all_files = [os.path.join(directory, f) for f in os.listdir(directory)
+                        if os.path.isfile(os.path.join(directory, f)) and 
                         any(f.endswith(ext) for ext in self._extensions)]
             return self._read_files(all_files)
         
@@ -100,25 +100,25 @@ class BaseChef(ABC):
     def process(self,
                 texts: Union[str, List[str]],
                 files: Optional[Union[str, List[str]]] = None,
-                dir: Optional[str] = None) -> str:
+                directory: Optional[str] = None) -> str:
         """Process the text or the files/dir.
 
         Args:
             texts: The text to process.
             files: The files to process.
-            dir: The directory to process the files from.
+            directory: The directory to process the files from.
 
         Returns:
             The processed text.
 
         """
         # Text and files are mutually exclusive
-        if texts is not None and (files is not None or dir is not None):
+        if texts is not None and (files is not None or directory is not None):
             raise ValueError("Either text or files/dir must be provided, not both")
         
         # If files is provided, fetch the files
         if files is not None:
-            texts = self.fetch(files, dir)
+            texts = self.fetch(files, directory)
         
         # Clean the texts
         texts = [self.clean(text) for text in texts]
@@ -129,6 +129,6 @@ class BaseChef(ABC):
     def __call__(self,
                  texts: Optional[Union[str, List[str]]] = None,
                  files: Optional[Union[str, List[str]]] = None,
-                 dir: Optional[str] = None) -> str:
+                 directory: Optional[str] = None) -> str:
         """Call the chef."""
-        return self.process(texts, files, dir)
+        return self.process(texts, files, directory)

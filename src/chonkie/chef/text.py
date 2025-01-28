@@ -2,7 +2,7 @@
 import re
 
 from chonkie.chef.base import BaseChef
-from chonkie.chef.patterns import Abbreviations, UnicodeReplacements
+from chonkie.chef.patterns import ABBREVIATIONS, UnicodeReplacements
 
 
 class TextChef(BaseChef):
@@ -16,7 +16,8 @@ class TextChef(BaseChef):
                  whitespace: bool = True,
                  newlines: bool = True,
                  abbreviations: bool = True,
-                 ellipsis: bool = True, 
+                 ellipsis: bool = True,
+                 mid_sentence_newlines: bool = False, 
                  sentence_endings: str = '.!?;:') -> None:
         """Initialize the TextChef with common text file extensions."""
         extensions = ['.txt', '.md', '.rst', '.text']
@@ -25,6 +26,7 @@ class TextChef(BaseChef):
         # Initialize the flags
         self._enable_whitespace = whitespace
         self._enable_newlines = newlines
+        self._enable_mid_sentence_newlines = mid_sentence_newlines
         self._enable_abbreviations = abbreviations
         self._enable_ellipsis = ellipsis
 
@@ -32,18 +34,18 @@ class TextChef(BaseChef):
         self._sentence_endings = sentence_endings
         
         # Initialize the patterns
-        self._abbreviations = Abbreviations.all() if abbreviations else set()
+        self._abbreviations = ABBREVIATIONS if abbreviations else set()
         self._unicode_replacements = UnicodeReplacements()
 
         # Compiling the regex patterns
         self._ellipsis_pattern = re.compile(r'\.{3,}')
-        self._newline_pattern = re.compile(r'\n+')
+        self._paragraph_pattern = re.compile(r'\n{2,}')
 
     def _handle_abbreviations(self, text: str) -> str:
         """Replace the fullstop in abbreviations with a dot leader."""
         for abbreviation in self._abbreviations:
             new_abbreviation = abbreviation.replace('.', self._unicode_replacements.DOT_LEADER)
-            text = re.sub(abbreviation, new_abbreviation, text)
+            text = text.replace(abbreviation, new_abbreviation)
         return text
 
     def _replace_ellipsis(self, text: str) -> str:
@@ -70,7 +72,7 @@ class TextChef(BaseChef):
 
         """
         # Replace multiple spaces with single space
-        text = ' '.join(text.split())
+        text = ' '.join(text.split(' '))
         return text
     
     def _normalize_newlines(self, text: str) -> str:
@@ -87,24 +89,62 @@ class TextChef(BaseChef):
         text = text.replace('\r\n', '\n').replace('\r', '\n')
         
         # Normalize more than one newline as double newlines
-        text = self._newline_pattern.sub('\n\n', text)
+        text = self._paragraph_pattern.sub('\n\n', text)
 
-        # Remove empty lines while preserving paragraph structure
-        lines = [line.strip() for line in text.split('\n')]
-        result = []
+        return text
+    
+    def _handle_mid_sentence_newlines(self, text: str) -> str:
+        """Handle mid-sentence newlines while preserving paragraph breaks.
         
-        for i, line in enumerate(lines):
-            if not line:  # Skip empty lines
+        This function distinguishes between line wrapping and paragraph breaks:
+        - Multiple newlines (2+) indicate paragraph breaks and are preserved
+        - Single newlines within sentences are converted to spaces
+        - Newlines after sentence endings start new lines
+        
+        Args:
+            text: Input text
+                
+        Returns:
+            Text with line wrapping handled but paragraph breaks preserved
+
+        """
+        # Split into paragraphs (2+ newlines)
+        paragraphs = text.split('\n\n')
+        processed_paragraphs = []
+        
+        for paragraph in paragraphs:
+            if not paragraph.strip():
                 continue
                 
-            # If this isn't the first line and previous line doesn't end with 
-            # sentence ending punctuation, join with a space instead of newline
-            if result and not result[-1][-1] in self._sentence_endings:
-                result[-1] = result[-1] + ' ' + line
-            else:
-                result.append(line)
+            # Split paragraph into lines
+            lines = paragraph.split('\n')
+            result = []
+            current_line = ''
+            
+            for line in lines:
+                stripped_line = line.strip()
+                if not stripped_line:
+                    continue
+                    
+                # If we have a current line and it doesn't end with sentence ending punctuation
+                # and the current line isn't starting with dialog markers or special punctuation
+                if (current_line and 
+                    not any(current_line.rstrip().endswith(end) for end in self._sentence_endings) and
+                    not any(stripped_line.startswith(p) for p in ['"', '"', ''', ''', '-', '—'])):
+                    current_line = f"{current_line} {stripped_line}"
+                else:
+                    if current_line:
+                        result.append(current_line)
+                    current_line = stripped_line
+            
+            if current_line:
+                result.append(current_line)
                 
-        return '\n'.join(result)
+            # Join the lines in this paragraph
+            processed_paragraphs.append('\n'.join(result))
+        
+        # Join paragraphs with double newlines
+        return '\n\n'.join(processed_paragraphs)
 
     def clean(self, text: str) -> str:
         r"""Clean the text by performing basic text processing operations.
@@ -124,6 +164,10 @@ class TextChef(BaseChef):
         # Normalize whitespace
         if self._enable_whitespace:
             text = self._normalize_whitespace(text)
+
+        # Handle mid-sentence newlines
+        if self._enable_mid_sentence_newlines:
+            text = self._handle_mid_sentence_newlines(text)
 
         # Normalize newlines
         if self._enable_newlines:
