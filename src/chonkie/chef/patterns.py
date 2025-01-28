@@ -1,81 +1,62 @@
 """Common text patterns and abbreviations used across chefs."""
 
 from dataclasses import dataclass
-from typing import Dict, Set
 
+# Titles and honorifics
+TITLES = {
+    'Mr.', 'Mrs.', 'Ms.', 'Dr.', 'Prof.',
+    'Sr.', 'Jr.', 'Rev.', 'Hon.',
+}
 
-@dataclass
-class Abbreviations:
-    """Common abbreviations grouped by category."""
-    
-    # Titles and honorifics
-    TITLES: Set[str] = {
-        'Mr.', 'Mrs.', 'Ms.', 'Dr.', 'Prof.',
-        'Sr.', 'Jr.', 'Rev.', 'Hon.',
-    }
-    
-    # Academic and professional 
-    ACADEMIC: Set[str] = {
-        'Ph.D.', 'M.D.', 'B.A.', 'M.A.', 'B.Sc.',
-        'M.Sc.', 'D.Phil.', 'LL.B.', 'LL.M.',
-    }
-    
-    # Latin abbreviations
-    LATIN: Set[str] = {
-        'etc.', 'e.g.', 'i.e.', 'viz.',
-        'vs.', 'al.', 'et al.', 'cf.',
-    }
-    
-    # Military and government
-    MILITARY: Set[str] = {
-        'Gen.', 'Col.', 'Lt.', 'Sgt.', 'Capt.',
-        'Maj.', 'Adm.', 'Gov.', 'Sen.', 'Rep.',
-    }
-    
-    # Common measurements
-    MEASUREMENTS: Set[str] = {
-        'cm.', 'mm.', 'km.', 'kg.', 'lb.',
-        'ft.', 'in.', 'hr.', 'min.', 'sec.',
-    }
-    
-    # Business and organization
-    BUSINESS: Set[str] = {
-        'Inc.', 'Ltd.', 'Corp.', 'Co.', 'LLC.',
-        'dept.', 'div.', 'est.', 'avg.', 'approx.',
-    }
-    
-    # Temporal abbreviations
-    TEMPORAL: Set[str] = {
-        'Jan.', 'Feb.', 'Mar.', 'Apr.', 'Jun.',
-        'Jul.', 'Aug.', 'Sep.', 'Sept.', 'Oct.',
-        'Nov.', 'Dec.', 'Mon.', 'Tue.', 'Wed.',
-        'Thu.', 'Fri.', 'Sat.', 'Sun.',
-    }
-    
-    # Geographical abbreviations
-    GEOGRAPHICAL: Set[str] = {
-        'U.S.', 'U.S.A.', 'U.K.', 'E.U.',
-        'Ave.', 'Blvd.', 'Rd.', 'St.', 'Mt.',
-    }
+# Academic and professional 
+ACADEMIC = {
+    'Ph.D.', 'M.D.', 'B.A.', 'M.A.', 'B.Sc.',
+    'M.Sc.', 'D.Phil.', 'LL.B.', 'LL.M.',
+}
 
-    @classmethod
-    def all(cls) -> Set[str]:
-        """Return all abbreviations as a single set."""
-        all_abbrevs = set()
-        for field_name in cls.__annotations__:
-            if isinstance(field_name, str) and field_name.isupper():
-                all_abbrevs.update(getattr(cls, field_name))
-        return all_abbrevs
+# Latin abbreviations
+LATIN = {
+    'etc.', 'e.g.', 'i.e.', 'viz.',
+    'vs.', 'al.', 'et al.', 'cf.',
+}
 
-    @classmethod
-    def by_category(cls) -> Dict[str, Set[str]]:
-        """Return abbreviations grouped by category."""
-        categories = {}
-        for field_name in cls.__annotations__:
-            if isinstance(field_name, str) and field_name.isupper():
-                categories[field_name.lower()] = getattr(cls, field_name)
-        return categories
+# Military and government
+MILITARY = {
+    'Gen.', 'Col.', 'Lt.', 'Sgt.', 'Capt.',
+    'Maj.', 'Adm.', 'Gov.', 'Sen.', 'Rep.',
+}
 
+# Common measurements
+MEASUREMENTS = {
+    'cm.', 'mm.', 'km.', 'kg.', 'lb.',
+    'ft.', 'in.', 'hr.', 'min.', 'sec.',
+}
+
+# Business and organization
+BUSINESS = {
+    'Inc.', 'Ltd.', 'Corp.', 'Co.', 'LLC.',
+    'dept.', 'div.', 'est.', 'avg.', 'approx.',
+}
+
+# Temporal abbreviations
+TEMPORAL = {
+    'Jan.', 'Feb.', 'Mar.', 'Apr.', 'Jun.',
+    'Jul.', 'Aug.', 'Sep.', 'Sept.', 'Oct.',
+    'Nov.', 'Dec.', 'Mon.', 'Tue.', 'Wed.',
+    'Thu.', 'Fri.', 'Sat.', 'Sun.',
+}
+
+# Geographical abbreviations
+GEOGRAPHICAL = {
+    'U.S.', 'U.S.A.', 'U.K.', 'E.U.',
+    'Ave.', 'Blvd.', 'Rd.', 'St.', 'Mt.',
+}
+
+# Combine all abbreviations
+ABBREVIATIONS = (
+    TITLES | ACADEMIC | LATIN | MILITARY | MEASUREMENTS |
+    BUSINESS | TEMPORAL | GEOGRAPHICAL
+)
 
 @dataclass(frozen=True, slots=True)
 class UnicodeReplacements:

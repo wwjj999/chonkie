@@ -1,7 +1,7 @@
 """Main package for Chonkie."""
 
 from .chef import (
-    Abbreviations,
+    ABBREVIATIONS,
     BaseChef,
     TextChef,
     UnicodeReplacements,
@@ -96,6 +96,6 @@ __all__ += [
 __all__ += [
     "BaseChef",
     "TextChef",
-    "Abbreviations",
+    "ABBREVIATIONS",
     "UnicodeReplacements",
 ]

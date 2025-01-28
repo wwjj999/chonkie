@@ -1,10 +1,10 @@
 """A module for handling text files."""
 
 from .base import BaseChef
-from .patterns import Abbreviations, UnicodeReplacements
+from .patterns import ABBREVIATIONS, UnicodeReplacements
 from .text import TextChef
 
 __all__ = ['BaseChef', 
            'TextChef',
-           'Abbreviations',
+           'ABBREVIATIONS',
            'UnicodeReplacements']
