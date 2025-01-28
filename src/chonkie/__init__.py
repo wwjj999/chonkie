@@ -1,5 +1,11 @@
 """Main package for Chonkie."""
 
+from .chef import (
+    Abbreviations,
+    BaseChef,
+    TextChef,
+    UnicodeReplacements,
+)
 from .chunker import (
     BaseChunker,
     LateChunker,
@@ -84,4 +90,12 @@ __all__ += [
 __all__ += [
     "BaseRefinery",
     "OverlapRefinery",
+]
+
+# Add all chef classes to __all__
+__all__ += [
+    "BaseChef",
+    "TextChef",
+    "Abbreviations",
+    "UnicodeReplacements",
 ]

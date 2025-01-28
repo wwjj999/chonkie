@@ -1,7 +1,7 @@
 """Sentence chunker."""
 from bisect import bisect_left
 from itertools import accumulate
-from typing import Any, List, Union, Literal
+from typing import Any, List, Literal, Union
 
 from chonkie.types import Chunk, Sentence, SentenceChunk
 

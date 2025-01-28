@@ -2,7 +2,7 @@
 from bisect import bisect_left
 from functools import lru_cache
 from itertools import accumulate
-from typing import Any, List, Optional, Union, Literal
+from typing import Any, List, Literal, Optional, Union
 
 from chonkie.chunker.base import BaseChunker
 from chonkie.types import Chunk, RecursiveChunk, RecursiveLevel, RecursiveRules

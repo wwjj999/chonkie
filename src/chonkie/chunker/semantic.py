@@ -1,7 +1,7 @@
 """Semantic chunking using sentence embeddings."""
 
 import warnings
-from typing import List, Union, Literal
+from typing import List, Literal, Union
 
 import numpy as np
 
@@ -28,6 +28,7 @@ class SemanticChunker(BaseChunker):
     
     Raises:
         ValueError: If parameters are invalid
+
     """
 
     def __init__(

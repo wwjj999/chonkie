@@ -1,8 +1,10 @@
-from typing import Optional, Union, List
+"""A Chef for handling text files."""
 import re
 
 from chonkie.chef.base import BaseChef
 from chonkie.chef.patterns import Abbreviations, UnicodeReplacements
+
+
 class TextChef(BaseChef):
     """A chef that handles basic text processing.
     

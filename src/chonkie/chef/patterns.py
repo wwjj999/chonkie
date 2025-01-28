@@ -1,7 +1,8 @@
 """Common text patterns and abbreviations used across chefs."""
 
 from dataclasses import dataclass
-from typing import Set, Dict
+from typing import Dict, Set
+
 
 @dataclass
 class Abbreviations:

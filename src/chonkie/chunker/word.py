@@ -1,6 +1,6 @@
 """Word-based chunker."""
 import re
-from typing import Any, List, Tuple, Union, Literal
+from typing import Any, List, Literal, Tuple, Union
 
 from chonkie.types import Chunk
 

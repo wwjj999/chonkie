@@ -1,8 +1,9 @@
 """Base class for all chefs."""
 
-from abc import ABC, abstractmethod
-from typing import Any, List, Optional, Union
 import os
+from abc import ABC, abstractmethod
+from typing import List, Optional, Union
+
 
 class BaseChef(ABC):
     """Base class for all chefs.
