@@ -1,7 +1,7 @@
 """Sentence chunker."""
 from bisect import bisect_left
 from itertools import accumulate
-from typing import Any, List, Union, Literal
+from typing import Any, Callable, List, Union, Literal
 
 from chonkie.types import Chunk, Sentence, SentenceChunk
 
@@ -26,7 +26,7 @@ class SentenceChunker(BaseChunker):
 
     def __init__(
         self,
-        tokenizer: Union[str, Any] = "gpt2",
+        tokenizer_or_token_counter: Union[str, Callable, Any] = "gpt2",
         chunk_size: int = 512,
         chunk_overlap: int = 128,
         min_sentences_per_chunk: int = 1,
@@ -54,7 +54,7 @@ class SentenceChunker(BaseChunker):
             ValueError: If parameters are invalid
 
         """
-        super().__init__(tokenizer)
+        super().__init__(tokenizer_or_token_counter=tokenizer_or_token_counter)
 
         if chunk_size <= 0:
             raise ValueError("chunk_size must be positive")
@@ -192,20 +192,6 @@ class SentenceChunker(BaseChunker):
 
         return sentences
 
-    def _get_token_counts(self, sentences: List[str]) -> List[int]:
-        """Get token counts for a list of sentences in batch.
-
-        Args:
-            sentences: List of sentences
-
-        Returns:
-            List of token counts for each sentence
-
-        """
-        # Batch encode all sentences at once
-        encoded_sentences = self._encode_batch(sentences)
-        return [len(encoded) for encoded in encoded_sentences]
-
     def _estimate_token_counts(self, sentences: List[str]) -> int:
         """Estimate token count using character length."""
         CHARS_PER_TOKEN = 6.0  # Avg. char per token for llama3 is b/w 6-7
@@ -248,7 +234,7 @@ class SentenceChunker(BaseChunker):
 
         if not self.approximate:
             # Get accurate token counts in batch
-            token_counts = self._get_token_counts(sentence_texts)
+            token_counts = self._count_tokens_batch(sentence_texts)
         else:
             # Estimate token counts using character length
             token_counts = self._estimate_token_counts(sentence_texts)
@@ -365,7 +351,7 @@ class SentenceChunker(BaseChunker):
             # Get candidate sentences and verify actual token count
             chunk_sentences = sentences[pos:split_idx]
             chunk_text = "".join(s.text for s in chunk_sentences)
-            actual = len(self._encode(chunk_text))
+            actual = self._count_tokens(chunk_text)
 
             # Given the actual token_count and the estimate, get a feedback value for the next loop
             feedback = self._get_feedback(estimate, actual)
@@ -379,7 +365,7 @@ class SentenceChunker(BaseChunker):
                 split_idx -= 1
                 chunk_sentences = sentences[pos:split_idx]
                 chunk_text = "".join(s.text for s in chunk_sentences)
-                actual = len(self._encode(chunk_text))
+                actual = self._count_tokens(chunk_text)
     
             chunks.append(self._create_chunk(chunk_sentences, actual))
 
