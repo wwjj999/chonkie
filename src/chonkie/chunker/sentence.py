@@ -12,12 +12,14 @@ class SentenceChunker(BaseChunker):
     """SentenceChunker splits the sentences in a text based on token limits and sentence boundaries.
 
     Args:
-        tokenizer: The tokenizer instance to use for encoding/decoding
+        tokenizer_or_token_counter: The tokenizer instance to use for encoding/decoding
         chunk_size: Maximum number of tokens per chunk
         chunk_overlap: Number of tokens to overlap between chunks
         min_sentences_per_chunk: Minimum number of sentences per chunk (defaults to 1)
-        min_chunk_size: Minimum number of tokens per sentence (defaults to 2)
+        min_characters_per_sentence: Minimum number of characters per sentence
         approximate: Whether to use approximate token counting (defaults to True)
+        delim: Delimiters to split sentences on
+        return_type: Whether to return chunks or texts
 
     Raises:
         ValueError: If parameters are invalid
@@ -40,11 +42,10 @@ class SentenceChunker(BaseChunker):
         SentenceChunker splits the sentences in a text based on token limits and sentence boundaries.
 
         Args:
-            tokenizer: The tokenizer instance to use for encoding/decoding
+            tokenizer_or_token_counter: The tokenizer instance to use for encoding/decoding
             chunk_size: Maximum number of tokens per chunk
             chunk_overlap: Number of tokens to overlap between chunks
             min_sentences_per_chunk: Minimum number of sentences per chunk (defaults to 1)
-            min_chunk_size: Minimum number of tokens per sentence (defaults to 2)
             min_characters_per_sentence: Minimum number of characters per sentence
             approximate: Whether to use approximate token counting (defaults to True)
             delim: Delimiters to split sentences on
