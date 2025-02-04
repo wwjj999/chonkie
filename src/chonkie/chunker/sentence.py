@@ -1,4 +1,5 @@
 """Sentence chunker."""
+import warnings
 from bisect import bisect_left
 from itertools import accumulate
 from typing import Any, Callable, List, Literal, Union
@@ -115,7 +116,7 @@ class SentenceChunker(BaseChunker):
 
         # Combine short splits with previous sentence
         for s in splits:
-            if len(s.strip()) < self.min_characters_per_sentence:
+            if len(s) < self.min_characters_per_sentence:
                 current += s
             else:
                 if current:
@@ -279,7 +280,15 @@ class SentenceChunker(BaseChunker):
 
             # Handle minimum sentences requirement
             if split_idx - pos < self.min_sentences_per_chunk:
-                split_idx = pos + self.min_sentences_per_chunk
+                # If the minimum sentences per chunk can be met, set the split index to the minimum sentences per chunk
+                # Otherwise, warn the user that the minimum sentences per chunk could not be met for all chunks
+                if pos + self.min_sentences_per_chunk <= len(sentences):
+                    split_idx = pos + self.min_sentences_per_chunk
+                else:
+                    warnings.warn(f"Minimum sentences per chunk as {self.min_sentences_per_chunk} could not be met for all chunks. " +
+                                  f"Last chunk of the text will have only {len(sentences) - pos} sentences. " +
+                                  "Consider increasing the chunk_size or decreasing the min_sentences_per_chunk.")
+                    split_idx = len(sentences)
 
             # Get the estimated token count
             estimate = token_sums[split_idx] - token_sums[pos]

@@ -1,7 +1,7 @@
 """Dataclasses for Chonkie."""
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, List, Optional, Union, Literal
+from typing import TYPE_CHECKING, List, Literal, Optional, Union
 
 if TYPE_CHECKING:
     import numpy as np
