@@ -1,4 +1,5 @@
 """Sentence chunker."""
+import warnings
 from bisect import bisect_left
 from itertools import accumulate
 from typing import Any, Callable, List, Literal, Union
@@ -7,7 +8,7 @@ from chonkie.types import Chunk, Sentence, SentenceChunk
 
 from .base import BaseChunker
 
-import warnings
+
 class SentenceChunker(BaseChunker):
     """SentenceChunker splits the sentences in a text based on token limits and sentence boundaries.
 
