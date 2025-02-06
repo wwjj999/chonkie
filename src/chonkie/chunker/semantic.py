@@ -107,6 +107,7 @@ class SemanticChunker(BaseChunker):
         self.min_characters_per_sentence = min_characters_per_sentence
         self.threshold_step = threshold_step
         self.delim = delim
+        self.include_delim = include_delim
         self.sep = "🦛"
         self.return_type = return_type
         
