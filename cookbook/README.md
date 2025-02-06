@@ -10,7 +10,7 @@ _A collection of recipes, tutorials, and projects using Chonkie_
 
 ## 📖 Official Tutorials
 
-| Tutorial | Description | Try it in Colab |
+| Tutorial | Description | Try it |
 |----------|-------------|-----------------|
 | Recursive Chunking for PDF/Markdown Documents | A quick look at how you can use Chonkie's RecursiveChunker to chunk your PDF/Markdown documents and build a RAG pipeline over it! | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/bhavnicksm/chonkie/blob/main/cookbook/tutorials/recursive_chunking_pdf.ipynb) |
 
@@ -22,7 +22,7 @@ Want to add your integration? Simply [raise an issue](https://github.com/bhavnic
 
 | Integration | Description | Repository |
 |-------------|-------------|------------|
-| ⚡️ FlashRAG | High-performance RAG framework optimized for speed and efficiency | [![GitHub](https://img.shields.io/badge/GitHub-181717?style=plastic&logo=github&logoColor=white&labelColor=464646)](https://github.com/RUC-NLPIR/FlashRAG) |
+| ⚡️ FlashRAG | A Python toolkit for the reproduction and development of Retrieval Augmented Generation (RAG) research. | [![GitHub](https://img.shields.io/badge/GitHub-181717?style=plastic&logo=github&logoColor=white&labelColor=464646)](https://github.com/RUC-NLPIR/FlashRAG) |
 | 📄 txtai | All-in-one embeddings database for semantic search, LLM orchestration and language model workflows | [![GitHub](https://img.shields.io/badge/GitHub-181717?style=plastic&logo=github&logoColor=white&labelColor=464646)](https://github.com/neuml/txtai) |
 | [Add your integration here!](CONTRIBUTING.md) | Share your Chonkie integration with the community | [![GitHub](https://img.shields.io/badge/GitHub-181717?style=plastic&logo=github&logoColor=white&labelColor=464646)](CONTRIBUTING.md) |
 
