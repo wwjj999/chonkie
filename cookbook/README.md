@@ -37,7 +37,6 @@ Share your knowledge and experiences with Chonkie! Whether it's a blog post, vid
 
 Have content to share? Open an issue with your resource and we'll get it added to the cookbook!
 
-
 ## 📝 Contributing
 
 Want to add your project or integration to the cookbook? Check out our [contribution guidelines](CONTRIBUTING.md)!
