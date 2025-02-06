@@ -74,10 +74,15 @@ class RecursiveChunker(BaseChunker):
             merged_splits = []
             for i, split in enumerate(splits):
                 if len(split) < self.min_characters_per_chunk:
+                    # If there are already merged splits, we merge the current split with the last merged split
                     if merged_splits:
                         merged_splits[-1] += split
+                    # If there are no merge splits, we must merge this with the next split if it exists
+                    elif i+1 < len(splits):
+                        splits[i+1] = split + splits[i+1]
                     else:
-                        splits[i+1] = split + splits[i+1] # When merge splits is empty, we merge the current split with the next split
+                        # If there is no next split, we just add the split to the merged splits
+                        merged_splits.append(split)
                     continue
                 else:
                     merged_splits.append(split)
