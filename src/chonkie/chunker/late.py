@@ -69,6 +69,7 @@ class LateChunker(BaseChunker):
         self.min_characters_per_sentence = min_characters_per_sentence
         self.approximate = approximate
         self.delim = delim
+        self.include_delim = include_delim
         self.sep = '🦛'
 
         # Initialise the embeddings via AutoEmbeddings
