@@ -39,7 +39,7 @@ Have content to share? Open an issue with your resource and we'll get it added t
 
 ## 📝 Contributing
 
-Want to add your project or integration to the cookbook? Check out our [contribution guidelines](CONTRIBUTING.md)!
+Want to add your project or integration to the cookbook? Check out our [contribution guidelines](/CONTRIBUTING.md)!
 
 ---
 
