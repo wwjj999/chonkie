@@ -2,11 +2,10 @@
 from typing import List
 
 import pytest
-
-from chonkie import Chunk
-from chonkie import SentenceChunker
-
 from tokenizers import Tokenizer
+
+from chonkie import Chunk, SentenceChunker
+
 
 @pytest.fixture
 def tokenizer():
