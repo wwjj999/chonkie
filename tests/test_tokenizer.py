@@ -322,3 +322,92 @@ def test_tokenizer_string_representation():
     
     assert str(char_tokenizer) == "CharacterTokenizer(vocab_size=1)"
     assert str(word_tokenizer) == "WordTokenizer(vocab_size=1)"
+
+# Tests for vocabulary and token mapping
+def test_word_tokenizer_vocab_and_mapping(word_tokenizer, sample_text):
+    """Test vocabulary building and token mapping in WordTokenizer."""
+    # Initial state
+    assert word_tokenizer.get_vocab() == [' ']
+    assert dict(word_tokenizer.get_token2id()) == {' ': 0}
+    
+    # After encoding text
+    tokens = word_tokenizer.encode(sample_text)
+    vocab = word_tokenizer.get_vocab()
+    token2id = word_tokenizer.get_token2id()
+    
+    # Check vocabulary
+    assert len(vocab) > 1
+    assert ' ' in vocab
+    assert 'language' in vocab
+    assert 'processing' in vocab
+    
+    # Check token to id mapping
+    assert isinstance(token2id, dict)
+    assert all(isinstance(token, str) for token in token2id.keys())
+    assert all(isinstance(idx, int) for idx in token2id.values())
+    assert token2id[' '] == 0
+    
+    # Verify mapping consistency
+    for token in vocab:
+        assert token in token2id
+        assert vocab[token2id[token]] == token
+
+def test_char_tokenizer_vocab_and_mapping(char_tokenizer, sample_text):
+    """Test vocabulary building and token mapping in CharacterTokenizer."""
+    # Initial state
+    assert char_tokenizer.get_vocab() == [' ']
+    assert dict(char_tokenizer.get_token2id()) == {' ': 0}
+    
+    # After encoding text
+    tokens = char_tokenizer.encode(sample_text)
+    vocab = char_tokenizer.get_vocab()
+    token2id = char_tokenizer.get_token2id()
+    
+    # Check vocabulary
+    assert len(vocab) > 1
+    assert ' ' in vocab
+    assert 'a' in vocab
+    assert 'N' in vocab
+    assert '(' in vocab
+    assert ')' in vocab
+    
+    # Check token to id mapping
+    assert isinstance(token2id, dict)
+    assert all(isinstance(token, str) for token in token2id.keys())
+    assert all(isinstance(idx, int) for idx in token2id.values())
+    assert token2id[' '] == 0
+    
+    # Verify mapping consistency
+    for token in vocab:
+        assert token in token2id
+        assert vocab[token2id[token]] == token
+    
+    # Verify all characters in sample text are in vocabulary
+    for char in sample_text:
+        assert char in vocab
+        assert char in token2id
+
+def test_tokenizer_vocab_consistency(word_tokenizer, char_tokenizer):
+    """Test that vocabulary remains consistent across multiple encodings."""
+    text1 = "Hello world"
+    text2 = "Hello universe"
+    
+    # Test WordTokenizer
+    tokens1 = word_tokenizer.encode(text1)
+    vocab_size1 = len(word_tokenizer.get_vocab())
+    tokens2 = word_tokenizer.encode(text2)
+    vocab_size2 = len(word_tokenizer.get_vocab())
+    
+    assert vocab_size2 > vocab_size1
+    assert "Hello" in word_tokenizer.get_vocab()
+    assert word_tokenizer.get_token2id()["Hello"] == word_tokenizer.encode("Hello")[0]
+    
+    # Test CharacterTokenizer
+    tokens1 = char_tokenizer.encode(text1)
+    vocab_size1 = len(char_tokenizer.get_vocab())
+    tokens2 = char_tokenizer.encode(text2)
+    vocab_size2 = len(char_tokenizer.get_vocab())
+    
+    assert vocab_size2 > vocab_size1
+    assert "H" in char_tokenizer.get_vocab()
+    assert char_tokenizer.get_token2id()["H"] == char_tokenizer.encode("H")[0]
