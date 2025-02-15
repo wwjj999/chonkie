@@ -1,3 +1,4 @@
+"""Embeddings implementation using Cohere's API."""
 import importlib
 import os
 import warnings
