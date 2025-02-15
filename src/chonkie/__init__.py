@@ -42,9 +42,10 @@ from .types import (
     SentenceChunk,
 )
 
+# This hippo grows with every release 🦛✨~
 __version__ = "0.5.0"
 __name__ = "chonkie"
-__author__ = "Chonkie AI"
+__author__ = "🦛 Chonkie AI Team"
 
 # Add basic package metadata to __all__
 __all__ = [
