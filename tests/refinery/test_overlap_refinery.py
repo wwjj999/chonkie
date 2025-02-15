@@ -32,13 +32,13 @@ def basic_chunks() -> List[Chunk]:
             token_count=8,
         ),
         Chunk(
-            text="This is the second chunk of text.",
+            text=" This is the second chunk of text.",
             start_index=31,
             end_index=62,
             token_count=8,
         ),
         Chunk(
-            text="This is the third chunk of text.",
+            text=" This is the third chunk of text.",
             start_index=63,
             end_index=93,
             token_count=8,
@@ -141,7 +141,7 @@ def test_overlap_refinery_basic_chunks_exact(basic_chunks, tokenizer):
         assert isinstance(refined[i].context, Context)
         # Verify exact token count using tokenizer
         actual_tokens = len(tokenizer.encode(refined[i].context.text))
-        assert actual_tokens <= 4
+        assert actual_tokens <= 4, f"Actual tokens: {actual_tokens} exceeds context size: 4"
 
 
 def test_overlap_refinery_sentence_chunks(sentence_chunks):
@@ -373,7 +373,7 @@ The methods section begins here.
 It contains important information."""
 
 @pytest.fixture
-def hierarchical_chunks(hierarchical_text):
+def hierarchical_chunks():
     """Fixture providing pre-chunked hierarchical text."""
     chunks = [
         Chunk(
@@ -602,54 +602,10 @@ def test_overlap_refinery_token_mode(basic_chunks, tokenizer):
         actual_tokens = len(tokenizer.encode(refined[i].context.text))
         assert actual_tokens <= 4
 
-def test_overlap_refinery_sentence_mode(sample_text):
+def test_overlap_refinery_sentence_mode(sentence_chunks):
     """Test OverlapRefinery in sentence mode."""
-    # Create sentence chunks
-    chunks = [
-        SentenceChunk(
-            text="This is sentence one. This is sentence two.",
-            start_index=0,
-            end_index=45,
-            token_count=10,
-            sentences=[
-                Sentence(
-                    text="This is sentence one.",
-                    start_index=0,
-                    end_index=21,
-                    token_count=10
-                ),
-                Sentence(
-                    text="This is sentence two.",
-                    start_index=22,
-                    end_index=45,
-                    token_count=10
-                )
-            ]
-        ),
-        SentenceChunk(
-            text="This is sentence three. This is sentence four.",
-            start_index=46,
-            end_index=95,
-            token_count=10,
-            sentences=[
-                Sentence(
-                    text="This is sentence three.",
-                    start_index=46,
-                    end_index=67,
-                    token_count=10
-                ),  
-                Sentence(
-                    text="This is sentence four.",
-                    start_index=68,
-                    end_index=95,
-                    token_count=10
-                )
-            ]
-        )
-    ]
-    
     refinery = OverlapRefinery(mode="sentence", context_size=1)
-    refined = refinery.refine(chunks)
+    refined = refinery.refine(sentence_chunks)
     
     # Verify sentence-based context
     assert refined[0].context is not None
@@ -668,14 +624,18 @@ def test_overlap_refinery_exact_vs_approximate(basic_chunks, tokenizer):
     exact_refinery = OverlapRefinery(
         context_size=4,
         tokenizer=tokenizer,
-        approximate=False
+        approximate=False,
+        merge_context=True,
+        inplace=False
     )
     exact_refined = exact_refinery.refine(basic_chunks)
     
     # Approximate counting
     approx_refinery = OverlapRefinery(
         context_size=4,
-        approximate=True
+        approximate=True,
+        merge_context=True,
+        inplace=False
     )
     approx_refined = approx_refinery.refine(basic_chunks)
     
