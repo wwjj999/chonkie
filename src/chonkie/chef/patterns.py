@@ -58,7 +58,7 @@ ABBREVIATIONS = (
     BUSINESS | TEMPORAL | GEOGRAPHICAL
 )
 
-@dataclass(frozen=True, slots=True)
+@dataclass
 class UnicodeReplacements:
     """Common Unicode characters used for replacements."""
     
