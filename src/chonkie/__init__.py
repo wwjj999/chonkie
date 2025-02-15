@@ -13,6 +13,7 @@ from .chunker import (
 from .embeddings import (
     AutoEmbeddings,
     BaseEmbeddings,
+    CohereEmbeddings,
     Model2VecEmbeddings,
     OpenAIEmbeddings,
     SentenceTransformerEmbeddings,
@@ -21,6 +22,7 @@ from .refinery import (
     BaseRefinery,
     OverlapRefinery,
 )
+from .tokenizer import CharacterTokenizer, Tokenizer, WordTokenizer
 from .types import (
     Chunk,
     Context,
@@ -34,9 +36,10 @@ from .types import (
     SentenceChunk,
 )
 
-__version__ = "0.4.1"
+# This hippo grows with every release 🦛✨~
+__version__ = "0.5.0"
 __name__ = "chonkie"
-__author__ = "Chonkie AI"
+__author__ = "🦛 Chonkie AI Team"
 
 # Add basic package metadata to __all__
 __all__ = [
@@ -59,6 +62,13 @@ __all__ += [
     "LateChunk",
 ]
 
+# Add all tokenizer classes to __all__
+__all__ += [
+    "Tokenizer",
+    "CharacterTokenizer",
+    "WordTokenizer",
+]
+
 # Add all chunker classes to __all__
 __all__ += [
     "BaseChunker",
@@ -77,6 +87,7 @@ __all__ += [
     "Model2VecEmbeddings",
     "SentenceTransformerEmbeddings",
     "OpenAIEmbeddings",
+    "CohereEmbeddings",
     "AutoEmbeddings",
 ]
 
