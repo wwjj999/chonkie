@@ -1,6 +1,6 @@
 """Dataclasses for Chonkie."""
 
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, List, Literal, Optional, Union
 
 if TYPE_CHECKING:
@@ -39,7 +39,7 @@ class Context:
     # Trivial function but we keep it for consistency with other chunk types.
     def to_dict(self) -> dict:
         """Return the Context as a dictionary."""
-        return asdict(self)
+        return self.__dict__.copy()
     
     @classmethod
     def from_dict(cls, data: dict):
@@ -101,13 +101,8 @@ class Chunk:
     # Trivial function but we keep it for consistency across chunk types.
     def to_dict(self) -> dict:
         """Return the Chunk as a dictionary."""
-        result = {
-            "text": self.text,
-            "start_index": self.start_index,
-            "end_index": self.end_index,
-            "token_count": self.token_count,
-            "context": self.context.to_dict() if self.context is not None else None,
-        }
+        result = self.__dict__.copy()
+        result["context"] = self.context.to_dict() if self.context is not None else None
         return result
     
     @classmethod
@@ -118,7 +113,6 @@ class Chunk:
             **data,
             context=Context.from_dict(context_repr) if context_repr is not None else None,
         )
-
 
     def __str__(self) -> str:
         """Return string representation of the chunk."""
@@ -152,12 +146,7 @@ class Chunk:
 
     def copy(self) -> "Chunk":
         """Return a deep copy of the chunk."""
-        return Chunk(
-            text=self.text,
-            start_index=self.start_index,
-            end_index=self.end_index,
-            token_count=self.token_count,
-        )
+        return Chunk.from_dict(self.to_dict())
 
 
 @dataclass
@@ -182,7 +171,7 @@ class Sentence:
     # Trivial functions but we keep them for consistency with other chunk types.
     def to_dict(self) -> dict:
         """Return the Chunk as a dictionary."""
-        return asdict(self)
+        return self.__dict__.copy()
     
     @classmethod
     def from_dict(cls, data: dict):
@@ -215,7 +204,7 @@ class SentenceChunk(Chunk):
         return result
     
     @classmethod
-    def from_dict(cls, data):
+    def from_dict(cls, data: dict) -> "SentenceChunk":
         """Create a SentenceChunk object from a dictionary."""
         sentences_dict = data.pop("sentences")
         sentences = [Sentence.from_dict(sentence) for sentence in sentences_dict]
@@ -422,7 +411,7 @@ class RecursiveLevel:
 
     def to_dict(self) -> dict:
         """Return the RecursiveLevel as a dictionary."""
-        return asdict(self)
+        return self.__dict__.copy()
     
     @classmethod
     def from_dict(cls, data: dict):
@@ -519,7 +508,8 @@ class RecursiveRules:
             result["levels"] = self.levels.to_dict()
         elif isinstance(self.levels, list):
             result["levels"] = [level.to_dict() for level in self.levels]
-
+        else:
+            raise ValueError("Invalid levels type")
         return result
     
     @classmethod
