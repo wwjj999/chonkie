@@ -1,3 +1,4 @@
+"""Base class for all Refinery classes."""
 from abc import ABC, abstractmethod
 from typing import List, Union
 
@@ -22,7 +23,7 @@ class BaseRefinery(ABC):
     @abstractmethod
     def refine(self, chunks: List[Chunk]) -> List[Chunk]:
         """Refine the given list of chunks and return the refined list."""
-        pass
+        raise NotImplementedError("Refine method must be implemented by subclasses")
     
     def refine_batch(self, chunks_batch: List[List[Chunk]]) -> List[List[Chunk]]:
         """Refine the given list of chunks and return the refined list."""
@@ -32,7 +33,7 @@ class BaseRefinery(ABC):
     @abstractmethod
     def is_available(cls) -> bool:
         """Check if the Refinery is available."""
-        pass
+        return True
 
     def __repr__(self) -> str:
         """Representation of the Refinery."""
