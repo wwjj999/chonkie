@@ -560,6 +560,148 @@ def test_recursive_refinery_single_chunk():
     assert len(refined) == 1
     assert refined[0].context is None
 
+def test_overlap_refinery_invalid_mode():
+    """Test that OverlapRefinery raises error for invalid mode."""
+    with pytest.raises(ValueError, match="Invalid mode: invalid_mode"):
+        OverlapRefinery(mode="invalid_mode")
+
+def test_overlap_refinery_invalid_method():
+    """Test that OverlapRefinery raises error for invalid method."""
+    with pytest.raises(ValueError, match="Invalid method: invalid_method"):
+        OverlapRefinery(method="invalid_method")
+
+def test_overlap_refinery_modes():
+    """Test that OverlapRefinery initializes with all valid modes."""
+    valid_modes = ["auto", "token", "sentence", "recursive"]
+    for mode in valid_modes:
+        refinery = OverlapRefinery(mode=mode)
+        assert refinery.mode == mode
+
+def test_overlap_refinery_methods():
+    """Test that OverlapRefinery initializes with all valid methods."""
+    valid_methods = ["suffix", "prefix"]
+    for method in valid_methods:
+        refinery = OverlapRefinery(method=method)
+        assert refinery.method == method
+
+def test_overlap_refinery_token_mode(basic_chunks, tokenizer):
+    """Test OverlapRefinery in token mode with exact token counting."""
+    refinery = OverlapRefinery(
+        mode="token",
+        context_size=4,
+        tokenizer=tokenizer,
+        approximate=False
+    )
+    refined = refinery.refine(basic_chunks)
+    
+    # Verify token-based context
+    for i in range(len(refined) - 1):
+        assert refined[i].context is not None
+        assert refined[i].context.token_count <= 4
+        # Verify exact token count
+        actual_tokens = len(tokenizer.encode(refined[i].context.text))
+        assert actual_tokens <= 4
+
+def test_overlap_refinery_sentence_mode(sample_text):
+    """Test OverlapRefinery in sentence mode."""
+    # Create sentence chunks
+    chunks = [
+        SentenceChunk(
+            text="This is sentence one. This is sentence two.",
+            start_index=0,
+            end_index=45,
+            token_count=10,
+            sentences=[
+                Sentence(
+                    text="This is sentence one.",
+                    start_index=0,
+                    end_index=21,
+                    token_count=10
+                ),
+                Sentence(
+                    text="This is sentence two.",
+                    start_index=22,
+                    end_index=45,
+                    token_count=10
+                )
+            ]
+        ),
+        SentenceChunk(
+            text="This is sentence three. This is sentence four.",
+            start_index=46,
+            end_index=95,
+            token_count=10,
+            sentences=[
+                Sentence(
+                    text="This is sentence three.",
+                    start_index=46,
+                    end_index=67,
+                    token_count=10
+                ),  
+                Sentence(
+                    text="This is sentence four.",
+                    start_index=68,
+                    end_index=95,
+                    token_count=10
+                )
+            ]
+        )
+    ]
+    
+    refinery = OverlapRefinery(mode="sentence", context_size=1)
+    refined = refinery.refine(chunks)
+    
+    # Verify sentence-based context
+    assert refined[0].context is not None
+    assert len(refined[0].context.text.split('.')) <= 2  # One sentence + possible partial
+
+def test_overlap_refinery_auto_mode(basic_chunks, tokenizer):
+    """Test OverlapRefinery in auto mode with different chunk types."""
+    # Test with basic chunks
+    refinery = OverlapRefinery(mode="auto", context_size=4, tokenizer=tokenizer)
+    refined = refinery.refine(basic_chunks)
+    assert refined[0].context is not None
+
+def test_overlap_refinery_exact_vs_approximate(basic_chunks, tokenizer):
+    """Test difference between exact and approximate token counting."""
+    # Exact counting
+    exact_refinery = OverlapRefinery(
+        context_size=4,
+        tokenizer=tokenizer,
+        approximate=False
+    )
+    exact_refined = exact_refinery.refine(basic_chunks)
+    
+    # Approximate counting
+    approx_refinery = OverlapRefinery(
+        context_size=4,
+        approximate=True
+    )
+    approx_refined = approx_refinery.refine(basic_chunks)
+    
+    # Compare results
+    for exact, approx in zip(exact_refined, approx_refined):
+        if exact.context and approx.context:
+            # Exact should be precisely <= context_size
+            assert len(tokenizer.encode(exact.context.text)) <= 4
+            # Approximate might vary but should be close
+            approx_tokens = len(exact.context.text) / exact_refinery._AVG_CHAR_PER_TOKEN
+            assert abs(approx_tokens - 4) <= 2
+
+def test_overlap_refinery_inplace_modification(basic_chunks):
+    """Test inplace modification of chunks."""
+    # Test with inplace=True
+    inplace_refinery = OverlapRefinery(context_size=4, inplace=True)
+    original_chunks = basic_chunks.copy()
+    refined = inplace_refinery.refine(original_chunks)
+    assert refined is original_chunks  # Should modify in place
+    
+    # Test with inplace=False
+    no_inplace_refinery = OverlapRefinery(context_size=4, inplace=False)
+    original_chunks = basic_chunks.copy()
+    refined = no_inplace_refinery.refine(original_chunks)
+    assert refined is not original_chunks  # Should create new list
+
 
 if __name__ == "__main__":
     pytest.main()
