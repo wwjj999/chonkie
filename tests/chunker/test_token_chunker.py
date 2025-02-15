@@ -271,7 +271,12 @@ def test_token_chunker_repr(tiktokenizer):
     """Test that the TokenChunker has a string representation."""
     chunker = TokenChunker(tokenizer=tiktokenizer, chunk_size=512, chunk_overlap=128)
 
-    assert repr(chunker) == "TokenChunker(tokenizer=<Encoding 'gpt2'>, chunk_size=512, chunk_overlap=128)"
+    assert repr(chunker) == (
+        f"TokenChunker(tokenizer={tiktokenizer}, "
+        f"chunk_size={chunker.chunk_size}, "
+        f"chunk_overlap={chunker.chunk_overlap}, "
+        f"return_type={chunker.return_type})"
+    )
 
 
 def test_token_chunker_call(tiktokenizer, sample_text):

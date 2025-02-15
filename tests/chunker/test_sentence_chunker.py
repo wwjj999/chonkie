@@ -99,8 +99,16 @@ def test_sentence_chunker_repr(tokenizer):
 
     assert (
         repr(chunker)
-        == "SentenceChunker(chunk_size=512, chunk_overlap=128, min_sentences_per_chunk=1)"
-    )
+        == (f"SentenceChunker(tokenizer={tokenizer}, "
+            f"chunk_size={chunker.chunk_size}, "
+            f"chunk_overlap={chunker.chunk_overlap}, "
+            f"min_sentences_per_chunk={chunker.min_sentences_per_chunk}, "
+            f"min_characters_per_sentence={chunker.min_characters_per_sentence}, "
+            f"approximate={chunker.approximate}, "
+            f"delim={chunker.delim}, "
+            f"include_delim={chunker.include_delim}, "
+            f"return_type={chunker.return_type})")
+        )
 
 
 def test_sentence_chunker_overlap(tokenizer, sample_text):

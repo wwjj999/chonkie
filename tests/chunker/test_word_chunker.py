@@ -147,7 +147,12 @@ def test_word_chunker_repr(tokenizer):
     """Test that the WordChunker has a string representation."""
     chunker = WordChunker(tokenizer_or_token_counter=tokenizer, chunk_size=512, chunk_overlap=128)
 
-    assert repr(chunker) == "WordChunker(chunk_size=512, chunk_overlap=128)"
+    assert repr(chunker) == (
+        f"WordChunker(tokenizer={tokenizer}, "
+        f"chunk_size={chunker.chunk_size}, "
+        f"chunk_overlap={chunker.chunk_overlap}, "
+        f"return_type={chunker.return_type})"
+    )
 
 
 def test_word_chunker_call(tokenizer, sample_text):
