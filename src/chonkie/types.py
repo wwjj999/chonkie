@@ -175,6 +175,13 @@ class Sentence:
     def from_dict(cls, data: dict):
         """Create a Sentence object from a dictionary."""
         return cls(**data)
+    
+    def __repr__(self) -> str:
+        """Return a string representation of the Sentence."""
+        return (
+            f"Sentence(text={self.text}, start_index={self.start_index}, "
+            f"end_index={self.end_index}, token_count={self.token_count})"
+        )
 
 
 @dataclass
@@ -211,6 +218,14 @@ class SentenceChunk(Chunk):
         return cls(
             **data,
             sentences=sentences
+        )
+    
+    def __repr__(self) -> str:
+        """Return a string representation of the SentenceChunk."""
+        return (
+            f"SentenceChunk(text={self.text}, start_index={self.start_index}, "
+            f"end_index={self.end_index}, token_count={self.token_count}, "
+            f"sentences={self.sentences})"
         )
 
 
@@ -251,6 +266,13 @@ class SemanticSentence(Sentence):
             embedding=embedding
         )
 
+    def __repr__(self) -> str:
+        """Return a string representation of the SemanticSentence."""
+        return (
+            f"SemanticSentence(text={self.text}, start_index={self.start_index}, "
+            f"end_index={self.end_index}, token_count={self.token_count}, "
+            f"sentences={self.sentences})"
+        )
 
 @dataclass
 class SemanticChunk(SentenceChunk):
@@ -281,6 +303,14 @@ class SemanticChunk(SentenceChunk):
         return cls(
             **data,
             sentences=sentences
+        )
+    
+    def __repr__(self) -> str:
+        """Return a string representation of the SemanticChunk."""
+        return (
+            f"SemanticChunk(text={self.text}, start_index={self.start_index}, "
+            f"end_index={self.end_index}, token_count={self.token_count}, "
+            f"sentences={self.sentences})"
         )
 
 
@@ -318,8 +348,14 @@ class LateSentence(Sentence):
             **data,
             embedding=embedding
         )
-
-
+    
+    def __repr__(self) -> str:
+        """Return a string representation of the LateSentence."""
+        return (
+            f"LateSentence(text={self.text}, start_index={self.start_index}, "
+            f"end_index={self.end_index}, token_count={self.token_count}, "
+            f"embedding={self.embedding})"
+        )
 @dataclass
 class LateChunk(Chunk):
     """LateChunk dataclass representing a chunk with an embedding.
@@ -358,6 +394,14 @@ class LateChunk(Chunk):
             **data,
             sentences=sentences,
             embedding=embedding
+            )
+    
+    def __repr__(self) -> str:
+        """Return a string representation of the LateChunk."""
+        return (
+            f"LateChunk(text={self.text}, start_index={self.start_index}, "
+            f"end_index={self.end_index}, token_count={self.token_count}, "
+            f"sentences={self.sentences}, embedding={self.embedding})"
         )
 
 
@@ -415,6 +459,13 @@ class RecursiveLevel:
         """Create a RecursiveLevel object from a dictionary."""
         return cls(**data)
 
+    def __repr__(self) -> str:
+        """Return a string representation of the RecursiveLevel."""
+        return (
+            f"RecursiveLevel(delimiters={self.delimiters}, "
+            f"whitespace={self.whitespace}, "
+            f"include_delim={self.include_delim})"
+        )
 
 @dataclass
 class RecursiveRules:

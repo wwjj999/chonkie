@@ -442,3 +442,13 @@ class LateChunker(BaseChunker):
             chunk.embedding = embedding
 
         return chunks
+
+    def __repr__(self) -> str:
+        """Return a string representation of the LateChunker."""
+        return (
+            f"LateChunker(model={self.embedding_model}, mode={self.mode}, "
+            f"chunk_size={self.chunk_size}, min_sentences_per_chunk={self.min_sentences_per_chunk}, "
+            f"min_characters_per_sentence={self.min_characters_per_sentence}, "
+            f"approximate={self.approximate}, delim={self.delim}, "
+            f"include_delim={self.include_delim})"
+        )
