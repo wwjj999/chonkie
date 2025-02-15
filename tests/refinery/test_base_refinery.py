@@ -1,5 +1,6 @@
 """Tests for the BaseRefinery class."""
 import pytest
+
 from chonkie.refinery.base import BaseRefinery
 from chonkie.types import Chunk
 

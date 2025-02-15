@@ -331,7 +331,7 @@ def test_word_tokenizer_vocab_and_mapping(word_tokenizer, sample_text):
     assert dict(word_tokenizer.get_token2id()) == {' ': 0}
     
     # After encoding text
-    tokens = word_tokenizer.encode(sample_text)
+    word_tokenizer.encode(sample_text)
     vocab = word_tokenizer.get_vocab()
     token2id = word_tokenizer.get_token2id()
     
@@ -359,7 +359,7 @@ def test_char_tokenizer_vocab_and_mapping(char_tokenizer, sample_text):
     assert dict(char_tokenizer.get_token2id()) == {' ': 0}
     
     # After encoding text
-    tokens = char_tokenizer.encode(sample_text)
+    char_tokenizer.encode(sample_text)
     vocab = char_tokenizer.get_vocab()
     token2id = char_tokenizer.get_token2id()
     
@@ -393,9 +393,9 @@ def test_tokenizer_vocab_consistency(word_tokenizer, char_tokenizer):
     text2 = "Hello universe"
     
     # Test WordTokenizer
-    tokens1 = word_tokenizer.encode(text1)
+    word_tokenizer.encode(text1)
     vocab_size1 = len(word_tokenizer.get_vocab())
-    tokens2 = word_tokenizer.encode(text2)
+    word_tokenizer.encode(text2)
     vocab_size2 = len(word_tokenizer.get_vocab())
     
     assert vocab_size2 > vocab_size1
@@ -403,9 +403,9 @@ def test_tokenizer_vocab_consistency(word_tokenizer, char_tokenizer):
     assert word_tokenizer.get_token2id()["Hello"] == word_tokenizer.encode("Hello")[0]
     
     # Test CharacterTokenizer
-    tokens1 = char_tokenizer.encode(text1)
+    char_tokenizer.encode(text1)
     vocab_size1 = len(char_tokenizer.get_vocab())
-    tokens2 = char_tokenizer.encode(text2)
+    char_tokenizer.encode(text2)
     vocab_size2 = len(char_tokenizer.get_vocab())
     
     assert vocab_size2 > vocab_size1
