@@ -216,15 +216,11 @@ class OverlapRefinery(BaseRefinery):
         if not hasattr(self, "tokenizer"):
             return None
 
-        # Take _AVG_CHAR_PER_TOKEN * context_size characters to ensure enough tokens
-        char_window = min(len(chunk.text), int(self.context_size * self._AVG_CHAR_PER_TOKEN))
-        text_portion = chunk.text[-char_window:]
-
         # Get exact token boundaries
-        tokens = self._encode(text_portion) #TODO: should be self._encode; need a unified tokenizer interface
+        tokens = self._encode(chunk.text)
         context_tokens = min(self.context_size, len(tokens))
         context_tokens_ids = tokens[-context_tokens:]
-        context_text = self._decode(context_tokens_ids) #TODO: should be self._decode; need a unified tokenizer interface
+        context_text = self._decode(context_tokens_ids)
 
         # Find where context text starts in chunk
         try:
@@ -250,12 +246,8 @@ class OverlapRefinery(BaseRefinery):
         if not hasattr(self, "tokenizer"):
             return None
 
-        # Take _AVG_CHAR_PER_TOKEN * context_size characters to ensure enough tokens
-        char_window = min(len(chunk.text), int(self.context_size * self._AVG_CHAR_PER_TOKEN))
-        text_portion = chunk.text[:char_window]
-
         # Get exact token boundaries
-        tokens = self._encode(text_portion)
+        tokens = self._encode(chunk.text)
         context_tokens = min(self.context_size, len(tokens))
         context_tokens_ids = tokens[:context_tokens]
         context_text = self._decode(context_tokens_ids)
