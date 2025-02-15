@@ -202,4 +202,5 @@ class CohereEmbeddings(BaseEmbeddings):
         return importlib.util.find_spec("cohere") is not None
     
     def __repr__(self) -> str:
+        """Return a string representation of the CohereEmbeddings object."""
         return f"CohereEmbeddings(model={self.model})"

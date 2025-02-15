@@ -10,3 +10,5 @@ chonkie.egg-info/PKG-INFO
 chonkie.egg-info/requires.txt
 chonkie.egg-info/SOURCES.txt
 chonkie.egg-info/top_level.txt
+/tmp/*
+/tests/data/*
