@@ -1,3 +1,5 @@
+"""Test the SemanticChunker class."""
+
 import os
 from typing import List
 

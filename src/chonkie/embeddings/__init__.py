@@ -1,3 +1,5 @@
+"""Embeddings classes for text embedding."""
+
 from .auto import AutoEmbeddings
 from .base import BaseEmbeddings
 from .cohere import CohereEmbeddings

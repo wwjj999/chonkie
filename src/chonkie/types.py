@@ -442,14 +442,6 @@ class RecursiveLevel:
                         "Use whitespace=True instead",
                     )
 
-    def __repr__(self) -> str:
-        """Get a string representation of the recursive level."""
-        return (
-            f"RecursiveLevel(delimiters={self.delimiters}, "
-            f"whitespace={self.whitespace}, "
-            f"include_delim={self.include_delim})"
-        )
-
     def to_dict(self) -> dict:
         """Return the RecursiveLevel as a dictionary."""
         return self.__dict__.copy()

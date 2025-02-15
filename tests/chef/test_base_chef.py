@@ -22,7 +22,7 @@ def test_chef():
 @pytest.fixture
 def tmp_path() -> Path:
     """Create a temporary path."""
-    return Path('tmp')
+    return Path('tests/data')
 
 @pytest.fixture
 def temp_files(tmp_path) -> List[Path]:

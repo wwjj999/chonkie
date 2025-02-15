@@ -1,3 +1,5 @@
+"""Registry for embedding implementations with pattern matching support."""
+
 import re
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Pattern, Type, Union

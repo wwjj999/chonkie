@@ -1,3 +1,5 @@
+"""Test the OverlapRefinery class."""
+
 from typing import List
 
 import pytest
