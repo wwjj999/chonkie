@@ -204,11 +204,12 @@ class SentenceChunk(Chunk):
     @classmethod
     def from_dict(cls, data: dict) -> "SentenceChunk":
         """Create a SentenceChunk object from a dictionary."""
-        sentences_dict = data.pop("sentences")
-        sentences = [Sentence.from_dict(sentence) for sentence in sentences_dict]
-        parent = super().from_dict(data)
+        sentences_dict = data.pop("sentences") if "sentences" in data else None
+        sentences = [Sentence.from_dict(sentence) 
+                     for sentence
+                     in sentences_dict] if sentences_dict is not None else []
         return cls(
-            **vars(parent),
+            **data,
             sentences=sentences
         )
 
@@ -242,10 +243,11 @@ class SemanticSentence(Sentence):
     def from_dict(cls, data: dict):
         """Create a SemanticSentence object from a dictionary."""
         embedding_list = data.pop("embedding")
-        embedding = np.array(embedding_list, dtype=np.float64) if embedding_list is not None else None
-        parent = super().from_dict(data)
+        # NOTE: We can't use np.array() here because we don't import numpy in this file,
+        # and we don't want add 50MiB to the package size.
+        embedding = embedding_list if embedding_list is not None else None
         return cls(
-            **vars(parent),
+            **data,
             embedding=embedding
         )
 
@@ -276,9 +278,8 @@ class SemanticChunk(SentenceChunk):
         """Create a SemanticChunk object from a dictionary."""
         sentences_dict = data.pop("sentences")
         sentences = [SemanticSentence.from_dict(sentence) for sentence in sentences_dict]
-        parent = super().from_dict(data)
         return cls(
-            **vars(parent),
+            **data,
             sentences=sentences
         )
 
@@ -313,9 +314,8 @@ class LateSentence(Sentence):
         """Create a LateSentence object from a dictionary."""
         embedding_list = data.pop("embedding")
         embedding = np.array(embedding_list, dtype=np.float64) if embedding_list is not None else None
-        parent = super().from_dict(data)
         return cls(
-            **vars(parent),
+            **data,
             embedding=embedding
         )
 
@@ -354,9 +354,8 @@ class LateChunk(Chunk):
         sentences = [LateSentence.from_dict(sentence) for sentence in sentences_dict]
         embedding_list = data.pop("embedding")
         embedding = np.array(embedding_list, dtype=np.float64) if embedding_list is not None else None
-        parent = super().from_dict(data)
         return cls(
-            **vars(parent),
+            **data,
             sentences=sentences,
             embedding=embedding
         )
@@ -517,9 +516,9 @@ class RecursiveRules:
         levels = None
         if levels_repr is not None:
             if isinstance(levels_repr, dict):
-                levels = RecursiveLevel.from_dict(levels)
+                levels = RecursiveLevel.from_dict(levels_repr)
             elif isinstance(levels_repr, list):
-                levels = [RecursiveLevel.from_dict(level) for level in levels]
+                levels = [RecursiveLevel.from_dict(level) for level in levels_repr]
         return cls(
             levels=levels
         )
@@ -553,17 +552,10 @@ class RecursiveChunk(Chunk):
 
     def to_dict(self) -> dict:
         """Return the RecursiveChunk as a dictionary."""
-        result = super().to_dict()
-        result["level"] = self.level
-        return result
+        return self.__dict__.copy()
     
     @classmethod
     def from_dict(cls, data: dict):
         """Create a RecursiveChunk object from a dictionary."""
-        level = data.pop("level")
-        parent = super().from_dict(data)
-        return cls(
-            **vars(parent),
-            level=level
-        )
+        return cls(**data)
         
