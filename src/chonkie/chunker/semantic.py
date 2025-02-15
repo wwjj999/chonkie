@@ -581,9 +581,9 @@ class SemanticChunker(BaseChunker):
         """Return a string representation of the SemanticChunker."""
         return (
             f"SemanticChunker(model={self.embedding_model}, "
+            f"chunk_size={self.chunk_size}, "
             f"mode={self.mode}, "
             f"threshold={self.threshold}, "
-            f"chunk_size={self.chunk_size}, "
             f"similarity_window={self.similarity_window}, "
             f"min_sentences={self.min_sentences}, "
             f"min_chunk_size={self.min_chunk_size}, "
