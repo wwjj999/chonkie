@@ -226,5 +226,6 @@ class TokenChunker(BaseChunker):
         return (
             f"TokenChunker(tokenizer={self.tokenizer}, "
             f"chunk_size={self.chunk_size}, "
-            f"chunk_overlap={self.chunk_overlap})"
+            f"chunk_overlap={self.chunk_overlap}, "
+            f"return_type={self.return_type})"
         )
