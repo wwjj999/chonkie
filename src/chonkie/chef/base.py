@@ -42,14 +42,35 @@ class BaseChef(ABC):
     def _read_files(self, file_paths: List[str]) -> List[str]:
         """Read multiple files and return their contents."""
         return [self._read_file(f) for f in file_paths]
-    
+
+    def _get_files_from_directory(self, directory: str) -> List[str]:
+        """Recursively get all files with supported extensions from directory.
+        
+        Args:
+            directory: The directory to search in
+            
+        Returns:
+            List of file paths that match supported extensions
+
+        """
+        matching_files = []
+        
+        for root, _, files in os.walk(directory):
+            for file in files:
+                file_path = os.path.join(root, file)
+                if any(file.endswith(ext) for ext in self._extensions):
+                    matching_files.append(file_path)
+                    
+        return matching_files
+
     def fetch(self,
              files: Optional[Union[str, List[str]]] = None,
              directory: Optional[str] = None) -> Union[str, List[str]]:
         """Fetch the files from the given directory or file paths.
 
         Reads the file or files from the given directory or file paths and
-        returns the content of the file or files.
+        returns the content of the file or files. When a directory is provided,
+        it recursively searches for files with supported extensions.
         
         Args:
             files: The files to fetch.
@@ -64,16 +85,12 @@ class BaseChef(ABC):
         if files is not None and directory is not None:
             raise ValueError("Only one of files or directory can be provided")
         
-        # If dir is provided, fetch all the files in the supported extensions
-        # If supported extensions are not provided, fetch all the files
+        # If dir is provided, recursively fetch all files with supported extensions
         if directory is not None:
             if not os.path.isdir(directory):
                 raise FileNotFoundError(f"Directory not found: {directory}")
             
-            # Get all files from directory which are supported extensions
-            all_files = [os.path.join(directory, f) for f in os.listdir(directory)
-                        if os.path.isfile(os.path.join(directory, f)) and 
-                        any(f.endswith(ext) for ext in self._extensions)]
+            all_files = self._get_files_from_directory(directory)
             return self._read_files(all_files)
         
         # If single file, then convert to list
@@ -98,7 +115,7 @@ class BaseChef(ABC):
         return text
 
     def process(self,
-                texts: Union[str, List[str]],
+                texts: Optional[Union[str, List[str]]] = None,
                 files: Optional[Union[str, List[str]]] = None,
                 directory: Optional[str] = None) -> str:
         """Process the text or the files/dir.
@@ -117,7 +134,7 @@ class BaseChef(ABC):
             raise ValueError("Either text or files/dir must be provided, not both")
         
         # If files is provided, fetch the files
-        if files is not None:
+        if files is not None or directory is not None:
             texts = self.fetch(files, directory)
         
         # Clean the texts

@@ -72,7 +72,7 @@ class TextChef(BaseChef):
 
         """
         # Replace multiple spaces with single space
-        text = ' '.join(text.split(' '))
+        text = ' '.join([s for s in text.split(' ') if s])
         return text
     
     def _normalize_newlines(self, text: str) -> str:
