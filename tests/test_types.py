@@ -30,7 +30,7 @@ def test_context_validation():
         Context(text=123, token_count=1)
 
     # Test invalid token count type
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         Context(text="test", token_count="1")
 
     # Test negative token count
