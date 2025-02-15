@@ -14,6 +14,7 @@ from chonkie.types import (
     SentenceChunk,
 )
 
+
 # Context Tests
 def test_context_init():
     """Test Context initialization."""
