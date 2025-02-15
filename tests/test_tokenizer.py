@@ -78,6 +78,39 @@ def test_tokenizer_initialization(request, tokenizer_fixture):
     assert tokenizer is not None
     assert tokenizer._tokenizer_backend in ["transformers", "tokenizers", "tiktoken"]
 
+# Test if the Tokenizer class can initialize with a model name
+@pytest.mark.parametrize("model_name", [
+    "gpt2",
+    "bert-base-uncased",
+    "cl100k_base",
+    "p50k_base"
+])
+def test_tokenizer_string_initialization(model_name):
+    """Test initialization of tokenizer with different model strings."""
+    try:
+        tokenizer = Tokenizer(model_name)
+        assert tokenizer is not None
+        assert tokenizer._tokenizer_backend in ["transformers", "tokenizers", "tiktoken"]
+        
+        # Test basic functionality to ensure it's properly initialized
+        sample = "This is a test sentence."
+        tokens = tokenizer.encode(sample)
+        assert isinstance(tokens, list)
+        assert len(tokens) > 0
+        assert all(isinstance(token, int) for token in tokens)
+        
+        decoded = tokenizer.decode(tokens)
+        assert isinstance(decoded, str)
+        # Check if main words are preserved (accounting for different tokenizer behaviors)
+        assert all(word.lower() in decoded.lower() for word in ["test", "sentence"])
+        
+    except ImportError as e:
+        pytest.skip(f"Required backend for {model_name} not installed: {str(e)}")
+    except Exception as e:
+        if "not found in model index" in str(e):
+            pytest.skip(f"Model {model_name} not available")
+        else:
+            raise e
 
 # Tests for different tokenizer backends
 @pytest.mark.parametrize("tokenizer_fixture", [
