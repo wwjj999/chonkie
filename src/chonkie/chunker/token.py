@@ -69,14 +69,12 @@ class TokenChunker(BaseChunker):
         if self.chunk_overlap > 0:
             # we get the overlap texts, that gives you the start_index for the next chunk
             # if the token group is smaller than the overlap, we just use the whole token group
-            overlap_texts = self.tokenizer.decode_batch(
-                [
-                    token_group[-self.chunk_overlap :]
-                    if (len(token_group) > self.chunk_overlap)
-                    else token_group
-                    for token_group in token_groups
-                ]
-            )
+            overlap_texts = self.tokenizer.decode_batch([
+                token_group[-self.chunk_overlap :]
+                if (len(token_group) > self.chunk_overlap)
+                else token_group
+                for token_group in token_groups
+            ])
             overlap_lengths = [len(overlap_text) for overlap_text in overlap_texts]
         else:
             overlap_lengths = [0] * len(token_groups)

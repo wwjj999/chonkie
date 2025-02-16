@@ -302,18 +302,18 @@ def test_semantic_chunker_token_counts(embedding_model, sample_text):
         embedding_model=embedding_model, chunk_size=512, threshold=0.5
     )
     chunks = chunker.chunk(sample_text)
-    assert all(
-        [chunk.token_count > 0 for chunk in chunks]
-    ), "All chunks must have a positive token count"
-    assert all(
-        [chunk.token_count <= 512 for chunk in chunks]
-    ), "All chunks must have a token count less than or equal to 512"
+    assert all([chunk.token_count > 0 for chunk in chunks]), (
+        "All chunks must have a positive token count"
+    )
+    assert all([chunk.token_count <= 512 for chunk in chunks]), (
+        "All chunks must have a token count less than or equal to 512"
+    )
 
     token_counts = [chunker._count_tokens(chunk.text) for chunk in chunks]
     for i, (chunk, token_count) in enumerate(zip(chunks, token_counts)):
-        assert (
-            chunk.token_count == token_count
-        ), f"Chunk {i} has a token count of {chunk.token_count} but the encoded text length is {token_count}"
+        assert chunk.token_count == token_count, (
+            f"Chunk {i} has a token count of {chunk.token_count} but the encoded text length is {token_count}"
+        )
 
 
 def test_semantic_chunker_reconstruction(embedding_model, sample_text):

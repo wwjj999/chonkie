@@ -150,9 +150,9 @@ def test_word_chunker_batch_chunking(tokenizer, sample_batch):
 
     assert len(chunks) == len(sample_batch)
     assert all([len(text_chunks) > 0 for text_chunks in chunks])
-    assert all(
-        [type(chunk) is Chunk for text_chunks in chunks for chunk in text_chunks]
-    )
+    assert all([
+        type(chunk) is Chunk for text_chunks in chunks for chunk in text_chunks
+    ])
 
 
 def test_word_chunker_repr(tokenizer):
@@ -236,20 +236,18 @@ def test_word_chunker_token_counts(tokenizer, sample_text):
         tokenizer_or_token_counter=tokenizer, chunk_size=512, chunk_overlap=128
     )
     chunks = chunker.chunk(sample_text)
-    assert all(
-        [chunk.token_count > 0 for chunk in chunks]
-    ), "All chunks must have a positive token count"
-    assert all(
-        [chunk.token_count <= 512 for chunk in chunks]
-    ), "All chunks must have a token count less than or equal to 512"
+    assert all([chunk.token_count > 0 for chunk in chunks]), (
+        "All chunks must have a positive token count"
+    )
+    assert all([chunk.token_count <= 512 for chunk in chunks]), (
+        "All chunks must have a token count less than or equal to 512"
+    )
 
     token_counts = [len(tokenizer.encode(chunk.text)) for chunk in chunks]
-    assert all(
-        [
-            chunk.token_count == token_count
-            for chunk, token_count in zip(chunks, token_counts)
-        ]
-    ), "All chunks must have a token count equal to the length of the encoded text"
+    assert all([
+        chunk.token_count == token_count
+        for chunk, token_count in zip(chunks, token_counts)
+    ]), "All chunks must have a token count equal to the length of the encoded text"
 
 
 def test_word_chunker_return_type(tokenizer, sample_text):

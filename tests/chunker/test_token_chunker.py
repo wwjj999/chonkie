@@ -255,17 +255,17 @@ def test_token_chunker_batch_chunking(tiktokenizer, sample_batch):
     assert len(chunks) > 0
     assert all([len(chunk) > 0 for chunk in chunks])
     assert all([type(chunk[0]) is Chunk for chunk in chunks])
-    assert all(
-        [all([chunk.token_count <= 512 for chunk in chunks]) for chunks in chunks]
-    )
+    assert all([
+        all([chunk.token_count <= 512 for chunk in chunks]) for chunks in chunks
+    ])
     assert all([all([chunk.token_count > 0 for chunk in chunks]) for chunks in chunks])
     assert all([all([chunk.text is not None for chunk in chunks]) for chunks in chunks])
-    assert all(
-        [all([chunk.start_index is not None for chunk in chunks]) for chunks in chunks]
-    )
-    assert all(
-        [all([chunk.end_index is not None for chunk in chunks]) for chunks in chunks]
-    )
+    assert all([
+        all([chunk.start_index is not None for chunk in chunks]) for chunks in chunks
+    ])
+    assert all([
+        all([chunk.end_index is not None for chunk in chunks]) for chunks in chunks
+    ])
 
 
 def test_token_chunker_repr(tiktokenizer):
@@ -331,20 +331,18 @@ def test_token_chunker_token_counts(tiktokenizer, sample_text):
     """Test that the TokenChunker correctly calculates token counts."""
     chunker = TokenChunker(tokenizer=tiktokenizer, chunk_size=512, chunk_overlap=128)
     chunks = chunker.chunk(sample_text)
-    assert all(
-        [chunk.token_count > 0 for chunk in chunks]
-    ), "All chunks must have a positive token count"
-    assert all(
-        [chunk.token_count <= 512 for chunk in chunks]
-    ), "All chunks must have a token count less than or equal to 512"
+    assert all([chunk.token_count > 0 for chunk in chunks]), (
+        "All chunks must have a positive token count"
+    )
+    assert all([chunk.token_count <= 512 for chunk in chunks]), (
+        "All chunks must have a token count less than or equal to 512"
+    )
 
     token_counts = [len(tiktokenizer.encode(chunk.text)) for chunk in chunks]
-    assert all(
-        [
-            chunk.token_count == token_count
-            for chunk, token_count in zip(chunks, token_counts)
-        ]
-    ), "All chunks must have a token count equal to the length of the encoded text"
+    assert all([
+        chunk.token_count == token_count
+        for chunk, token_count in zip(chunks, token_counts)
+    ]), "All chunks must have a token count equal to the length of the encoded text"
 
 
 def test_token_chunker_indices_batch(tiktokenizer, sample_text):

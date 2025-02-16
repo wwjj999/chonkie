@@ -1,7 +1,7 @@
-"""Tests for the SDPM (Semantic Density Peak Mapping) Chunker.
+"""Tests for the SDPM (Semantic Double-Pass Merging) Chunker.
 
-This module contains test cases for the SDPMChunker class, which implements
-a chunking strategy based on semantic density and peak mapping. The tests verify:
+This module contains test cases for the SDPMChunker class. 
+The tests verify:
 
 - Basic chunking functionality with simple text
 - Handling of complex markdown formatted text
@@ -171,20 +171,18 @@ def test_spdm_chunker_token_counts(embedding_model, sample_text):
         embedding_model=embedding_model, chunk_size=512, threshold=0.5
     )
     chunks = chunker.chunk(sample_text)
-    assert all(
-        [chunk.token_count > 0 for chunk in chunks]
-    ), "All chunks must have a positive token count"
-    assert all(
-        [chunk.token_count <= 512 for chunk in chunks]
-    ), "All chunks must have a token count less than or equal to 512"
+    assert all([chunk.token_count > 0 for chunk in chunks]), (
+        "All chunks must have a positive token count"
+    )
+    assert all([chunk.token_count <= 512 for chunk in chunks]), (
+        "All chunks must have a token count less than or equal to 512"
+    )
 
     token_counts = [chunker._count_tokens(chunk.text) for chunk in chunks]
-    assert all(
-        [
-            chunk.token_count == token_count
-            for chunk, token_count in zip(chunks, token_counts)
-        ]
-    ), "All chunks must have a token count equal to the length of the encoded text"
+    assert all([
+        chunk.token_count == token_count
+        for chunk, token_count in zip(chunks, token_counts)
+    ]), "All chunks must have a token count equal to the length of the encoded text"
 
 
 def test_sdpm_chunker_return_type(embedding_model, sample_text):

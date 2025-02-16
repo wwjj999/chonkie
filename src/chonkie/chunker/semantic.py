@@ -245,9 +245,9 @@ class SemanticChunker(BaseChunker):
                 if j >= 0 and j < len(raw_sentences):
                     group.append(raw_sentences[j])
             sentence_groups.append("".join(group))
-        assert (
-            len(sentence_groups) == len(raw_sentences)
-        ), f"Number of sentence groups ({len(sentence_groups)}) does not match number of raw sentences ({len(raw_sentences)})"
+        assert len(sentence_groups) == len(raw_sentences), (
+            f"Number of sentence groups ({len(sentence_groups)}) does not match number of raw sentences ({len(raw_sentences)})"
+        )
         embeddings = self.embedding_model.embed_batch(sentence_groups)
 
         # Batch compute token counts

@@ -145,9 +145,9 @@ def test_overlap_refinery_basic_chunks_exact(basic_chunks, tokenizer):
         assert isinstance(refined[i].context, Context)
         # Verify exact token count using tokenizer
         actual_tokens = len(tokenizer.encode(refined[i].context.text))
-        assert (
-            actual_tokens <= 4
-        ), f"Actual tokens: {actual_tokens} exceeds context size: 4"
+        assert actual_tokens <= 4, (
+            f"Actual tokens: {actual_tokens} exceeds context size: 4"
+        )
 
 
 def test_overlap_refinery_sentence_chunks(sentence_chunks):
@@ -271,9 +271,9 @@ def test_overlap_refinery_prefix_mode_with_merge(basic_chunks, tokenizer):
         # Verify token count increase
         original_tokens = len(tokenizer.encode(basic_chunks[i].text))
         new_tokens = len(tokenizer.encode(refined[i].text))
-        assert (
-            new_tokens >= original_tokens
-        ), f"{refined[i].text} {basic_chunks[i].text}"
+        assert new_tokens >= original_tokens, (
+            f"{refined[i].text} {basic_chunks[i].text}"
+        )
         # Verify start index is from context
         assert refined[i].start_index == refined[i].context.start_index
 
@@ -298,13 +298,13 @@ def test_overlap_refinery_sample_text_suffix(sample_text):
     assert len(refined) == len(chunks)
     for i, chunk in enumerate(refined):
         if i != len(refined) - 1:
-            assert (
-                chunker._count_tokens(chunk.text) == 512
-            ), f"Chunk {i} has {chunker._count_tokens(chunk.text)} tokens"
+            assert chunker._count_tokens(chunk.text) == 512, (
+                f"Chunk {i} has {chunker._count_tokens(chunk.text)} tokens"
+            )
         else:
-            assert (
-                chunker._count_tokens(chunk.text) == chunk.token_count
-            ), f"Chunk {i} has {chunker._count_tokens(chunk.text)} tokens"
+            assert chunker._count_tokens(chunk.text) == chunk.token_count, (
+                f"Chunk {i} has {chunker._count_tokens(chunk.text)} tokens"
+            )
 
 
 def test_overlap_refinery_sample_text_prefix(sample_text):
@@ -338,9 +338,9 @@ def test_overlap_refinery_sample_text_prefix(sample_text):
             actual_token_count.append(chunk.token_count)
             predicted_token_count.append(chunk.token_count)
 
-    assert (
-        actual_token_count == predicted_token_count
-    ), f"Actual token count: {actual_token_count} does not match predicted token count: {predicted_token_count}"
+    assert actual_token_count == predicted_token_count, (
+        f"Actual token count: {actual_token_count} does not match predicted token count: {predicted_token_count}"
+    )
 
 
 # Hierarchical Functions
