@@ -164,9 +164,7 @@ EmbeddingsRegistry.register(
 )
 
 # Register Cohere embeddings with pattern
-EmbeddingsRegistry.register(
-    "cohere", CohereEmbeddings, pattern=r"^cohere|^embed-"
-)
+EmbeddingsRegistry.register("cohere", CohereEmbeddings, pattern=r"^cohere|^embed-")
 EmbeddingsRegistry.register("embed-english-v3.0", CohereEmbeddings)
 EmbeddingsRegistry.register("embed-multilingual-v3.0", CohereEmbeddings)
 EmbeddingsRegistry.register("embed-english-light-v3.0", CohereEmbeddings)

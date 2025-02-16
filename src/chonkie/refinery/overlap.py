@@ -51,7 +51,7 @@ class OverlapRefinery(BaseRefinery):
 
         """
         super().__init__(context_size)
-        
+
         # validate mode
         if mode not in ["auto", "token", "sentence", "recursive"]:
             raise ValueError(f"Invalid mode: {mode}")
@@ -75,10 +75,10 @@ class OverlapRefinery(BaseRefinery):
             # Without tokenizer, must use approximate method
             self.tokenizer = None
             self.approximate = True
-        
+
         # Average number of characters per token
         self._AVG_CHAR_PER_TOKEN = 7
-    
+
     def _get_tokenizer_backend(self) -> str:
         """Get the tokenizer backend."""
         if "tokenizers" in str(type(self.tokenizer)):
@@ -88,7 +88,9 @@ class OverlapRefinery(BaseRefinery):
         elif "transformers" in str(type(self.tokenizer)):
             return "transformers"
         else:
-            raise ValueError(f"Unsupported tokenizer backend: {str(type(self.tokenizer))}")
+            raise ValueError(
+                f"Unsupported tokenizer backend: {str(type(self.tokenizer))}"
+            )
 
     def _encode(self, text: str) -> List[int]:
         """Encode text using the tokenizer backend."""
@@ -99,7 +101,9 @@ class OverlapRefinery(BaseRefinery):
         elif self._tokenizer_backend == "transformers":
             return self.tokenizer.encode(text, add_special_tokens=False)
         else:
-            raise ValueError(f"Unsupported tokenizer backend: {self._tokenizer_backend}")
+            raise ValueError(
+                f"Unsupported tokenizer backend: {self._tokenizer_backend}"
+            )
 
     def _decode(self, tokens: List[int]) -> str:
         """Decode tokens using the tokenizer backend."""
@@ -110,18 +114,27 @@ class OverlapRefinery(BaseRefinery):
         elif self._tokenizer_backend == "transformers":
             return self.tokenizer.decode(tokens, skip_special_tokens=True)
         else:
-            raise ValueError(f"Unsupported tokenizer backend: {self._tokenizer_backend}")
+            raise ValueError(
+                f"Unsupported tokenizer backend: {self._tokenizer_backend}"
+            )
 
     def _encode_batch(self, texts: List[str]) -> List[List[int]]:
         """Batch encode texts using the tokenizer backend."""
         if self._tokenizer_backend == "tokenizers":
-            return [t.ids for t in self.tokenizer.encode_batch(texts, add_special_tokens=False)]
+            return [
+                t.ids
+                for t in self.tokenizer.encode_batch(texts, add_special_tokens=False)
+            ]
         elif self._tokenizer_backend == "tiktoken":
             return self.tokenizer.encode_batch(texts)
         elif self._tokenizer_backend == "transformers":
-            return self.tokenizer.batch_encode_plus(texts, add_special_tokens=False)["input_ids"]
+            return self.tokenizer.batch_encode_plus(texts, add_special_tokens=False)[
+                "input_ids"
+            ]
         else:
-            raise ValueError(f"Unsupported tokenizer backend: {self._tokenizer_backend}")
+            raise ValueError(
+                f"Unsupported tokenizer backend: {self._tokenizer_backend}"
+            )
 
     def _decode_batch(self, tokens: List[List[int]]) -> List[str]:
         """Batch decode tokens using the tokenizer backend."""
@@ -132,7 +145,9 @@ class OverlapRefinery(BaseRefinery):
         elif self._tokenizer_backend == "transformers":
             return self.tokenizer.batch_decode(tokens, skip_special_tokens=True)
         else:
-            raise ValueError(f"Unsupported tokenizer backend: {self._tokenizer_backend}")     
+            raise ValueError(
+                f"Unsupported tokenizer backend: {self._tokenizer_backend}"
+            )
 
     def _get_refined_chunks(
         self, chunks: List[Chunk], inplace: bool = True
@@ -357,10 +372,12 @@ class OverlapRefinery(BaseRefinery):
         """
         # If the chunk doesn't have the attribute sentences, raise an error
         if not hasattr(chunk, "sentences"):
-            raise ValueError("Input chunk does not have attribute sentences. " +
-                             "`mode=sentence` is currently only supported for SentenceChunk or SemanticChunk."+
-                             f"Input chunk type: {type(chunk)}. If you truly wish for it to be supported, please open an issue on github.")
-        
+            raise ValueError(
+                "Input chunk does not have attribute sentences. "
+                + "`mode=sentence` is currently only supported for SentenceChunk or SemanticChunk."
+                + f"Input chunk type: {type(chunk)}. If you truly wish for it to be supported, please open an issue on github."
+            )
+
         # If the chunk has no sentences, return None
         if not chunk.sentences:
             return None
@@ -400,10 +417,12 @@ class OverlapRefinery(BaseRefinery):
         """
         # If the chunk doesn't have the attribute sentences, raise an error
         if not hasattr(chunk, "sentences"):
-            raise ValueError("Input chunk does not have attribute sentences" +
-                             "mode=sentence is only supported for SentenceChunk or SemanticChunk."+
-                             f"Input chunk type: {type(chunk)}. If you truly wish for it to be supported, please open an issue on github.")
-        
+            raise ValueError(
+                "Input chunk does not have attribute sentences"
+                + "mode=sentence is only supported for SentenceChunk or SemanticChunk."
+                + f"Input chunk type: {type(chunk)}. If you truly wish for it to be supported, please open an issue on github."
+            )
+
         # If the chunk has no sentences, return None
         if not chunk.sentences:
             return None
@@ -429,11 +448,10 @@ class OverlapRefinery(BaseRefinery):
             start_index=context_sentences[0].start_index,
             end_index=context_sentences[-1].end_index,
         )
-    
-    def _split_text_at_rule(self, 
-                            text: str,
-                            rule: RecursiveLevel, 
-                            sep: str = "🦛") -> List[str]:
+
+    def _split_text_at_rule(
+        self, text: str, rule: RecursiveLevel, sep: str = "🦛"
+    ) -> List[str]:
         """Split the text at the current rule."""
         if rule.delimiters:
             for delimiter in rule.delimiters:
@@ -452,19 +470,20 @@ class OverlapRefinery(BaseRefinery):
         else:
             return self._split_at_tokens(text)
 
-    def _split_at_whitespace(self,
-                             text: str) -> List[str]:
+    def _split_at_whitespace(self, text: str) -> List[str]:
         """Split the text at whitespace."""
-        return text.split(' ')
-    
-    def _split_at_tokens(self,
-                         text: str) -> List[str]:
+        return text.split(" ")
+
+    def _split_at_tokens(self, text: str) -> List[str]:
         """Split the text at tokens."""
         tokens = self._encode(text)
 
         # Split the tokens at the chunk size
-        token_splits = [tokens[i:i+self.context_size] for i in range(0, len(tokens), self.context_size)]
-        
+        token_splits = [
+            tokens[i : i + self.context_size]
+            for i in range(0, len(tokens), self.context_size)
+        ]
+
         # Decode the tokens back to text
         splits = self._decode_batch(token_splits)
         return splits
@@ -478,22 +497,24 @@ class OverlapRefinery(BaseRefinery):
             return len(self._encode(text))
         else:
             return estimate
-    
-    def _merge_splits(self, 
-                     splits: List[str],
-                     token_counts: List[int],
-                     combine_with_whitespace: bool = False, 
-                     reverse: bool = False, 
-                     boundry: Literal["ahead", "behind"] = "ahead") -> Tuple[List[str], List[int]]:
+
+    def _merge_splits(
+        self,
+        splits: List[str],
+        token_counts: List[int],
+        combine_with_whitespace: bool = False,
+        reverse: bool = False,
+        boundry: Literal["ahead", "behind"] = "ahead",
+    ) -> Tuple[List[str], List[int]]:
         """Merge splits based on token counts."""
         # If the number of splits and token counts does not match, raise an error
         if len(splits) != len(token_counts):
             raise ValueError("The number of splits and token counts does not match.")
-        
+
         # If the splits are larger than the context size, we can just return the splits
         if all(tc > self.context_size for tc in token_counts):
             return splits, token_counts
-        
+
         # If reverse is True, we need to reverse the splits and token counts
         if reverse:
             splits = splits[::-1]
@@ -504,14 +525,16 @@ class OverlapRefinery(BaseRefinery):
 
         # NOTE: When combining with or without whitespace, most tokenizers will not count the space as a token
         # so it makes no difference in the token counts
-        cumulative_token_counts = list(accumulate([0] + token_counts, lambda x, y: x + y)) 
+        cumulative_token_counts = list(
+            accumulate([0] + token_counts, lambda x, y: x + y)
+        )
 
         # Iterate through the splits and merge them if they are too short
 
         current_index = 0
         merged_token_counts = []
 
-        # Use bisect_left to find the index to merge at 
+        # Use bisect_left to find the index to merge at
         while current_index < len(splits):
             current_token_count = cumulative_token_counts[current_index]
             required_token_count = current_token_count + self.context_size
@@ -519,9 +542,20 @@ class OverlapRefinery(BaseRefinery):
 
             # Find the index to merge at
             if boundry == "ahead":
-                index = min(bisect_left(cumulative_token_counts, required_token_count, lo=current_index), len(splits)) # Does one larger than the required token count
+                index = min(
+                    bisect_left(
+                        cumulative_token_counts, required_token_count, lo=current_index
+                    ),
+                    len(splits),
+                )  # Does one larger than the required token count
             elif boundry == "behind":
-                index = min(bisect_left(cumulative_token_counts, required_token_count, lo=current_index) - 1, len(splits)) # Does one smaller than the required token count
+                index = min(
+                    bisect_left(
+                        cumulative_token_counts, required_token_count, lo=current_index
+                    )
+                    - 1,
+                    len(splits),
+                )  # Does one smaller than the required token count
             else:
                 raise ValueError(f"Invalid boundry: {boundry}")
 
@@ -536,7 +570,9 @@ class OverlapRefinery(BaseRefinery):
                 merged.append("".join(splits[current_index:index]))
 
             # Add the token count of the merged split
-            merged_token_counts.append(cumulative_token_counts[min(index, len(splits))] - current_token_count)
+            merged_token_counts.append(
+                cumulative_token_counts[min(index, len(splits))] - current_token_count
+            )
 
             # Update the current index
             current_index = index
@@ -547,29 +583,26 @@ class OverlapRefinery(BaseRefinery):
 
         return merged, merged_token_counts
 
-    def _prefix_overlap_recursive(self, 
-                                  text: str,
-                                  full_text: str,
-                                  level: int = 0) -> Optional[Context]:
+    def _prefix_overlap_recursive(
+        self, text: str, full_text: str, level: int = 0
+    ) -> Optional[Context]:
         """Recursively find the overlap context for a recursive chunk."""
         if not self.rules:
             return None
-        
+
         # Split the text at the current rule
         rule = self.rules[level]
         splits = self._split_text_at_rule(text, rule)
         token_counts = [self._get_token_count(split) for split in splits]
         if not rule.whitespace:
-            merged, merged_token_counts = self._merge_splits(splits, 
-                                                             token_counts, 
-                                                             combine_with_whitespace=False, 
-                                                             reverse=True)
+            merged, merged_token_counts = self._merge_splits(
+                splits, token_counts, combine_with_whitespace=False, reverse=True
+            )
         else:
-            merged, merged_token_counts = self._merge_splits(splits, 
-                                                             token_counts, 
-                                                             combine_with_whitespace=True, 
-                                                             reverse=True)
-        
+            merged, merged_token_counts = self._merge_splits(
+                splits, token_counts, combine_with_whitespace=True, reverse=True
+            )
+
         # Recursively find the overlap context for the merged splits if they are too long
         if merged_token_counts[-1] > self.context_size:
             return self._prefix_overlap_recursive(merged[-1], full_text, level + 1)
@@ -583,26 +616,28 @@ class OverlapRefinery(BaseRefinery):
                 start_index=start_index,
                 end_index=end_index,
             )
-    
-    def _suffix_overlap_recursive(self, text: str, full_text: str, level: int = 0) -> Optional[Context]:
+
+    def _suffix_overlap_recursive(
+        self, text: str, full_text: str, level: int = 0
+    ) -> Optional[Context]:
         """Get appropriate overlap context based on chunk type."""
         if not self.rules:
             return None
-        
+
         # Split the text at the current rule
         rule = self.rules[level]
         splits = self._split_text_at_rule(text, rule)
         token_counts = [self._get_token_count(split) for split in splits]
         # If the rule has no whitespace, we can just merge the splits
         if not rule.whitespace:
-            merged, merged_token_counts = self._merge_splits(splits, 
-                                                             token_counts, 
-                                                             combine_with_whitespace=False)
+            merged, merged_token_counts = self._merge_splits(
+                splits, token_counts, combine_with_whitespace=False
+            )
         else:
-            merged, merged_token_counts = self._merge_splits(splits, 
-                                                             token_counts, 
-                                                             combine_with_whitespace=True)
-        
+            merged, merged_token_counts = self._merge_splits(
+                splits, token_counts, combine_with_whitespace=True
+            )
+
         if merged_token_counts[0] > self.context_size:
             return self._suffix_overlap_recursive(merged[0], full_text, level + 1)
         else:
@@ -614,7 +649,7 @@ class OverlapRefinery(BaseRefinery):
                 start_index=start_index,
                 end_index=end_index,
             )
-        
+
     def _get_prefix_overlap_context(self, chunk: Chunk) -> Optional[Context]:
         """Get appropriate overlap context based on chunk type."""
         # If the mode is auto, we need to check the type of the chunk

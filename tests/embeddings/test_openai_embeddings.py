@@ -1,4 +1,5 @@
 """Test suite for OpenAIEmbeddings."""
+
 import os
 
 import numpy as np

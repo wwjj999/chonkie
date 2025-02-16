@@ -10,6 +10,7 @@ def text_chef():
     """Create a default TextChef instance."""
     return TextChef()
 
+
 @pytest.fixture
 def custom_text_chef():
     """Create a TextChef with custom settings."""
@@ -19,8 +20,9 @@ def custom_text_chef():
         abbreviations=True,
         ellipsis=True,
         mid_sentence_newlines=True,
-        sentence_endings='.!?'
+        sentence_endings=".!?",
     )
+
 
 class TestWhitespaceNormalization:
     """Test the whitespace normalization feature."""
@@ -36,6 +38,7 @@ class TestWhitespaceNormalization:
         assert text_chef.clean("") == ""
         assert text_chef.clean(None) == None
 
+
 class TestNewlineNormalization:
     """Test the newline normalization feature."""
 
@@ -50,6 +53,7 @@ class TestNewlineNormalization:
         text = "Paragraph 1\n\n\n\nParagraph 2"
         result = text_chef.clean(text)
         assert result == "Paragraph 1\n\nParagraph 2"
+
 
 class TestMidSentenceNewlines:
     """Test the mid sentence newlines feature."""
@@ -74,9 +78,10 @@ class TestMidSentenceNewlines:
 
     def test_dialog_markers(self, custom_text_chef):
         """Test handling dialog markers."""
-        text = "He said,\n\"Hello there!\""
+        text = 'He said,\n"Hello there!"'
         result = custom_text_chef.clean(text)
-        assert result == "He said,\n\"Hello there!\""
+        assert result == 'He said,\n"Hello there!"'
+
 
 class TestEllipsis:
     """Test the ellipsis feature."""
@@ -92,6 +97,7 @@ class TestEllipsis:
         text = "And then......."
         result = text_chef.clean(text)
         assert result == "And then…"
+
 
 class TestAbbreviations:
     """Test the abbreviations feature."""
@@ -109,6 +115,7 @@ class TestAbbreviations:
         result = text_chef.clean(text)
         assert all(c not in result for c in ["Prof.", "Ph.D.", "M.D."])
         assert all(c in result for c in ["Prof․", "Ph․D․", "M․D․"])
+
 
 class TestFeatureToggling:
     """Test the feature toggling feature."""
@@ -140,6 +147,7 @@ class TestFeatureToggling:
         text = "And then..."
         result = chef.clean(text)
         assert result == text
+
 
 class TestFileHandling:
     """Test the file handling feature."""

@@ -1,4 +1,5 @@
 """Test Cohere embeddings."""
+
 import os
 from importlib.util import find_spec
 

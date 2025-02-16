@@ -1,4 +1,5 @@
 """Sentence chunker."""
+
 import warnings
 from bisect import bisect_left
 from itertools import accumulate
@@ -38,7 +39,7 @@ class SentenceChunker(BaseChunker):
         approximate: bool = True,
         delim: Union[str, List[str]] = [".", "!", "?", "\n"],
         include_delim: Union[Literal["prev", "next"], None] = "prev",
-        return_type: Literal["chunks", "texts"] = "chunks"
+        return_type: Literal["chunks", "texts"] = "chunks",
     ):
         """Initialize the SentenceChunker with configuration parameters.
 
@@ -93,7 +94,7 @@ class SentenceChunker(BaseChunker):
 
         Args:
             text: Input text to be split into sentences
-            
+
         Returns:
             List of sentences
 
@@ -101,7 +102,7 @@ class SentenceChunker(BaseChunker):
         t = text
         for c in self.delim:
             if self.include_delim == "prev":
-                t = t.replace(c,  c + self.sep)
+                t = t.replace(c, c + self.sep)
             elif self.include_delim == "next":
                 t = t.replace(c, self.sep + c)
             else:
@@ -123,7 +124,7 @@ class SentenceChunker(BaseChunker):
                 current = ""
             else:
                 sentences.append(s)
-            
+
             # At any point if the current sentence is longer than the min_characters_per_sentence,
             # add it to the sentences
             if len(current) >= self.min_characters_per_sentence:
@@ -174,7 +175,9 @@ class SentenceChunker(BaseChunker):
         current_pos = 0
         for sent in sentence_texts:
             positions.append(current_pos)
-            current_pos += len(sent)  # No +1 space because sentences are already separated by spaces
+            current_pos += len(
+                sent
+            )  # No +1 space because sentences are already separated by spaces
 
         if not self.approximate:
             # Get accurate token counts in batch
@@ -292,9 +295,11 @@ class SentenceChunker(BaseChunker):
                 if pos + self.min_sentences_per_chunk <= len(sentences):
                     split_idx = pos + self.min_sentences_per_chunk
                 else:
-                    warnings.warn(f"Minimum sentences per chunk as {self.min_sentences_per_chunk} could not be met for all chunks. " +
-                                  f"Last chunk of the text will have only {len(sentences) - pos} sentences. " +
-                                  "Consider increasing the chunk_size or decreasing the min_sentences_per_chunk.")
+                    warnings.warn(
+                        f"Minimum sentences per chunk as {self.min_sentences_per_chunk} could not be met for all chunks. "
+                        + f"Last chunk of the text will have only {len(sentences) - pos} sentences. "
+                        + "Consider increasing the chunk_size or decreasing the min_sentences_per_chunk."
+                    )
                     split_idx = len(sentences)
 
             # Get the estimated token count
@@ -318,7 +323,7 @@ class SentenceChunker(BaseChunker):
                 chunk_sentences = sentences[pos:split_idx]
                 chunk_text = "".join(s.text for s in chunk_sentences)
                 actual = self._count_tokens(chunk_text)
-    
+
             chunks.append(self._create_chunk(chunk_sentences, actual))
 
             # Calculate next position with overlap

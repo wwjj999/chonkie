@@ -1,4 +1,5 @@
 """OpenAI embeddings."""
+
 import importlib.util as importutil
 import os
 import warnings
@@ -13,6 +14,7 @@ if importutil.find_spec("openai"):
     import numpy as np
     import tiktoken
     from openai import OpenAI
+
 
 class OpenAIEmbeddings(BaseEmbeddings):
     """OpenAI embeddings implementation using their API."""

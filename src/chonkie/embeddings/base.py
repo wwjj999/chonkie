@@ -1,4 +1,5 @@
 """Base class for all embeddings implementations."""
+
 import importlib.util as importutil
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Callable, List, Union
@@ -9,6 +10,7 @@ if TYPE_CHECKING:
 
 if importutil.find_spec("numpy"):
     import numpy as np
+
 
 class BaseEmbeddings(ABC):
     """Abstract base class for all embeddings implementations.
@@ -107,7 +109,9 @@ class BaseEmbeddings(ABC):
             float: Similarity score between the two embeddings
 
         """
-        return float(np.dot(u, v.T) / (np.linalg.norm(u) * np.linalg.norm(v)))  # cosine similarity
+        return float(
+            np.dot(u, v.T) / (np.linalg.norm(u) * np.linalg.norm(v))
+        )  # cosine similarity
 
     @property
     @abstractmethod

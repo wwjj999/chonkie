@@ -11,6 +11,7 @@ from chonkie.types import SemanticChunk, SemanticSentence, Sentence
 if importutil.find_spec("numpy"):
     import numpy as np
 
+
 class SemanticChunker(BaseChunker):
     """Chunker that splits text into semantically coherent chunks using embeddings.
 
@@ -27,7 +28,7 @@ class SemanticChunker(BaseChunker):
         delim: Delimiters to split sentences on
         include_delim: Whether to include the delimiters in the sentences
         return_type: Whether to return chunks or texts
-    
+
     Raises:
         ValueError: If parameters are invalid
 
@@ -47,7 +48,7 @@ class SemanticChunker(BaseChunker):
         delim: Union[str, List[str]] = [".", "!", "?", "\n"],
         include_delim: Union[Literal["prev", "next"], None] = "prev",
         return_type: Literal["chunks", "texts"] = "chunks",
-        **kwargs
+        **kwargs,
     ):
         """Initialize the SemanticChunker.
 
@@ -110,7 +111,7 @@ class SemanticChunker(BaseChunker):
         self.include_delim = include_delim
         self.sep = "🦛"
         self.return_type = return_type
-        
+
         if isinstance(threshold, float):
             self.similarity_threshold = threshold
             self.similarity_percentile = None
@@ -126,11 +127,11 @@ class SemanticChunker(BaseChunker):
         elif isinstance(embedding_model, str):
             from chonkie.embeddings.auto import AutoEmbeddings
 
-            self.embedding_model = AutoEmbeddings.get_embeddings(embedding_model, **kwargs)
-        else:
-            raise ValueError(
-                f"{embedding_model} is not a valid embedding model"
+            self.embedding_model = AutoEmbeddings.get_embeddings(
+                embedding_model, **kwargs
             )
+        else:
+            raise ValueError(f"{embedding_model} is not a valid embedding model")
 
         # Probably the dependency is not installed
         if self.embedding_model is None:
@@ -188,7 +189,7 @@ class SemanticChunker(BaseChunker):
                 current = ""
             else:
                 sentences.append(s)
-            
+
             # At any point if the current sentence is longer than the min_characters_per_sentence,
             # add it to the sentences
             if len(current) >= self.min_characters_per_sentence:
@@ -280,13 +281,15 @@ class SemanticChunker(BaseChunker):
         if len(sentences) == 1:
             return sentences[0].embedding
         else:
-            #NOTE: There's a known issue, where while calculating the sentence embeddings special tokens are added
-            # but when taking the token count the special tokens are not being counted, which causes a mismatch here. 
-            # This is a known issue and we're working on a fix. At the moment, the error is minimal and doesn't affect the chunking as much. 
+            # NOTE: There's a known issue, where while calculating the sentence embeddings special tokens are added
+            # but when taking the token count the special tokens are not being counted, which causes a mismatch here.
+            # This is a known issue and we're working on a fix. At the moment, the error is minimal and doesn't affect the chunking as much.
 
-            #TODO: Account for embedding model truncating to max_seq_length, which causes a mismatch in the token count.
+            # TODO: Account for embedding model truncating to max_seq_length, which causes a mismatch in the token count.
             return np.divide(
-                np.sum([(sent.embedding * sent.token_count) for sent in sentences], axis=0),
+                np.sum(
+                    [(sent.embedding * sent.token_count) for sent in sentences], axis=0
+                ),
                 np.sum([sent.token_count for sent in sentences]),
                 dtype=np.float32,
             )
@@ -297,17 +300,23 @@ class SemanticChunker(BaseChunker):
         current_sentence_window = [sentences[0]]
         window_embedding = sentences[0].embedding
         for i in range(1, len(sentences)):
-            similarities.append(self._get_semantic_similarity(window_embedding, sentences[i].embedding))
-            
+            similarities.append(
+                self._get_semantic_similarity(window_embedding, sentences[i].embedding)
+            )
+
             # Update the window embedding
             if len(current_sentence_window) < self.similarity_window:
                 current_sentence_window.append(sentences[i])
-                window_embedding = self._compute_group_embedding(current_sentence_window)
+                window_embedding = self._compute_group_embedding(
+                    current_sentence_window
+                )
             else:
                 current_sentence_window.pop(0)
                 current_sentence_window.append(sentences[i])
-                window_embedding = self._compute_group_embedding(current_sentence_window)
-            
+                window_embedding = self._compute_group_embedding(
+                    current_sentence_window
+                )
+
         return similarities
 
     def _get_split_indices(
@@ -362,16 +371,16 @@ class SemanticChunker(BaseChunker):
 
         # initialize threshold
         threshold = (low + high) / 2
-        
+
         while abs(high - low) > self.threshold_step:
             threshold = (low + high) / 2
             # Get the split indices
             split_indices = self._get_split_indices(similarities, threshold)
-            
+
             # Get the cumulative token count`s at the split indices
 
             split_token_counts = np.diff(cumulative_token_counts[split_indices])
-            
+
             # Get the median of the split token counts
             # median_split_token_count = np.median(split_token_counts)
             # Check if the split respects the chunk size
@@ -464,7 +473,9 @@ class SemanticChunker(BaseChunker):
         self, sentences: List[Sentence]
     ) -> List[List[Sentence]]:
         """Group sentences based on semantic similarity, respecting the similarity window."""
-        similarities = self._compute_window_similarities(sentences) # NOTE: This is calculating pairwise, but not window. 
+        similarities = self._compute_window_similarities(
+            sentences
+        )  # NOTE: This is calculating pairwise, but not window.
         split_indices = self._get_split_indices(similarities, self.similarity_threshold)
         groups = [
             sentences[split_indices[i] : split_indices[i + 1]]
@@ -479,9 +490,7 @@ class SemanticChunker(BaseChunker):
         else:
             return self._group_sentences_window(sentences)
 
-    def _create_chunk(
-        self, sentences: List[Sentence]
-    ) -> SemanticChunk:
+    def _create_chunk(self, sentences: List[Sentence]) -> SemanticChunk:
         """Create a chunk from a list of sentences."""
         if not sentences:
             raise ValueError("Cannot create chunk from empty sentence list")
@@ -500,7 +509,7 @@ class SemanticChunker(BaseChunker):
             return "".join(sent.text for sent in sentences)
         else:
             raise ValueError("Invalid return_type. Must be either 'chunks' or 'texts'.")
-        
+
     def _split_chunks(
         self, sentence_groups: List[List[Sentence]]
     ) -> List[SemanticChunk]:
