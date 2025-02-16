@@ -74,7 +74,12 @@ packages = ["chonkie",
             "chonkie.chef"]
 
 [tool.ruff]
-select = ["F", "I", "D", "DOC"]
+lint.select = ["F", "I", "D", "DOC"]
+lint.ignore = ["D211", "D213"]
+
+[tool.ruff.format]
+preview = true
+indent-style = "space"
 
 [tool.mypy]
 disallow_untyped_defs = true
