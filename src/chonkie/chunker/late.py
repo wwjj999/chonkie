@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 
 
 class LateChunker(BaseChunker):
+
     """Class for Late Chunking.
 
     In late chunking, we first take the embeddings of the entire text,

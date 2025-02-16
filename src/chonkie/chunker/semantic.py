@@ -13,6 +13,7 @@ if importutil.find_spec("numpy"):
 
 
 class SemanticChunker(BaseChunker):
+
     """Chunker that splits text into semantically coherent chunks using embeddings.
 
     Args:

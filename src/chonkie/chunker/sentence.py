@@ -11,6 +11,7 @@ from .base import BaseChunker
 
 
 class SentenceChunker(BaseChunker):
+
     """SentenceChunker splits the sentences in a text based on token limits and sentence boundaries.
 
     Args:

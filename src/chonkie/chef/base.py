@@ -6,6 +6,7 @@ from typing import List, Optional, Union
 
 
 class BaseChef(ABC):
+
     """Base class for all chefs.
 
     This class provides a base for all chefs. Chefs are used to process text

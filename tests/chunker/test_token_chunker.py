@@ -28,7 +28,6 @@ from tokenizers import Tokenizer
 from transformers import AutoTokenizer
 
 from chonkie import Chunk, TokenChunker
-from chonkie.tokenizer import Tokenizer as ChonkieTokenizer
 
 
 @pytest.fixture

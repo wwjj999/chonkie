@@ -9,6 +9,7 @@ from chonkie.chef.base import BaseChef
 
 
 class TestChef(BaseChef):
+
     """Test implementation of BaseChef."""
 
     def clean(self, text: str) -> str:

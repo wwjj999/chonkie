@@ -11,6 +11,7 @@ from .base import BaseEmbeddings
 
 
 class CohereEmbeddings(BaseEmbeddings):
+
     """Cohere embeddings implementation using their API."""
 
     AVAILABLE_MODELS = {

@@ -8,6 +8,7 @@ from .semantic import SemanticChunker
 
 
 class SDPMChunker(SemanticChunker):
+
     """Chunker implementation using the Semantic Document Partitioning Method (SDPM).
 
     The SDPM approach involves three main steps:

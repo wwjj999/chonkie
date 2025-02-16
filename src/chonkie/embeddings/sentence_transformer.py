@@ -15,6 +15,7 @@ if importutil.find_spec("sentence_transformers"):
 
 
 class SentenceTransformerEmbeddings(BaseEmbeddings):
+
     """Class for SentenceTransformer embeddings.
 
     This class provides an interface for the SentenceTransformer library, which

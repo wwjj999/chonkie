@@ -9,6 +9,7 @@ from .base import BaseChunker
 
 
 class WordChunker(BaseChunker):
+
     """Chunker that splits text into overlapping chunks based on words.
 
     Args:

@@ -17,6 +17,7 @@ from chonkie.types import (
 
 
 class OverlapRefinery(BaseRefinery):
+
     """Refinery class which adds overlap as context to chunks.
 
     It can handle different types of chunks (basic Chunks, SentenceChunks,

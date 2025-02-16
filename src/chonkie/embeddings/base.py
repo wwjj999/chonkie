@@ -13,6 +13,7 @@ if importutil.find_spec("numpy"):
 
 
 class BaseEmbeddings(ABC):
+
     """Abstract base class for all embeddings implementations.
 
     All embeddings implementations should inherit from this class and implement

@@ -1,7 +1,5 @@
 """Base classes for chunking text."""
 
-import importlib
-import inspect
 import warnings
 from abc import ABC, abstractmethod
 from multiprocessing import Pool, cpu_count
@@ -14,6 +12,7 @@ from chonkie.types import Chunk
 
 
 class BaseChunker(ABC):
+
     """Abstract base class for all chunker implementations.
 
     All chunker implementations should inherit from this class and implement

@@ -16,6 +16,7 @@ if importutil.find_spec("model2vec"):
 
 
 class Model2VecEmbeddings(BaseEmbeddings):
+
     """Class for model2vec embeddings.
 
     This class provides an interface for the model2vec library, which provides a variety

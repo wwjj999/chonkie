@@ -10,6 +10,7 @@ from .base import BaseChunker
 
 
 class TokenChunker(BaseChunker):
+
     """Chunker that splits text into chunks of a specified token size.
 
     Args:

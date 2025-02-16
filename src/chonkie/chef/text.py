@@ -7,6 +7,7 @@ from chonkie.chef.patterns import ABBREVIATIONS, UnicodeReplacements
 
 
 class TextChef(BaseChef):
+
     """A chef that handles basic text processing.
 
     This chef handles basic text files and performs common text cleaning operations

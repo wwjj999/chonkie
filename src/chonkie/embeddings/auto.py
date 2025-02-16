@@ -7,6 +7,7 @@ from .registry import EmbeddingsRegistry
 
 
 class AutoEmbeddings:
+
     """Factory class for automatically loading embeddings.
 
     This class provides a factory interface for loading embeddings based on an

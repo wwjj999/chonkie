@@ -133,6 +133,7 @@ ABBREVIATIONS = (
 
 @dataclass
 class UnicodeReplacements:
+
     """Common Unicode characters used for replacements."""
 
     DOT_LEADER = "․"  # U+2024 ONE DOT LEADER

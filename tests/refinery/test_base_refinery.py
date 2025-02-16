@@ -8,6 +8,7 @@ from chonkie.types import Chunk
 
 # Create a concrete implementation of BaseRefinery for testing
 class TestRefinery(BaseRefinery):
+
     """Test implementation of BaseRefinery."""
 
     def refine(self, chunks):

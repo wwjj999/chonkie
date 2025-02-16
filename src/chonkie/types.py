@@ -9,6 +9,7 @@ if TYPE_CHECKING:
 
 @dataclass
 class Context:
+
     """A dataclass representing contextual information for chunk refinement.
 
     This class stores text and token count information that can be used to add
@@ -77,6 +78,7 @@ class Context:
 
 @dataclass
 class Chunk:
+
     """Dataclass representing a text chunk with metadata.
 
     All attributes are read-only via slots for performance reasons.
@@ -151,6 +153,7 @@ class Chunk:
 
 @dataclass
 class Sentence:
+
     """Dataclass representing a sentence with metadata.
 
     All attributes are read-only via slots for performance reasons.
@@ -188,6 +191,7 @@ class Sentence:
 
 @dataclass
 class SentenceChunk(Chunk):
+
     """Dataclass representing a sentence chunk with metadata.
 
     All attributes are read-only via slots for performance reasons.
@@ -232,6 +236,7 @@ class SentenceChunk(Chunk):
 
 @dataclass
 class SemanticSentence(Sentence):
+
     """Dataclass representing a semantic sentence with metadata.
 
     This class is used to represent a sentence with an embedding.
@@ -275,6 +280,7 @@ class SemanticSentence(Sentence):
 
 @dataclass
 class SemanticChunk(SentenceChunk):
+
     """SemanticChunk dataclass representing a semantic chunk with metadata.
 
     Attributes:
@@ -314,6 +320,7 @@ class SemanticChunk(SentenceChunk):
 
 @dataclass
 class LateSentence(Sentence):
+
     """LateSentence dataclass representing a sentence with an embedding.
 
     This class is used to represent a sentence with an embedding.
@@ -359,6 +366,7 @@ class LateSentence(Sentence):
 
 @dataclass
 class LateChunk(Chunk):
+
     """LateChunk dataclass representing a chunk with an embedding.
 
     This class is used to represent a chunk with an embedding.
@@ -408,6 +416,7 @@ class LateChunk(Chunk):
 
 @dataclass
 class RecursiveLevel:
+
     """Configuration for a single level of recursive chunking.
 
     Attributes:
@@ -463,6 +472,7 @@ class RecursiveLevel:
 
 @dataclass
 class RecursiveRules:
+
     """Collection of rules for recursive chunking."""
 
     levels: Union[List[RecursiveLevel], RecursiveLevel, None] = None
@@ -569,6 +579,7 @@ class RecursiveRules:
 
 @dataclass
 class RecursiveChunk(Chunk):
+
     """A Chunk with a level attribute."""
 
     level: Union[int, None] = None

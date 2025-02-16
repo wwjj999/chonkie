@@ -74,6 +74,7 @@ packages = ["chonkie",
             "chonkie.chef"]
 
 [tool.ruff]
+exclude = ["*.ipynb"]
 lint.select = ["F", "I", "D", "DOC"]
 lint.ignore = ["D211", "D213"]
 

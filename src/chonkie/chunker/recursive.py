@@ -10,6 +10,7 @@ from chonkie.types import Chunk, RecursiveChunk, RecursiveLevel, RecursiveRules
 
 
 class RecursiveChunker(BaseChunker):
+
     """Chunker that uses recursive rules to chunk text.
 
     Attributes:

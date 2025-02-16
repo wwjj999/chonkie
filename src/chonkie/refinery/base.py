@@ -7,6 +7,7 @@ from chonkie.types import Chunk
 
 
 class BaseRefinery(ABC):
+
     """Base class for all Refinery classes.
 
     Refinery classes are used to refine the Chunks generated from the

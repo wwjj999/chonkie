@@ -17,6 +17,7 @@ if importutil.find_spec("openai"):
 
 
 class OpenAIEmbeddings(BaseEmbeddings):
+
     """OpenAI embeddings implementation using their API."""
 
     AVAILABLE_MODELS = {

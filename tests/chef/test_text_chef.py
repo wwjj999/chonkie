@@ -25,6 +25,7 @@ def custom_text_chef():
 
 
 class TestWhitespaceNormalization:
+
     """Test the whitespace normalization feature."""
 
     def test_multiple_spaces(self, text_chef):
@@ -40,6 +41,7 @@ class TestWhitespaceNormalization:
 
 
 class TestNewlineNormalization:
+
     """Test the newline normalization feature."""
 
     def test_mixed_newlines(self, text_chef):
@@ -56,6 +58,7 @@ class TestNewlineNormalization:
 
 
 class TestMidSentenceNewlines:
+
     """Test the mid sentence newlines feature."""
 
     def test_basic_line_wrapping(self, custom_text_chef):
@@ -84,6 +87,7 @@ class TestMidSentenceNewlines:
 
 
 class TestEllipsis:
+
     """Test the ellipsis feature."""
 
     def test_replace_dots(self, text_chef):
@@ -100,6 +104,7 @@ class TestEllipsis:
 
 
 class TestAbbreviations:
+
     """Test the abbreviations feature."""
 
     def test_common_abbreviations(self, text_chef):
@@ -118,6 +123,7 @@ class TestAbbreviations:
 
 
 class TestFeatureToggling:
+
     """Test the feature toggling feature."""
 
     def test_disable_whitespace(self):
@@ -150,6 +156,7 @@ class TestFeatureToggling:
 
 
 class TestFileHandling:
+
     """Test the file handling feature."""
 
     def test_supported_extensions(self, text_chef, tmp_path):

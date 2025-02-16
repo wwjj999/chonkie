@@ -7,6 +7,7 @@ from typing import Any, Callable, Dict, List, Union
 
 
 class Tokenizer:
+
     """Unified tokenizer interface for Chonkie.
 
     Handles tokenizer initialization and operations across different backends
@@ -212,6 +213,7 @@ class Tokenizer:
 
 
 class CharacterTokenizer:
+
     """Character-based tokenizer."""
 
     def __init__(self):
@@ -271,6 +273,7 @@ class CharacterTokenizer:
 
 
 class WordTokenizer:
+
     """Word-based tokenizer."""
 
     def __init__(self):
