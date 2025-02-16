@@ -1,6 +1,6 @@
 """Tests for the SDPM (Semantic Double-Pass Merging) Chunker.
 
-This module contains test cases for the SDPMChunker class. 
+This module contains test cases for the SDPMChunker class.
 The tests verify:
 
 - Basic chunking functionality with simple text
