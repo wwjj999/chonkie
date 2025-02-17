@@ -101,7 +101,7 @@ def test_overlap_refinery_initialization():
     assert refinery.context_size == 64
     assert refinery.merge_context is False
     assert refinery.approximate is False
-    assert refinery.tokenizer == tokenizer
+    assert refinery.tokenizer.tokenizer == tokenizer
 
 
 def test_overlap_refinery_empty_input():
@@ -298,12 +298,12 @@ def test_overlap_refinery_sample_text_suffix(sample_text):
     assert len(refined) == len(chunks)
     for i, chunk in enumerate(refined):
         if i != len(refined) - 1:
-            assert chunker._count_tokens(chunk.text) == 512, (
-                f"Chunk {i} has {chunker._count_tokens(chunk.text)} tokens"
+            assert chunker.tokenizer.count_tokens(chunk.text) == 512, (
+                f"Chunk {i} has {chunker.tokenizer.count_tokens(chunk.text)} tokens"
             )
         else:
-            assert chunker._count_tokens(chunk.text) == chunk.token_count, (
-                f"Chunk {i} has {chunker._count_tokens(chunk.text)} tokens"
+            assert chunker.tokenizer.count_tokens(chunk.text) == chunk.token_count, (
+                f"Chunk {i} has {chunker.tokenizer.count_tokens(chunk.text)} tokens"
             )
 
 
@@ -313,7 +313,7 @@ def test_overlap_refinery_sample_text_prefix(sample_text):
     chunker = TokenChunker(chunk_size=384, chunk_overlap=0)
     tokenizer = chunker.tokenizer
     chunks = chunker.chunk(sample_text)
-    original_token_count = [chunker._count_tokens(chunk.text) for chunk in chunks]
+    original_token_count = [chunker.tokenizer.count_tokens(chunk.text) for chunk in chunks]
 
     # Initialize refinery and refine chunks
     refinery = OverlapRefinery(
@@ -332,7 +332,7 @@ def test_overlap_refinery_sample_text_prefix(sample_text):
     predicted_token_count = []
     for i, chunk in enumerate(refined):
         if i != 0:
-            actual_token_count.append(chunker._count_tokens(chunk.text))
+            actual_token_count.append(chunker.tokenizer.count_tokens(chunk.text))
             predicted_token_count.append(original_token_count[i] + 128)
         else:
             actual_token_count.append(chunk.token_count)

@@ -24,7 +24,7 @@ class BaseChef(ABC):
             extensions: The supported extensions.
 
         """
-        self._extensions = extensions
+        self._extensions = extensions if extensions is not None else []
 
     def _read_file(self, file_path: str) -> str:
         """Read a single file and return its content."""
@@ -65,8 +65,8 @@ class BaseChef(ABC):
 
     def fetch(
         self,
-        files: Optional[Union[str, List[str]]] = None,
-        directory: Optional[str] = None,
+        files: Union[str, List[str], None] = None,
+        directory: Union[str, None] = None,
     ) -> Union[str, List[str]]:
         """Fetch the files from the given directory or file paths.
 
@@ -92,13 +92,13 @@ class BaseChef(ABC):
             if not os.path.isdir(directory):
                 raise FileNotFoundError(f"Directory not found: {directory}")
 
-            all_files = self._get_files_from_directory(directory)
-            return self._read_files(all_files)
-
+            files = self._get_files_from_directory(directory)
+            
         # If single file, then convert to list
         if isinstance(files, str):
             files = [files]
 
+        # Read the files
         return self._read_files(files)
 
     @abstractmethod
@@ -121,7 +121,7 @@ class BaseChef(ABC):
         texts: Optional[Union[str, List[str]]] = None,
         files: Optional[Union[str, List[str]]] = None,
         directory: Optional[str] = None,
-    ) -> str:
+    ) -> Union[str, List[str]]:
         """Process the text or the files/dir.
 
         Args:
@@ -152,6 +152,6 @@ class BaseChef(ABC):
         texts: Optional[Union[str, List[str]]] = None,
         files: Optional[Union[str, List[str]]] = None,
         directory: Optional[str] = None,
-    ) -> str:
+    ) -> Union[str, List[str]]:
         """Call the chef."""
         return self.process(texts, files, directory)

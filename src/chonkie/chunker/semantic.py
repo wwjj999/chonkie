@@ -210,14 +210,14 @@ class SemanticChunker(BaseChunker):
         else:
             return float(np.percentile(all_similarities, self.similarity_percentile))
 
-    def _prepare_sentences(self, text: str) -> List[Sentence]:
+    def _prepare_sentences(self, text: str) -> List[SemanticSentence]:
         """Prepare sentences with precomputed information.
 
         Args:
             text: Input text to be processed
 
         Returns:
-            List of Sentence objects with precomputed token counts and embeddings
+            List of SemanticSentence objects with precomputed token counts and embeddings
 
         """
         if not text.strip():
@@ -252,7 +252,7 @@ class SemanticChunker(BaseChunker):
         embeddings = self.embedding_model.embed_batch(sentence_groups)
 
         # Batch compute token counts
-        token_counts = self._count_tokens_batch(raw_sentences)
+        token_counts = self.tokenizer.count_tokens_batch(raw_sentences)
 
         # Create Sentence objects with all precomputed information
         sentences = [
@@ -277,7 +277,7 @@ class SemanticChunker(BaseChunker):
         similarity = self.embedding_model.similarity(embedding1, embedding2)
         return similarity
 
-    def _compute_group_embedding(self, sentences: List[Sentence]) -> "np.ndarray":
+    def _compute_group_embedding(self, sentences: List[SemanticSentence]) -> "np.ndarray":
         """Compute mean embedding for a group of sentences."""
         if len(sentences) == 1:
             return sentences[0].embedding
@@ -295,7 +295,7 @@ class SemanticChunker(BaseChunker):
                 dtype=np.float32,
             )
 
-    def _compute_window_similarities(self, sentences: List[Sentence]) -> List[float]:
+    def _compute_window_similarities(self, sentences: List[SemanticSentence]) -> List[float]:
         """Compute all pairwise similarities between sentences."""
         similarities = [1.0]
         current_sentence_window = [sentences[0]]
@@ -349,7 +349,7 @@ class SemanticChunker(BaseChunker):
         return splits
 
     def _calculate_threshold_via_binary_search(
-        self, sentences: List[Sentence]
+        self, sentences: List[SemanticSentence]
     ) -> float:
         """Calculate similarity threshold via binary search."""
         # Get the token counts and cumulative token counts
@@ -414,14 +414,14 @@ class SemanticChunker(BaseChunker):
 
         return threshold
 
-    def _calculate_threshold_via_percentile(self, sentences: List[Sentence]) -> float:
+    def _calculate_threshold_via_percentile(self, sentences: List[SemanticSentence]) -> float:
         """Calculate similarity threshold via percentile."""
         # Compute all pairwise similarities, since the embeddings are already computed
         # The embeddings are computed assuming a similarity window is applied
         all_similarities = self._compute_window_similarities(sentences)
         return float(np.percentile(all_similarities, 100 - self.similarity_percentile))
 
-    def _calculate_similarity_threshold(self, sentences: List[Sentence]) -> float:
+    def _calculate_similarity_threshold(self, sentences: List[SemanticSentence]) -> float:
         """Calculate similarity threshold either through the smart binary search or percentile."""
         if self.similarity_threshold is not None:
             return self.similarity_threshold
@@ -431,12 +431,12 @@ class SemanticChunker(BaseChunker):
             return self._calculate_threshold_via_binary_search(sentences)
 
     def _group_sentences_cumulative(
-        self, sentences: List[Sentence]
-    ) -> List[List[Sentence]]:
+        self, sentences: List[SemanticSentence]
+    ) -> List[List[SemanticSentence]]:
         """Group sentences based on semantic similarity, ignoring token count limits.
 
         Args:
-            sentences: List of Sentence objects with precomputed embeddings
+            sentences: List of SemanticSentence objects with precomputed embeddings
 
         Returns:
             List of sentence groups, where each group is semantically coherent
@@ -491,7 +491,7 @@ class SemanticChunker(BaseChunker):
         else:
             return self._group_sentences_window(sentences)
 
-    def _create_chunk(self, sentences: List[Sentence]) -> SemanticChunk:
+    def _create_chunk(self, sentences: List[SemanticSentence]) -> SemanticChunk:
         """Create a chunk from a list of sentences."""
         if not sentences:
             raise ValueError("Cannot create chunk from empty sentence list")
@@ -512,7 +512,7 @@ class SemanticChunker(BaseChunker):
             raise ValueError("Invalid return_type. Must be either 'chunks' or 'texts'.")
 
     def _split_chunks(
-        self, sentence_groups: List[List[Sentence]]
+        self, sentence_groups: List[List[SemanticSentence]]
     ) -> List[SemanticChunk]:
         """Split sentence groups into chunks that respect chunk_size.
 

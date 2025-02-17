@@ -309,7 +309,7 @@ def test_semantic_chunker_token_counts(embedding_model, sample_text):
         "All chunks must have a token count less than or equal to 512"
     )
 
-    token_counts = [chunker._count_tokens(chunk.text) for chunk in chunks]
+    token_counts = [chunker.tokenizer.count_tokens(chunk.text) for chunk in chunks]
     for i, (chunk, token_count) in enumerate(zip(chunks, token_counts)):
         assert chunk.token_count == token_count, (
             f"Chunk {i} has a token count of {chunk.token_count} but the encoded text length is {token_count}"

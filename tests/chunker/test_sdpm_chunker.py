@@ -178,7 +178,7 @@ def test_spdm_chunker_token_counts(embedding_model, sample_text):
         "All chunks must have a token count less than or equal to 512"
     )
 
-    token_counts = [chunker._count_tokens(chunk.text) for chunk in chunks]
+    token_counts = [chunker.tokenizer.count_tokens(chunk.text) for chunk in chunks]
     assert all([
         chunk.token_count == token_count
         for chunk, token_count in zip(chunks, token_counts)

@@ -14,6 +14,7 @@ from chonkie.types import (
     SemanticChunk,
     SentenceChunk,
 )
+from chonkie.tokenizer import Tokenizer
 
 
 class OverlapRefinery(BaseRefinery):
@@ -67,154 +68,13 @@ class OverlapRefinery(BaseRefinery):
         self.merge_context = merge_context
         self.inplace = inplace
         self.rules = rules
-        # If tokenizer provided, we can do exact token counting
-        if tokenizer is not None:
-            self.tokenizer = tokenizer
-            self._tokenizer_backend = self._get_tokenizer_backend()
-            self.approximate = approximate
-        else:
-            # Without tokenizer, must use approximate method
-            self.tokenizer = None
-            self.approximate = True
+        self.approximate = approximate
+
+        # Initialize the tokenizer
+        self.tokenizer = Tokenizer(tokenizer) if tokenizer else None
 
         # Average number of characters per token
         self._AVG_CHAR_PER_TOKEN = 7
-
-    def _get_tokenizer_backend(self) -> str:
-        """Get the tokenizer backend."""
-        if "tokenizers" in str(type(self.tokenizer)):
-            return "tokenizers"
-        elif "tiktoken" in str(type(self.tokenizer)):
-            return "tiktoken"
-        elif "transformers" in str(type(self.tokenizer)):
-            return "transformers"
-        else:
-            raise ValueError(
-                f"Unsupported tokenizer backend: {str(type(self.tokenizer))}"
-            )
-
-    def _encode(self, text: str) -> List[int]:
-        """Encode text using the tokenizer backend."""
-        if self._tokenizer_backend == "tokenizers":
-            return self.tokenizer.encode(text, add_special_tokens=False).ids
-        elif self._tokenizer_backend == "tiktoken":
-            return self.tokenizer.encode(text)
-        elif self._tokenizer_backend == "transformers":
-            return self.tokenizer.encode(text, add_special_tokens=False)
-        else:
-            raise ValueError(
-                f"Unsupported tokenizer backend: {self._tokenizer_backend}"
-            )
-
-    def _decode(self, tokens: List[int]) -> str:
-        """Decode tokens using the tokenizer backend."""
-        if self._tokenizer_backend == "tokenizers":
-            return self.tokenizer.decode(tokens)
-        elif self._tokenizer_backend == "tiktoken":
-            return self.tokenizer.decode(tokens)
-        elif self._tokenizer_backend == "transformers":
-            return self.tokenizer.decode(tokens, skip_special_tokens=True)
-        else:
-            raise ValueError(
-                f"Unsupported tokenizer backend: {self._tokenizer_backend}"
-            )
-
-    def _encode_batch(self, texts: List[str]) -> List[List[int]]:
-        """Batch encode texts using the tokenizer backend."""
-        if self._tokenizer_backend == "tokenizers":
-            return [
-                t.ids
-                for t in self.tokenizer.encode_batch(texts, add_special_tokens=False)
-            ]
-        elif self._tokenizer_backend == "tiktoken":
-            return self.tokenizer.encode_batch(texts)
-        elif self._tokenizer_backend == "transformers":
-            return self.tokenizer.batch_encode_plus(texts, add_special_tokens=False)[
-                "input_ids"
-            ]
-        else:
-            raise ValueError(
-                f"Unsupported tokenizer backend: {self._tokenizer_backend}"
-            )
-
-    def _decode_batch(self, tokens: List[List[int]]) -> List[str]:
-        """Batch decode tokens using the tokenizer backend."""
-        if self._tokenizer_backend == "tokenizers":
-            return self.tokenizer.decode_batch(tokens)
-        elif self._tokenizer_backend == "tiktoken":
-            return self.tokenizer.decode_batch(tokens)
-        elif self._tokenizer_backend == "transformers":
-            return self.tokenizer.batch_decode(tokens, skip_special_tokens=True)
-        else:
-            raise ValueError(
-                f"Unsupported tokenizer backend: {self._tokenizer_backend}"
-            )
-
-    def _get_refined_chunks(
-        self, chunks: List[Chunk], inplace: bool = True
-    ) -> List[Chunk]:
-        """Convert regular chunks to refined chunks with progressive memory cleanup.
-
-        This method takes regular chunks and converts them to RefinedChunks one at a
-        time. When inplace is True, it progressively removes chunks from the input
-        list to minimize memory usage.
-
-        The conversion preserves all relevant information from the original chunks,
-        including sentences and embeddings if they exist. This allows us to maintain
-        the full capabilities of semantic chunks while adding refinement features.
-
-        Args:
-            chunks: List of original chunks to convert
-            inplace: Whether to modify the input list during conversion
-
-        Returns:
-            List of RefinedChunks without any context (context is added later)
-
-        Example:
-            For memory efficiency with large datasets:
-            ```
-            chunks = load_large_dataset()  # Many chunks
-            refined = refinery._get_refined_chunks(chunks, inplace=True)
-            # chunks is now empty, memory is freed
-            ```
-
-        """
-        if not chunks:
-            return []
-
-        refined_chunks = []
-
-        # Use enumerate to track position without modifying list during iteration
-        for i in range(len(chunks)):
-            if inplace:
-                # Get and remove the first chunk
-                chunk = chunks.pop(0)
-            else:
-                # Just get a reference if not modifying in place
-                chunk = chunks[i]
-
-            # Create refined version preserving appropriate attributes
-            refined_chunk = SemanticChunk(
-                text=chunk.text,
-                start_index=chunk.start_index,
-                end_index=chunk.end_index,
-                token_count=chunk.token_count,
-                # Preserve sentences and embeddings if they exist
-                sentences=chunk.sentences
-                if isinstance(chunk, (SentenceChunk, SemanticChunk))
-                else None,
-                embedding=chunk.embedding if isinstance(chunk, SemanticChunk) else None,
-                context=None,  # Context is added later in the refinement process
-            )
-
-            refined_chunks.append(refined_chunk)
-
-        if inplace:
-            # Clear the input list to free memory
-            chunks.clear()
-            chunks += refined_chunks
-
-        return refined_chunks
 
     def _prefix_overlap_token_exact(self, chunk: Chunk) -> Optional[Context]:
         """Calculate precise token-based overlap context using tokenizer.
@@ -233,10 +93,10 @@ class OverlapRefinery(BaseRefinery):
             return None
 
         # Get exact token boundaries
-        tokens = self._encode(chunk.text)
+        tokens = self.tokenizer.encode(chunk.text)
         context_tokens = min(self.context_size, len(tokens))
         context_tokens_ids = tokens[-context_tokens:]
-        context_text = self._decode(context_tokens_ids)
+        context_text = self.tokenizer.decode(context_tokens_ids)
 
         # Find where context text starts in chunk
         try:
@@ -263,10 +123,10 @@ class OverlapRefinery(BaseRefinery):
             return None
 
         # Get exact token boundaries
-        tokens = self._encode(chunk.text)
+        tokens = self.tokenizer.encode(chunk.text)
         context_tokens = min(self.context_size, len(tokens))
         context_tokens_ids = tokens[:context_tokens]
-        context_text = self._decode(context_tokens_ids)
+        context_text = self.tokenizer.decode(context_tokens_ids)
 
         # Find where context text starts in chunk
         try:
@@ -477,7 +337,7 @@ class OverlapRefinery(BaseRefinery):
 
     def _split_at_tokens(self, text: str) -> List[str]:
         """Split the text at tokens."""
-        tokens = self._encode(text)
+        tokens = self.tokenizer.encode(text)
 
         # Split the tokens at the chunk size
         token_splits = [
@@ -486,7 +346,7 @@ class OverlapRefinery(BaseRefinery):
         ]
 
         # Decode the tokens back to text
-        splits = self._decode_batch(token_splits)
+        splits = self.tokenizer.decode_batch(token_splits)
         return splits
 
     def _get_token_count(self, text: str) -> int:
@@ -495,7 +355,7 @@ class OverlapRefinery(BaseRefinery):
         if estimate > self.context_size:
             return self.context_size + 1
         elif self.tokenizer is not None and not self.approximate:
-            return len(self._encode(text))
+            return self.tokenizer.count_tokens(text)
         else:
             return estimate
 
@@ -748,9 +608,7 @@ class OverlapRefinery(BaseRefinery):
                 # Calculate new token count
                 if hasattr(self, "tokenizer") and not self.approximate:
                     # Use exact token count if we have a tokenizer
-                    refined_chunks[i].token_count = len(
-                        self._encode(refined_chunks[i].text)
-                    )
+                    refined_chunks[i].token_count = self.tokenizer.count_tokens(refined_chunks[i].text)
                 else:
                     # Otherwise use approximate by adding context tokens plus one for space
                     refined_chunks[i].token_count = (
@@ -798,8 +656,8 @@ class OverlapRefinery(BaseRefinery):
                 # Calculate new token count
                 if hasattr(self, "tokenizer") and not self.approximate:
                     # Use exact token count if we have a tokenizer
-                    refined_chunks[i].token_count = len(
-                        self._encode(refined_chunks[i].text)
+                    refined_chunks[i].token_count = self.tokenizer.count_tokens(
+                        refined_chunks[i].text
                     )
                 else:
                     # Otherwise use approximate by adding context tokens

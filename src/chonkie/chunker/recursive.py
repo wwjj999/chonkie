@@ -112,7 +112,7 @@ class RecursiveChunker(BaseChunker):
 
     def _split_at_tokens(self, text: str) -> List[str]:
         """Split the text at tokens."""
-        tokens = self._encode(text)
+        tokens = self.tokenizer.encode(text)
 
         # Split the tokens at the chunk size
         token_splits = [
@@ -121,7 +121,7 @@ class RecursiveChunker(BaseChunker):
         ]
 
         # Decode the tokens back to text
-        splits = self._decode_batch(token_splits)
+        splits = self.tokenizer.decode_batch(token_splits)
         return splits
 
     def _merge_splits(
@@ -204,7 +204,7 @@ class RecursiveChunker(BaseChunker):
         if estimate > self.chunk_size:
             return self.chunk_size + 1
         else:
-            return self._count_tokens(text)
+            return self.tokenizer.count_tokens(text)
 
     def _create_chunk(
         self, text: str, token_count: int, level: int, full_text: Optional[str] = None

@@ -50,10 +50,14 @@ def test_sentence_chunker_initialization(tokenizer):
     )
 
     assert chunker is not None
-    assert chunker.tokenizer == tokenizer
+    assert chunker.tokenizer.tokenizer == tokenizer
     assert chunker.chunk_size == 512
     assert chunker.chunk_overlap == 128
     assert chunker.min_sentences_per_chunk == 1
+    assert chunker.approximate == True
+    assert chunker.delim == [".", "!", "?", "\n"]
+    assert chunker.include_delim == "prev"
+    assert chunker.return_type == "chunks"
 
 
 def test_sentence_chunker_chunking(tokenizer, sample_text):
@@ -111,7 +115,7 @@ def test_sentence_chunker_repr(tokenizer):
     )
 
     assert repr(chunker) == (
-        f"SentenceChunker(tokenizer={tokenizer}, "
+        f"SentenceChunker(tokenizer={chunker.tokenizer}, "
         f"chunk_size={chunker.chunk_size}, "
         f"chunk_overlap={chunker.chunk_overlap}, "
         f"min_sentences_per_chunk={chunker.min_sentences_per_chunk}, "

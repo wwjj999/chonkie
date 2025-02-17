@@ -158,10 +158,10 @@ class LateChunker(BaseChunker):
             return []
 
         # Encode full text
-        text_tokens = self._encode(text)
+        text_tokens = self.tokenizer.encode(text)
 
         # We decode the text because the tokenizer might result in a different output than text
-        decoded_text = self._decode(text_tokens)
+        decoded_text = self.tokenizer.decode(text_tokens)
 
         # Calculate chunk positions
         token_groups = [
@@ -174,7 +174,7 @@ class LateChunker(BaseChunker):
             len(toks) for toks in token_groups
         ]  # get the token counts; it's prolly chunk_size, but len doesn't take too long
 
-        chunk_texts = self._decode_batch(
+        chunk_texts = self.tokenizer.decode_batch(
             token_groups
         )  # decrease the time by decoding in one go (?)
 
@@ -248,7 +248,7 @@ class LateChunker(BaseChunker):
 
         """
         # Batch encode all sentences at once
-        encoded_sentences = self._encode_batch(sentences)
+        encoded_sentences = self.tokenizer.encode_batch(sentences)
         return [len(encoded) for encoded in encoded_sentences]
 
     def _estimate_token_counts(self, text: str) -> int:
@@ -382,7 +382,7 @@ class LateChunker(BaseChunker):
             # Get candidate sentences and verify actual token count
             chunk_sentences = sentences[pos:split_idx]
             chunk_text = "".join(s.text for s in chunk_sentences)
-            actual = len(self._encode(chunk_text))
+            actual = self.tokenizer.count_tokens(chunk_text)
 
             # Given the actual token_count and the estimate, get a feedback value for the next loop
             feedback = self._get_feedback(estimate, actual)
@@ -396,7 +396,7 @@ class LateChunker(BaseChunker):
                 split_idx -= 1
                 chunk_sentences = sentences[pos:split_idx]
                 chunk_text = "".join(s.text for s in chunk_sentences)
-                actual = len(self._encode(chunk_text))
+                actual = self.tokenizer.count_tokens(chunk_text)
 
             chunks.append(self._create_sentence_chunk(chunk_sentences, actual))
             pos = split_idx
