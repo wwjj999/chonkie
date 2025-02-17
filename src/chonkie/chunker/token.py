@@ -1,6 +1,7 @@
 """Token-based chunking."""
 
 from typing import Any, Generator, List, Literal, Union
+import warnings
 
 from tqdm import trange
 
@@ -24,7 +25,7 @@ class TokenChunker(BaseChunker):
         self,
         tokenizer: Union[str, Any] = "gpt2",
         chunk_size: int = 512,
-        chunk_overlap: Union[int, float] = 128,
+        chunk_overlap: Union[int, float] = 0,
         return_type: Literal["chunks", "texts"] = "chunks",
     ) -> None:
         """Initialize the TokenChunker with configuration parameters.
@@ -44,11 +45,18 @@ class TokenChunker(BaseChunker):
             raise ValueError("chunk_size must be positive")
         if isinstance(chunk_overlap, int) and chunk_overlap >= chunk_size:
             raise ValueError("chunk_overlap must be less than chunk_size")
-        if isinstance(chunk_overlap, float) and chunk_overlap >= 1:
-            raise ValueError("chunk_overlap must be less than 1")
         if return_type not in ["chunks", "texts"]:
             raise ValueError("return_type must be either 'chunks' or 'texts'")
 
+        # Add chunk_overlap deprecation warning
+        if chunk_overlap > 0:
+            warnings.warn(
+                "chunk_overlap is getting deprecated in v0.6.0. " +
+                "🦛 Chonkie advises you to use OverlapRefinery instead which is more flexible and powerful!",
+                DeprecationWarning,
+            )
+
+        # Assign the values if they make sense
         self.return_type = return_type
         self.chunk_size = chunk_size
         self.chunk_overlap = (

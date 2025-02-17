@@ -78,6 +78,14 @@ class SentenceChunker(BaseChunker):
         if return_type not in ["chunks", "texts"]:
             raise ValueError("Invalid return_type. Must be either 'chunks' or 'texts'.")
 
+        # Add chunk_overlap deprecation warning
+        if chunk_overlap > 0:
+            warnings.warn(
+                "chunk_overlap is getting deprecated in v0.6.0. " +
+                "🦛 Chonkie advises you to use OverlapRefinery instead which is more flexible and powerful!",
+                DeprecationWarning,
+            )
+        # Assign the values if they make sense
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
         self.min_sentences_per_chunk = min_sentences_per_chunk
