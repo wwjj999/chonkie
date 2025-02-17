@@ -274,7 +274,7 @@ class SemanticSentence(Sentence):
         return (
             f"SemanticSentence(text={self.text}, start_index={self.start_index}, "
             f"end_index={self.end_index}, token_count={self.token_count}, "
-            f"sentences={self.sentences})"
+            f"embedding={self.embedding})"
         )
 
 

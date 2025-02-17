@@ -1,6 +1,7 @@
 """Word-based chunker."""
 
 import re
+import warnings
 from typing import Any, Callable, List, Literal, Tuple, Union
 
 from chonkie.types import Chunk
@@ -26,7 +27,7 @@ class WordChunker(BaseChunker):
         self,
         tokenizer_or_token_counter: Union[str, Callable, Any] = "gpt2",
         chunk_size: int = 512,
-        chunk_overlap: int = 128,
+        chunk_overlap: int = 0,
         return_type: Literal["chunks", "texts"] = "chunks",
     ):
         """Initialize the WordChunker with configuration parameters.
@@ -50,6 +51,15 @@ class WordChunker(BaseChunker):
         if return_type not in ["chunks", "texts"]:
             raise ValueError("Invalid return_type. Must be either 'chunks' or 'texts'.")
 
+        # Add chunk_overlap deprecation warning
+        if chunk_overlap > 0:
+            warnings.warn(
+                "chunk_overlap is getting deprecated in v0.6.0. " +
+                "🦛 Chonkie advises you to use OverlapRefinery instead which is more flexible and powerful!",
+                DeprecationWarning,
+            )
+
+        # Assign the values if they make sense
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
         self.return_type = return_type
