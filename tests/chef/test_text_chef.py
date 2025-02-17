@@ -10,6 +10,7 @@ def text_chef():
     """Create a default TextChef instance."""
     return TextChef()
 
+
 @pytest.fixture
 def custom_text_chef():
     """Create a TextChef with custom settings."""
@@ -19,10 +20,12 @@ def custom_text_chef():
         abbreviations=True,
         ellipsis=True,
         mid_sentence_newlines=True,
-        sentence_endings='.!?'
+        sentence_endings=".!?",
     )
 
+
 class TestWhitespaceNormalization:
+
     """Test the whitespace normalization feature."""
 
     def test_multiple_spaces(self, text_chef):
@@ -36,7 +39,9 @@ class TestWhitespaceNormalization:
         assert text_chef.clean("") == ""
         assert text_chef.clean(None) == None
 
+
 class TestNewlineNormalization:
+
     """Test the newline normalization feature."""
 
     def test_mixed_newlines(self, text_chef):
@@ -51,7 +56,9 @@ class TestNewlineNormalization:
         result = text_chef.clean(text)
         assert result == "Paragraph 1\n\nParagraph 2"
 
+
 class TestMidSentenceNewlines:
+
     """Test the mid sentence newlines feature."""
 
     def test_basic_line_wrapping(self, custom_text_chef):
@@ -74,11 +81,13 @@ class TestMidSentenceNewlines:
 
     def test_dialog_markers(self, custom_text_chef):
         """Test handling dialog markers."""
-        text = "He said,\n\"Hello there!\""
+        text = 'He said,\n"Hello there!"'
         result = custom_text_chef.clean(text)
-        assert result == "He said,\n\"Hello there!\""
+        assert result == 'He said,\n"Hello there!"'
+
 
 class TestEllipsis:
+
     """Test the ellipsis feature."""
 
     def test_replace_dots(self, text_chef):
@@ -93,7 +102,9 @@ class TestEllipsis:
         result = text_chef.clean(text)
         assert result == "And then…"
 
+
 class TestAbbreviations:
+
     """Test the abbreviations feature."""
 
     def test_common_abbreviations(self, text_chef):
@@ -110,7 +121,9 @@ class TestAbbreviations:
         assert all(c not in result for c in ["Prof.", "Ph.D.", "M.D."])
         assert all(c in result for c in ["Prof․", "Ph․D․", "M․D․"])
 
+
 class TestFeatureToggling:
+
     """Test the feature toggling feature."""
 
     def test_disable_whitespace(self):
@@ -141,7 +154,9 @@ class TestFeatureToggling:
         result = chef.clean(text)
         assert result == text
 
+
 class TestFileHandling:
+
     """Test the file handling feature."""
 
     def test_supported_extensions(self, text_chef, tmp_path):

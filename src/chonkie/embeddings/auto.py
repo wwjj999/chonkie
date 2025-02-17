@@ -7,6 +7,7 @@ from .registry import EmbeddingsRegistry
 
 
 class AutoEmbeddings:
+
     """Factory class for automatically loading embeddings.
 
     This class provides a factory interface for loading embeddings based on an
@@ -70,7 +71,9 @@ class AutoEmbeddings:
                     try:
                         return embeddings_cls(model, **kwargs)
                     except Exception as e:
-                        raise ValueError(f"Failed to load {embeddings_cls.__name__}: {e}")
+                        raise ValueError(
+                            f"Failed to load {embeddings_cls.__name__}: {e}"
+                        )
             except Exception:
                 # Fall back to SentenceTransformerEmbeddings if no matching implementation is found
                 from .sentence_transformer import SentenceTransformerEmbeddings

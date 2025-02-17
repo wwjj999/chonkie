@@ -1,4 +1,5 @@
 """Sentence chunker."""
+
 import warnings
 from bisect import bisect_left
 from itertools import accumulate
@@ -10,6 +11,7 @@ from .base import BaseChunker
 
 
 class SentenceChunker(BaseChunker):
+
     """SentenceChunker splits the sentences in a text based on token limits and sentence boundaries.
 
     Args:
@@ -38,7 +40,7 @@ class SentenceChunker(BaseChunker):
         approximate: bool = True,
         delim: Union[str, List[str]] = [".", "!", "?", "\n"],
         include_delim: Union[Literal["prev", "next"], None] = "prev",
-        return_type: Literal["chunks", "texts"] = "chunks"
+        return_type: Literal["chunks", "texts"] = "chunks",
     ):
         """Initialize the SentenceChunker with configuration parameters.
 
@@ -93,7 +95,7 @@ class SentenceChunker(BaseChunker):
 
         Args:
             text: Input text to be split into sentences
-            
+
         Returns:
             List of sentences
 
@@ -101,7 +103,7 @@ class SentenceChunker(BaseChunker):
         t = text
         for c in self.delim:
             if self.include_delim == "prev":
-                t = t.replace(c,  c + self.sep)
+                t = t.replace(c, c + self.sep)
             elif self.include_delim == "next":
                 t = t.replace(c, self.sep + c)
             else:
@@ -123,7 +125,7 @@ class SentenceChunker(BaseChunker):
                 current = ""
             else:
                 sentences.append(s)
-            
+
             # At any point if the current sentence is longer than the min_characters_per_sentence,
             # add it to the sentences
             if len(current) >= self.min_characters_per_sentence:
@@ -136,7 +138,7 @@ class SentenceChunker(BaseChunker):
 
         return sentences
 
-    def _estimate_token_counts(self, sentences: List[str]) -> int:
+    def _estimate_token_counts(self, sentences: Union[str, List[str]]) -> int:
         """Estimate token count using character length."""
         CHARS_PER_TOKEN = 6.0  # Avg. char per token for llama3 is b/w 6-7
         if type(sentences) is str:
@@ -174,11 +176,13 @@ class SentenceChunker(BaseChunker):
         current_pos = 0
         for sent in sentence_texts:
             positions.append(current_pos)
-            current_pos += len(sent)  # No +1 space because sentences are already separated by spaces
+            current_pos += len(
+                sent
+            )  # No +1 space because sentences are already separated by spaces
 
         if not self.approximate:
             # Get accurate token counts in batch
-            token_counts = self._count_tokens_batch(sentence_texts)
+            token_counts = self.tokenizer.count_tokens_batch(sentence_texts)
         else:
             # Estimate token counts using character length
             token_counts = self._estimate_token_counts(sentence_texts)
@@ -190,35 +194,6 @@ class SentenceChunker(BaseChunker):
             )
             for sent, pos, count in zip(sentence_texts, positions, token_counts)
         ]
-
-    # def _prepare_sentences(self, text: str) -> List[Sentence]:
-    #     """Prepare sentences with either estimated or accurate token counts."""
-    #     # Split text into sentences
-    #     sentence_texts = self._split_sentences(text)
-    #     if not sentence_texts:
-    #         return []
-
-    #     # Calculate positions once
-    #     positions = []
-    #     current_pos = 0
-    #     for sent in sentence_texts:
-    #         positions.append(current_pos)
-    #         current_pos += len(sent) + 1  # +1 for space/separator
-
-    #     if not self.approximate:
-    #         # Get accurate token counts in batch
-    #         token_counts = self._get_token_counts(sentence_texts)
-    #     else:
-    #         # Estimate token counts using character length
-    #         token_counts = self._estimate_token_counts(sentence_texts)
-
-    #     # Create sentence objects
-    #     return [
-    #         Sentence(
-    #             text=sent, start_index=pos, end_index=pos + len(sent), token_count=count
-    #         )
-    #         for sent, pos, count in zip(sentence_texts, positions, token_counts)
-    #     ]
 
     def _create_chunk(self, sentences: List[Sentence], token_count: int) -> Chunk:
         """Create a chunk from a list of sentences.
@@ -292,9 +267,11 @@ class SentenceChunker(BaseChunker):
                 if pos + self.min_sentences_per_chunk <= len(sentences):
                     split_idx = pos + self.min_sentences_per_chunk
                 else:
-                    warnings.warn(f"Minimum sentences per chunk as {self.min_sentences_per_chunk} could not be met for all chunks. " +
-                                  f"Last chunk of the text will have only {len(sentences) - pos} sentences. " +
-                                  "Consider increasing the chunk_size or decreasing the min_sentences_per_chunk.")
+                    warnings.warn(
+                        f"Minimum sentences per chunk as {self.min_sentences_per_chunk} could not be met for all chunks. "
+                        + f"Last chunk of the text will have only {len(sentences) - pos} sentences. "
+                        + "Consider increasing the chunk_size or decreasing the min_sentences_per_chunk."
+                    )
                     split_idx = len(sentences)
 
             # Get the estimated token count
@@ -303,7 +280,7 @@ class SentenceChunker(BaseChunker):
             # Get candidate sentences and verify actual token count
             chunk_sentences = sentences[pos:split_idx]
             chunk_text = "".join(s.text for s in chunk_sentences)
-            actual = self._count_tokens(chunk_text)
+            actual = self.tokenizer.count_tokens(chunk_text)
 
             # Given the actual token_count and the estimate, get a feedback value for the next loop
             feedback = self._get_feedback(estimate, actual)
@@ -317,8 +294,8 @@ class SentenceChunker(BaseChunker):
                 split_idx -= 1
                 chunk_sentences = sentences[pos:split_idx]
                 chunk_text = "".join(s.text for s in chunk_sentences)
-                actual = self._count_tokens(chunk_text)
-    
+                actual = self.tokenizer.count_tokens(chunk_text)
+
             chunks.append(self._create_chunk(chunk_sentences, actual))
 
             # Calculate next position with overlap

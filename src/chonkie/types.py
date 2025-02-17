@@ -9,6 +9,7 @@ if TYPE_CHECKING:
 
 @dataclass
 class Context:
+
     """A dataclass representing contextual information for chunk refinement.
 
     This class stores text and token count information that can be used to add
@@ -40,7 +41,7 @@ class Context:
     def to_dict(self) -> dict:
         """Return the Context as a dictionary."""
         return self.__dict__.copy()
-    
+
     @classmethod
     def from_dict(cls, data: dict):
         """Create a Context object from a dictionary."""
@@ -77,6 +78,7 @@ class Context:
 
 @dataclass
 class Chunk:
+
     """Dataclass representing a text chunk with metadata.
 
     All attributes are read-only via slots for performance reasons.
@@ -102,14 +104,16 @@ class Chunk:
         result = self.__dict__.copy()
         result["context"] = self.context.to_dict() if self.context is not None else None
         return result
-    
+
     @classmethod
     def from_dict(cls, data: dict):
         """Create a Chunk object from a dictionary."""
         context_repr = data.pop("context")
         return cls(
             **data,
-            context=Context.from_dict(context_repr) if context_repr is not None else None,
+            context=Context.from_dict(context_repr)
+            if context_repr is not None
+            else None,
         )
 
     def __str__(self) -> str:
@@ -149,6 +153,7 @@ class Chunk:
 
 @dataclass
 class Sentence:
+
     """Dataclass representing a sentence with metadata.
 
     All attributes are read-only via slots for performance reasons.
@@ -170,12 +175,12 @@ class Sentence:
     def to_dict(self) -> dict:
         """Return the Chunk as a dictionary."""
         return self.__dict__.copy()
-    
+
     @classmethod
     def from_dict(cls, data: dict):
         """Create a Sentence object from a dictionary."""
         return cls(**data)
-    
+
     def __repr__(self) -> str:
         """Return a string representation of the Sentence."""
         return (
@@ -186,6 +191,7 @@ class Sentence:
 
 @dataclass
 class SentenceChunk(Chunk):
+
     """Dataclass representing a sentence chunk with metadata.
 
     All attributes are read-only via slots for performance reasons.
@@ -207,19 +213,18 @@ class SentenceChunk(Chunk):
         result = super().to_dict()
         result["sentences"] = [sentence.to_dict() for sentence in self.sentences]
         return result
-    
+
     @classmethod
     def from_dict(cls, data: dict) -> "SentenceChunk":
         """Create a SentenceChunk object from a dictionary."""
         sentences_dict = data.pop("sentences") if "sentences" in data else None
-        sentences = [Sentence.from_dict(sentence) 
-                     for sentence
-                     in sentences_dict] if sentences_dict is not None else []
-        return cls(
-            **data,
-            sentences=sentences
+        sentences = (
+            [Sentence.from_dict(sentence) for sentence in sentences_dict]
+            if sentences_dict is not None
+            else []
         )
-    
+        return cls(**data, sentences=sentences)
+
     def __repr__(self) -> str:
         """Return a string representation of the SentenceChunk."""
         return (
@@ -231,6 +236,7 @@ class SentenceChunk(Chunk):
 
 @dataclass
 class SemanticSentence(Sentence):
+
     """Dataclass representing a semantic sentence with metadata.
 
     This class is used to represent a sentence with an embedding.
@@ -253,7 +259,7 @@ class SemanticSentence(Sentence):
             self.embedding.tolist() if self.embedding is not None else None
         )
         return result
-    
+
     @classmethod
     def from_dict(cls, data: dict):
         """Create a SemanticSentence object from a dictionary."""
@@ -261,10 +267,7 @@ class SemanticSentence(Sentence):
         # NOTE: We can't use np.array() here because we don't import numpy in this file,
         # and we don't want add 50MiB to the package size.
         embedding = embedding_list if embedding_list is not None else None
-        return cls(
-            **data,
-            embedding=embedding
-        )
+        return cls(**data, embedding=embedding)
 
     def __repr__(self) -> str:
         """Return a string representation of the SemanticSentence."""
@@ -274,8 +277,10 @@ class SemanticSentence(Sentence):
             f"sentences={self.sentences})"
         )
 
+
 @dataclass
 class SemanticChunk(SentenceChunk):
+
     """SemanticChunk dataclass representing a semantic chunk with metadata.
 
     Attributes:
@@ -294,17 +299,16 @@ class SemanticChunk(SentenceChunk):
         result = super().to_dict()
         result["sentences"] = [sentence.to_dict() for sentence in self.sentences]
         return result
-    
+
     @classmethod
     def from_dict(cls, data: dict):
         """Create a SemanticChunk object from a dictionary."""
         sentences_dict = data.pop("sentences")
-        sentences = [SemanticSentence.from_dict(sentence) for sentence in sentences_dict]
-        return cls(
-            **data,
-            sentences=sentences
-        )
-    
+        sentences = [
+            SemanticSentence.from_dict(sentence) for sentence in sentences_dict
+        ]
+        return cls(**data, sentences=sentences)
+
     def __repr__(self) -> str:
         """Return a string representation of the SemanticChunk."""
         return (
@@ -316,6 +320,7 @@ class SemanticChunk(SentenceChunk):
 
 @dataclass
 class LateSentence(Sentence):
+
     """LateSentence dataclass representing a sentence with an embedding.
 
     This class is used to represent a sentence with an embedding.
@@ -338,17 +343,18 @@ class LateSentence(Sentence):
             self.embedding.tolist() if self.embedding is not None else None
         )
         return result
-    
+
     @classmethod
     def from_dict(cls, data: dict):
         """Create a LateSentence object from a dictionary."""
         embedding_list = data.pop("embedding")
-        embedding = np.array(embedding_list, dtype=np.float64) if embedding_list is not None else None
-        return cls(
-            **data,
-            embedding=embedding
+        embedding = (
+            np.array(embedding_list, dtype=np.float64)
+            if embedding_list is not None
+            else None
         )
-    
+        return cls(**data, embedding=embedding)
+
     def __repr__(self) -> str:
         """Return a string representation of the LateSentence."""
         return (
@@ -356,8 +362,11 @@ class LateSentence(Sentence):
             f"end_index={self.end_index}, token_count={self.token_count}, "
             f"embedding={self.embedding})"
         )
+
+
 @dataclass
 class LateChunk(Chunk):
+
     """LateChunk dataclass representing a chunk with an embedding.
 
     This class is used to represent a chunk with an embedding.
@@ -382,20 +391,20 @@ class LateChunk(Chunk):
             self.embedding.tolist() if self.embedding is not None else None
         )
         return result
-    
+
     @classmethod
     def from_dict(cls, data: dict):
         """Create a LateChunk object from a dictionary."""
         sentences_dict = data.pop("sentences")
         sentences = [LateSentence.from_dict(sentence) for sentence in sentences_dict]
         embedding_list = data.pop("embedding")
-        embedding = np.array(embedding_list, dtype=np.float64) if embedding_list is not None else None
-        return cls(
-            **data,
-            sentences=sentences,
-            embedding=embedding
-            )
-    
+        embedding = (
+            np.array(embedding_list, dtype=np.float64)
+            if embedding_list is not None
+            else None
+        )
+        return cls(**data, sentences=sentences, embedding=embedding)
+
     def __repr__(self) -> str:
         """Return a string representation of the LateChunk."""
         return (
@@ -407,6 +416,7 @@ class LateChunk(Chunk):
 
 @dataclass
 class RecursiveLevel:
+
     """Configuration for a single level of recursive chunking.
 
     Attributes:
@@ -445,7 +455,7 @@ class RecursiveLevel:
     def to_dict(self) -> dict:
         """Return the RecursiveLevel as a dictionary."""
         return self.__dict__.copy()
-    
+
     @classmethod
     def from_dict(cls, data: dict):
         """Create a RecursiveLevel object from a dictionary."""
@@ -459,8 +469,10 @@ class RecursiveLevel:
             f"include_delim={self.include_delim})"
         )
 
+
 @dataclass
 class RecursiveRules:
+
     """Collection of rules for recursive chunking."""
 
     levels: Union[List[RecursiveLevel], RecursiveLevel, None] = None
@@ -551,7 +563,7 @@ class RecursiveRules:
         else:
             raise ValueError("Invalid levels type")
         return result
-    
+
     @classmethod
     def from_dict(cls, data: dict):
         """Create a RecursiveRules object from a dictionary."""
@@ -562,13 +574,12 @@ class RecursiveRules:
                 levels = RecursiveLevel.from_dict(levels_repr)
             elif isinstance(levels_repr, list):
                 levels = [RecursiveLevel.from_dict(level) for level in levels_repr]
-        return cls(
-            levels=levels
-        )
+        return cls(levels=levels)
 
 
 @dataclass
 class RecursiveChunk(Chunk):
+
     """A Chunk with a level attribute."""
 
     level: Union[int, None] = None
@@ -596,9 +607,8 @@ class RecursiveChunk(Chunk):
     def to_dict(self) -> dict:
         """Return the RecursiveChunk as a dictionary."""
         return self.__dict__.copy()
-    
+
     @classmethod
     def from_dict(cls, data: dict):
         """Create a RecursiveChunk object from a dictionary."""
         return cls(**data)
-        
