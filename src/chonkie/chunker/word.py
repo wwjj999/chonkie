@@ -17,6 +17,7 @@ class WordChunker(BaseChunker):
         tokenizer: The tokenizer instance to use for encoding/decoding
         chunk_size: Maximum number of tokens per chunk
         chunk_overlap: Maximum number of tokens to overlap between chunks
+        return_type: Whether to return chunks or texts
 
     Raises:
         ValueError: If chunk_size <= 0 or chunk_overlap >= chunk_size
