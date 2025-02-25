@@ -53,7 +53,7 @@ class OpenAIEmbeddings(BaseEmbeddings):
         super().__init__()
         if not self.is_available():
             raise ImportError(
-                "One (or more) of the following packages is not available: openai, numpy, tiktoken. Please install it via `pip install "chonkie[openai]"`"
+                "One (or more) of the following packages is not available: openai, numpy, tiktoken. Please install it via `pip install \"chonkie[openai]\"`"
             )
 
         if model not in self.AVAILABLE_MODELS:
