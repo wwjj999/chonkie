@@ -11,7 +11,8 @@ requires-python = ">=3.9"
 license = {file = "LICENSE"}
 keywords = ["chunking", "rag", "nlp", "text-processing"]
 authors = [
-    {name = "Bhavnick Minhas", email = "bhavnicksm@gmail.com"}
+    {name = "Bhavnick Minhas", email = "bhavnick@chonkie.ai"},
+    {name = "Shreyash Nigam", email = "shreyash@chonkie.ai"}
 ]
 classifiers = [
     "License :: OSI Approved :: MIT License",
