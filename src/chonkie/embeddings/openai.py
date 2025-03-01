@@ -53,7 +53,7 @@ class OpenAIEmbeddings(BaseEmbeddings):
         super().__init__()
         if not self.is_available():
             raise ImportError(
-                "OpenAI package is not available. Please install it via `pip install chonkie[openai]`"
+                "One (or more) of the following packages is not available: openai, numpy, tiktoken. Please install it via `pip install \"chonkie[openai]\"`"
             )
 
         if model not in self.AVAILABLE_MODELS:
@@ -169,7 +169,12 @@ class OpenAIEmbeddings(BaseEmbeddings):
     @classmethod
     def is_available(cls) -> bool:
         """Check if the OpenAI package is available."""
-        return importutil.find_spec("openai") is not None
+        # We should check for OpenAI package alongside Numpy and tiktoken
+        return (
+            importutil.find_spec("openai") is not None
+            and importutil.find_spec("numpy") is not None
+            and importutil.find_spec("tiktoken") is not None
+        )
 
     def __repr__(self) -> str:
         """Representation of the OpenAIEmbeddings instance."""

@@ -142,11 +142,10 @@ If you use Chonkie in your research, please cite it as follows:
 
 ```bibtex
 @misc{chonkie2024,
-  author = {Minhas, Bhavnick},
+  author = {Minhas, Bhavnick AND Nigam, Shreyash},
   title = {Chonkie: A Fast Feature-full Chunking Library for RAG Bots},
   year = {2024},
   publisher = {GitHub},
-  journal = {GitHub repository},
   howpublished = {\url{https://github.com/bhavnick/chonkie}},
 }
 ```
