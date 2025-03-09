@@ -8,10 +8,6 @@ from typing import TYPE_CHECKING, Any, Callable, List, Union
 if TYPE_CHECKING:
     import numpy as np
 
-if importutil.find_spec("numpy"):
-    import numpy as np
-
-
 class BaseEmbeddings(ABC):
 
     """Abstract base class for all embeddings implementations.
@@ -33,7 +29,8 @@ class BaseEmbeddings(ABC):
             NotImplementedError: If any of the abstract methods are not implemented
 
         """
-        pass
+        # Lazy import dependencies if they are not already imported
+        self._import_dependencies()
 
     @abstractmethod
     def embed(self, text: str) -> "np.ndarray":
@@ -93,7 +90,22 @@ class BaseEmbeddings(ABC):
 
         """
         return [self.count_tokens(text) for text in texts]
+    
+    @classmethod
+    def _import_dependencies(cls) -> None:
+        """Lazy import dependencies for the embeddings implementation.
 
+        This method should be implemented by all embeddings implementations that require
+        additional dependencies. It lazily imports the dependencies only when they are needed.
+        """
+        if cls.is_available():
+            global np
+            import numpy as np
+        else:
+            raise ImportError(
+                "numpy is not available. Please install it via `pip install chonkie[semantic]`"
+            ) 
+        
     def similarity(self, u: "np.ndarray", v: "np.ndarray") -> float:
         """Compute the similarity between two embeddings.
 
@@ -127,7 +139,7 @@ class BaseEmbeddings(ABC):
 
         """
         raise NotImplementedError
-
+    
     @classmethod
     def is_available(cls) -> bool:
         """Check if this embeddings implementation is available (dependencies installed).
@@ -138,8 +150,8 @@ class BaseEmbeddings(ABC):
             bool: True if the embeddings implementation is available, False otherwise
 
         """
-        return True
-
+        return importutil.find_spec("numpy") is not None
+    
     def get_tokenizer_or_token_counter(self) -> Union[Any, Callable[[str], int]]:
         """Return the tokenizer or token counter object.
 
