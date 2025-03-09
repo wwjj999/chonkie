@@ -145,7 +145,10 @@ class SentenceTransformerEmbeddings(BaseEmbeddings):
     @classmethod
     def is_available(cls) -> bool:
         """Check if sentence-transformers is available."""
-        return importutil.find_spec("sentence_transformers") is not None
+        return (
+            importutil.find_spec("sentence_transformers") is not None
+            and importutil.find_spec("numpy") is not None
+        )
     
     @classmethod
     def _import_dependencies(cls) -> None:
