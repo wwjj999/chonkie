@@ -2,15 +2,14 @@
 
 import importlib.util as importutil
 import warnings
-from typing import List, Literal, Union
+from typing import TYPE_CHECKING, List, Literal, Union
 
 from chonkie.chunker.base import BaseChunker
 from chonkie.embeddings.base import BaseEmbeddings
 from chonkie.types import SemanticChunk, SemanticSentence, Sentence
 
-if importutil.find_spec("numpy"):
+if TYPE_CHECKING:
     import numpy as np
-
 
 class SemanticChunker(BaseChunker):
 
@@ -99,7 +98,10 @@ class SemanticChunker(BaseChunker):
             raise ValueError("threshold (int) must be between 1 and 100")
         if return_type not in ["chunks", "texts"]:
             raise ValueError("Invalid return_type. Must be either 'chunks' or 'texts'.")
-
+        
+        # Lazy import dependencies to avoid importing them when not needed
+        self._import_dependencies()
+        
         self.mode = mode
         self.chunk_size = chunk_size
         self.threshold = threshold
@@ -586,7 +588,21 @@ class SemanticChunker(BaseChunker):
         chunks = self._split_chunks(sentence_groups)
 
         return chunks
+    
+    def _import_dependencies(self) -> None:
+        """Lazy import dependencies for the chunker implementation.
 
+        This method should be implemented by all chunker implementations that require
+        additional dependencies. It lazily imports the dependencies only when they are needed.
+        """
+        if importutil.find_spec("numpy"):
+            global np
+            import numpy as np
+        else:
+            raise ImportError(
+                "numpy is not available. Please install it via `pip install chonkie[semantic]`"
+            )
+        
     def __repr__(self) -> str:
         """Return a string representation of the SemanticChunker."""
         return (
