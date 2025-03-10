@@ -6,6 +6,8 @@ import warnings
 from typing import List, Optional
 
 import numpy as np
+import requests
+import tokenizers
 
 from .base import BaseEmbeddings
 
@@ -61,19 +63,32 @@ class CohereEmbeddings(BaseEmbeddings):
 
         """
         super().__init__()
-        if not self.is_available():
-            raise ImportError(
-                "Cohere package is not available. Please install it via pip."
-            )
-        else:
-            global cohere
-            import requests
-            import tokenizers
-            from cohere import ClientV2  # using v2
+
+        # Lazy import dependencies if they are not already imported
+        self._import_dependencies()
 
         if model not in self.AVAILABLE_MODELS:
             raise ValueError(
                 f"Model {model} is not available. Choose from: {list(self.AVAILABLE_MODELS.keys())}"
+            )
+
+        self.model = model
+        self._dimension = self.AVAILABLE_MODELS[model][1]
+        tokenizer_url = (
+            self.TOKENIZER_BASE_URL
+            + (model if self.AVAILABLE_MODELS[model][0] else self.DEFAULT_MODEL)
+            + ".json"
+        )
+        response = requests.get(tokenizer_url)
+        self._tokenizer = tokenizers.Tokenizer.from_str(response.text)
+        self._batch_size = min(batch_size, 96)  # max batch size for cohere is 96
+        self._show_warnings = show_warnings
+        self._max_retries = max_retries
+        self._api_key = api_key or os.getenv("COHERE_API_KEY")
+
+        if self._api_key is None:
+            raise ValueError(
+                "Cohere API key not found. Either pass it as api_key or set COHERE_API_KEY environment variable."
             )
 
         self.model = model
@@ -215,7 +230,24 @@ class CohereEmbeddings(BaseEmbeddings):
     def is_available(cls) -> bool:
         """Check if the Cohere package is available."""
         return importlib.util.find_spec("cohere") is not None
+    
+    @classmethod
+    def _import_dependencies(cls) -> None:
+        """Lazy import dependencies for the embeddings implementation.
 
+        This method should be implemented by all embeddings implementations that require
+        additional dependencies. It lazily imports the dependencies only when they are needed.
+
+        """
+        if cls.is_available():
+            global np, ClientV2
+            import numpy as np
+            from cohere import ClientV2
+        else:
+            raise ImportError(
+                "cohere is not available. Please install it via `pip install chonkie[cohere]`"
+            )
+        
     def __repr__(self) -> str:
         """Return a string representation of the CohereEmbeddings object."""
         return f"CohereEmbeddings(model={self.model})"

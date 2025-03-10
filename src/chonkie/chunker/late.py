@@ -67,6 +67,9 @@ class LateChunker(BaseChunker):
             )
         if type(delim) not in [str, list]:
             raise TypeError("delim must be of type str or list of str")
+        
+        # Lazy import dependencies to avoid importing them when not needed
+        self._import_dependencies()
 
         self.mode = mode
         self.chunk_size = chunk_size
@@ -105,11 +108,6 @@ class LateChunker(BaseChunker):
                 "LateChunker (currently) only works with SentenceTransformerEmbeddings",
                 "Please install the `st` extra to use this feature",
             )
-
-        # Import numpy here as to not import it when it's not needed
-        if importlib.util.find_spec("numpy") is not None:
-            global np
-            import numpy as np
 
         # Keeping the tokenizer the same as the sentence model is important
         # for the semantic meaning to be calculated properly
@@ -464,6 +462,20 @@ class LateChunker(BaseChunker):
             chunk.embedding = embedding
 
         return chunks
+    
+    def _import_dependencies(self) -> None:
+        """Lazy import dependencies for the chunker implementation.
+
+        This method should be implemented by all chunker implementations that require
+        additional dependencies. It lazily imports the dependencies only when they are needed.
+        """
+        if importlib.util.find_spec("numpy") is not None:
+            global np
+            import numpy as np
+        else:
+            raise ImportError(
+                "numpy is not available. Please install it via `pip install chonkie[st]`"
+            )
 
     def __repr__(self) -> str:
         """Return a string representation of the LateChunker."""

@@ -10,12 +10,6 @@ from .base import BaseEmbeddings
 if TYPE_CHECKING:
     import numpy as np
 
-if importutil.find_spec("openai"):
-    import numpy as np
-    import tiktoken
-    from openai import OpenAI
-
-
 class OpenAIEmbeddings(BaseEmbeddings):
 
     """OpenAI embeddings implementation using their API."""
@@ -51,10 +45,9 @@ class OpenAIEmbeddings(BaseEmbeddings):
 
         """
         super().__init__()
-        if not self.is_available():
-            raise ImportError(
-                "One (or more) of the following packages is not available: openai, numpy, tiktoken. Please install it via `pip install \"chonkie[openai]\"`"
-            )
+
+        # Lazy import dependencies if they are not already imported
+        self._import_dependencies()
 
         if model not in self.AVAILABLE_MODELS:
             raise ValueError(
@@ -176,6 +169,23 @@ class OpenAIEmbeddings(BaseEmbeddings):
             and importutil.find_spec("tiktoken") is not None
         )
 
+    @classmethod
+    def _import_dependencies(cls) -> None:
+        """Lazy import dependencies for the embeddings implementation.
+
+        This method should be implemented by all embeddings implementations that require
+        additional dependencies. It lazily imports the dependencies only when they are needed.
+        """
+        if cls.is_available():
+            global np, tiktoken, OpenAI
+            import numpy as np
+            import tiktoken
+            from openai import OpenAI
+        else:
+            raise ImportError(
+                "One (or more) of the following packages is not available: openai, numpy, tiktoken. Please install it via `pip install \"chonkie[openai]\"`"
+            )
+        
     def __repr__(self) -> str:
         """Representation of the OpenAIEmbeddings instance."""
         return f"OpenAIEmbeddings(model={self.model})"
