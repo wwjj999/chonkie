@@ -3,7 +3,7 @@
 from bisect import bisect_left
 from functools import lru_cache
 from itertools import accumulate
-from typing import Any, Callable, List, Literal, Optional, Union
+from typing import Any, Callable, List, Literal, Optional, Sequence, Union
 
 from chonkie.chunker.base import BaseChunker
 from chonkie.types import Chunk, RecursiveChunk, RecursiveLevel, RecursiveRules
@@ -234,7 +234,7 @@ class RecursiveChunker(BaseChunker):
 
     def _recursive_chunk(
         self, text: str, level: int = 0, full_text: Optional[str] = None
-    ) -> List[RecursiveChunk]:
+    ) -> Sequence[RecursiveChunk]:
         """Recursive chunking logic."""
         # First make sure the text is not empty
         if not text:
@@ -302,7 +302,7 @@ class RecursiveChunker(BaseChunker):
                     chunks.append(split)
         return chunks
 
-    def chunk(self, text: str) -> List[Chunk]:
+    def chunk(self, text: str) -> Sequence[Chunk]:
         """Chunk the text."""
         return self._recursive_chunk(text, level=0, full_text=text)
 

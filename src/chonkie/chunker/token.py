@@ -1,7 +1,7 @@
 """Token-based chunking."""
 
 import warnings
-from typing import Any, Generator, List, Literal, Union
+from typing import Any, Generator, List, Literal, Sequence, Union
 
 from tqdm import trange
 
@@ -72,7 +72,7 @@ class TokenChunker(BaseChunker):
         chunk_texts: List[str],
         token_groups: List[List[int]],
         token_counts: List[int],
-    ) -> List[Chunk]:
+    ) -> Sequence[Chunk]:
         """Create chunks from a list of texts."""
         # Find the overlap lengths for index calculation
         if self.chunk_overlap > 0:
@@ -118,7 +118,7 @@ class TokenChunker(BaseChunker):
             if end == len(tokens):
                 break
 
-    def chunk(self, text: str) -> List[Chunk]:
+    def chunk(self, text: str) -> Sequence[Chunk]:
         """Split text into overlapping chunks of specified token size.
 
         Args:
@@ -152,7 +152,7 @@ class TokenChunker(BaseChunker):
         elif self.return_type == "texts":
             return self.tokenizer.decode_batch(token_groups)
 
-    def _process_batch(self, texts: List[str]) -> List[List[Chunk]]:
+    def _process_batch(self, texts: List[str]) -> Sequence[Sequence[Chunk]]:
         """Process a batch of texts."""
         # encode the texts into tokens in a batch
         tokens_list = self.tokenizer.encode_batch(texts)
@@ -187,7 +187,7 @@ class TokenChunker(BaseChunker):
 
     def chunk_batch(
         self, texts: List[str], batch_size: int = 1, show_progress_bar: bool = True
-    ) -> List[List[Chunk]]:
+    ) -> Sequence[Sequence[Chunk]]:
         """Split a batch of texts into their respective chunks.
 
         Args:
@@ -219,7 +219,7 @@ class TokenChunker(BaseChunker):
         text: Union[str, List[str]],
         batch_size: int = 1,
         show_progress_bar: bool = True,
-    ) -> Union[List[Chunk], List[List[Chunk]]]:
+    ) -> Union[Sequence[Chunk], Sequence[Sequence[Chunk]]]:
         """Make the TokenChunker callable directly.
 
         Args:
