@@ -1,10 +1,10 @@
 """Refinery class which adds overlap as context to chunks."""
-
 from bisect import bisect_left
 from itertools import accumulate
 from typing import Any, List, Literal, Optional, Tuple
 
 from chonkie.refinery.base import BaseRefinery
+from chonkie.tokenizer import Tokenizer
 from chonkie.types import (
     Chunk,
     Context,
@@ -14,7 +14,6 @@ from chonkie.types import (
     SemanticChunk,
     SentenceChunk,
 )
-from chonkie.tokenizer import Tokenizer
 
 
 class OverlapRefinery(BaseRefinery):

@@ -9,12 +9,6 @@ if TYPE_CHECKING:
     import numpy as np
     from model2vec import StaticModel
 
-# import numpy and model2vec only if they are available
-if importutil.find_spec("model2vec"):
-    import numpy as np
-    from model2vec import StaticModel
-
-
 class Model2VecEmbeddings(BaseEmbeddings):
 
     """Class for model2vec embeddings.
@@ -31,14 +25,10 @@ class Model2VecEmbeddings(BaseEmbeddings):
         self, model: Union[str, "StaticModel"] = "minishlab/potion-base-8M"
     ) -> None:
         """Initialize Model2VecEmbeddings with a str or StaticModel instance."""
-        if not self.is_available():
-            raise ImportError(
-                "model2vec is not available. Please install it via `pip install chonkie[model2vec]`"
-            )
-        else:
-            global StaticModel, np
-            import numpy as np
-            from model2vec import StaticModel
+        super().__init__()
+
+        # Lazy import dependencies if they are not already imported
+        self._import_dependencies()
 
         if isinstance(model, str):
             self.model_name_or_path = model
@@ -90,7 +80,23 @@ class Model2VecEmbeddings(BaseEmbeddings):
     def is_available(cls) -> bool:
         """Check if model2vec is available."""
         return importutil.find_spec("model2vec") is not None
+    
+    @classmethod
+    def _import_dependencies(cls) -> None:
+        """Lazy import dependencies for the embeddings implementation.
 
+        This method should be implemented by all embeddings implementations that require
+        additional dependencies. It lazily imports the dependencies only when they are needed.
+        """
+        if cls.is_available():
+            global np, StaticModel
+            import numpy as np
+            from model2vec import StaticModel
+        else:
+            raise ImportError(
+                "model2vec is not available. Please install it via `pip install chonkie[model2vec]`"
+            )
+        
     def __repr__(self) -> str:
         """Representation of the Model2VecEmbeddings instance."""
         return f"Model2VecEmbeddings(model_name_or_path={self.model_name_or_path})"
