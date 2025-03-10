@@ -43,11 +43,11 @@ class Context:
         return self.__dict__.copy()
 
     @classmethod
-    def from_dict(cls, data: dict):
+    def from_dict(cls, data: dict) -> "Context":
         """Create a Context object from a dictionary."""
         return cls(**data)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate the Context attributes after initialization."""
         if not isinstance(self.text, str):
             raise ValueError("text must be a string")
@@ -177,7 +177,7 @@ class Sentence:
         return self.__dict__.copy()
 
     @classmethod
-    def from_dict(cls, data: dict):
+    def from_dict(cls, data: dict) -> "Sentence":
         """Create a Sentence object from a dictionary."""
         return cls(**data)
 
@@ -261,7 +261,7 @@ class SemanticSentence(Sentence):
         return result
 
     @classmethod
-    def from_dict(cls, data: dict):
+    def from_dict(cls, data: dict) -> "SemanticSentence":
         """Create a SemanticSentence object from a dictionary."""
         embedding_list = data.pop("embedding")
         # NOTE: We can't use np.array() here because we don't import numpy in this file,
@@ -345,7 +345,7 @@ class LateSentence(Sentence):
         return result
 
     @classmethod
-    def from_dict(cls, data: dict):
+    def from_dict(cls, data: dict) -> "LateSentence":
         """Create a LateSentence object from a dictionary."""
         embedding_list = data.pop("embedding")
         embedding = (
@@ -393,7 +393,7 @@ class LateChunk(Chunk):
         return result
 
     @classmethod
-    def from_dict(cls, data: dict):
+    def from_dict(cls, data: dict) -> "LateChunk":
         """Create a LateChunk object from a dictionary."""
         sentences_dict = data.pop("sentences")
         sentences = [LateSentence.from_dict(sentence) for sentence in sentences_dict]
@@ -457,7 +457,7 @@ class RecursiveLevel:
         return self.__dict__.copy()
 
     @classmethod
-    def from_dict(cls, data: dict):
+    def from_dict(cls, data: dict) -> "RecursiveLevel":
         """Create a RecursiveLevel object from a dictionary."""
         return cls(**data)
 
@@ -565,7 +565,7 @@ class RecursiveRules:
         return result
 
     @classmethod
-    def from_dict(cls, data: dict):
+    def from_dict(cls, data: dict) -> "RecursiveRules":
         """Create a RecursiveRules object from a dictionary."""
         levels_repr = data.pop("levels")
         levels = None
@@ -609,6 +609,6 @@ class RecursiveChunk(Chunk):
         return self.__dict__.copy()
 
     @classmethod
-    def from_dict(cls, data: dict):
+    def from_dict(cls, data: dict) -> "RecursiveChunk":
         """Create a RecursiveChunk object from a dictionary."""
         return cls(**data)
