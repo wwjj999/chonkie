@@ -13,6 +13,11 @@ TITLES = {
     "Jr.",
     "Rev.",
     "Hon.",
+    "Mx.",
+    "Miss.",
+    "Madam.",
+    "Sir.",
+    "Lady."
 }
 
 # Academic and professional
@@ -26,6 +31,13 @@ ACADEMIC = {
     "D.Phil.",
     "LL.B.",
     "LL.M.",
+    "D.D.S.",
+    "D.V.M.",
+    "M.B.A.",
+    "B.Ed.",
+    "M.Ed.",
+    "B.Eng.",
+    "M.Eng."
 }
 
 # Latin abbreviations
@@ -38,6 +50,10 @@ LATIN = {
     "al.",
     "et al.",
     "cf.",
+    "N.B.",
+    "P.S.",
+    "Q.E.D.",
+    "R.I.P."
 }
 
 # Military and government
@@ -52,6 +68,13 @@ MILITARY = {
     "Gov.",
     "Sen.",
     "Rep.",
+    "Cmdr.",
+    "Pvt.",
+    "Cpl.",
+    "Brig.",
+    "Cpt.",
+    "Lt.Col.",
+    "Maj.Gen."
 }
 
 # Common measurements
@@ -66,6 +89,14 @@ MEASUREMENTS = {
     "hr.",
     "min.",
     "sec.",
+    "m.",
+    "g.",
+    "mg.",
+    "ml.",
+    "l.",
+    "sq.",
+    "cu.",
+    "oz."
 }
 
 # Business and organization
@@ -80,6 +111,13 @@ BUSINESS = {
     "est.",
     "avg.",
     "approx.",
+    "Pty.",
+    "PLC.",
+    "GmbH.",
+    "S.A.",
+    "N.V.",
+    "B.V.",
+    "S.p.A."
 }
 
 # Temporal abbreviations
@@ -103,6 +141,10 @@ TEMPORAL = {
     "Fri.",
     "Sat.",
     "Sun.",
+    "Q1.",
+    "Q2.",
+    "Q3.",
+    "Q4."
 }
 
 # Geographical abbreviations
@@ -116,6 +158,11 @@ GEOGRAPHICAL = {
     "Rd.",
     "St.",
     "Mt.",
+    "Dr.",
+    "Ln.",
+    "Pl.",
+    "Ct.",
+    "Terr."
 }
 
 # Combine all abbreviations

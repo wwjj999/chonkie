@@ -21,6 +21,9 @@ class TextChef(BaseChef):
         abbreviations: bool = True,
         ellipsis: bool = True,
         mid_sentence_newlines: bool = False,
+        decimals: bool = True,
+        email: bool = True,
+        url: bool = True,
         sentence_endings: str = ".!?;:",
     ) -> None:
         """Initialize the TextChef with common text file extensions."""
@@ -33,25 +36,34 @@ class TextChef(BaseChef):
         self._enable_mid_sentence_newlines = mid_sentence_newlines
         self._enable_abbreviations = abbreviations
         self._enable_ellipsis = ellipsis
+        self._enable_decimal_points = decimals
+        self._enable_email = email
+        self._enable_url = url
 
         # Initialize the sentence endings
         self._sentence_endings = sentence_endings
 
         # Initialize the patterns
+        self._dot = "."
         self._abbreviations = ABBREVIATIONS if abbreviations else set()
         self._unicode_replacements = UnicodeReplacements()
 
         # Compiling the regex patterns
         self._ellipsis_pattern = re.compile(r"\.{3,}")
         self._paragraph_pattern = re.compile(r"\n{2,}")
+        self._decimal_pattern = re.compile(r'(?<=\d)\.(?=\d)')  # matches only the dot between any two digits
+        self._email_pattern = re.compile(r'\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b')
+        self._url_pattern = re.compile(r'\b(?:https?://|www\.)[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\S*\b')
 
     def _handle_abbreviations(self, text: str) -> str:
         """Replace the fullstop in abbreviations with a dot leader."""
         for abbreviation in self._abbreviations:
+            # Only match the abbreviations that are surrounded by word boundaries
+            pattern = re.compile(rf'\b{re.escape(abbreviation)}\b')
             new_abbreviation = abbreviation.replace(
                 ".", self._unicode_replacements.DOT_LEADER
             )
-            text = text.replace(abbreviation, new_abbreviation)
+            text = pattern.sub(new_abbreviation, text)
         return text
 
     def _replace_ellipsis(self, text: str) -> str:
@@ -66,6 +78,57 @@ class TextChef(BaseChef):
         """
         # Replace any sequence of 3 or more dots with ellipsis character
         return self._ellipsis_pattern.sub(self._unicode_replacements.ELLIPSIS, text)
+    
+    def _replace_decimal_points(self, text: str) -> str:
+        """Replace the DOT with the DOT LEADER at places where there is a decimal point.
+        
+        Args:
+            text: Input text
+            
+        Returns:
+            Text with replaced decimal points
+            
+        """
+        # Replace any decimal point between two digits with a dot leader
+        return self._decimal_pattern.sub(self._unicode_replacements.DOT_LEADER, text)
+    
+    def _replace_emails(self, text: str) -> str:
+        """Replace the DOT in an email with the DOT LEADER.
+        
+        Args:
+            text: Input text
+            
+        Returns:
+            Text with replaced DOTs in emails
+        
+        """
+        # Match all the emails
+        email_matches = self._email_pattern.findall(text)
+        for email_match in email_matches:
+            # Replace the dots with the dot leaders
+            modified = email_match.replace(self._dot, self._unicode_replacements.DOT_LEADER)
+            text = text.replace(email_match, modified)  # change the occurrences
+        
+        return text
+    
+    def _replace_urls(self, text: str) -> str:
+        """Replace the DOT in an URL with the DOT LEADER.
+        
+        Args:
+            text: Input text
+            
+        Returns:
+            Text with replaced DOTs in URLs
+        
+        """
+        # Match all the URLs in the given text
+        url_matches = self._url_pattern.findall(text)
+        for url_match in url_matches:
+            # Replace the dots with the dot leaders
+            modified = url_match.replace(self._dot, self._unicode_replacements.DOT_LEADER)
+            text = text.replace(url_match, modified)    # change the occurrences
+            
+        return text
 
     def _normalize_whitespace(self, text: str) -> str:
         """Normalize whitespace in text.
@@ -194,5 +257,17 @@ class TextChef(BaseChef):
         # Replace abbreviations
         if self._enable_abbreviations:
             text = self._handle_abbreviations(text)
+            
+        # Replace decimal points
+        if self._enable_decimal_points:
+            text = self._replace_decimal_points(text)
+
+        # Replace the dots in emails
+        if self._enable_email:
+            text = self._replace_emails(text)
+            
+        # Replace the dots in URLs
+        if self._enable_url:
+            text = self._replace_urls(text)
 
         return text
