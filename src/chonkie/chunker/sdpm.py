@@ -47,7 +47,7 @@ class SDPMChunker(SemanticChunker):
         skip_window: int = 1,
         return_type: Literal["chunks", "texts"] = "chunks",
         **kwargs,
-    ):
+    ) -> None:
         """Initialize the SDPMChunker.
 
         Args:

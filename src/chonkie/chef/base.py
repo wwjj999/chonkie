@@ -141,10 +141,20 @@ class BaseChef(ABC):
         if files is not None or directory is not None:
             texts = self.fetch(files, directory)
 
+        # Handle empty texts and single strings
+        if texts is None:
+            return []
+        elif isinstance(texts, str):
+            texts = [texts]
+
         # Clean the texts
         texts = [self.clean(text) for text in texts]
 
-        # return the cleaned texts
+        # If input was a single string, return a single string
+        if isinstance(texts, list) and len(texts) == 1:
+            return texts[0]
+        
+        # Return the cleaned texts
         return texts
 
     def __call__(

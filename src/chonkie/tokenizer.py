@@ -3,8 +3,15 @@
 import importlib
 import inspect
 from collections import defaultdict
-from typing import Any, Callable, Dict, List, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Literal, Sequence, Union
 
+if TYPE_CHECKING:
+    if importlib.util.find_spec("transformers") is not None:
+        import transformers
+    if importlib.util.find_spec("tokenizers") is not None:
+        import tokenizers
+    if importlib.util.find_spec("tiktoken") is not None:
+        import tiktoken
 
 class Tokenizer:
 
@@ -21,7 +28,7 @@ class Tokenizer:
 
     """
 
-    def __init__(self, tokenizer: Union[str, Callable, Any] = "gpt2"):
+    def __init__(self, tokenizer: Union[str, Callable, Any] = "gpt2") -> None:
         """Initialize the tokenizer."""
         # Initialize the tokenizer
         if isinstance(tokenizer, str):
@@ -32,7 +39,11 @@ class Tokenizer:
         # Determine the tokenizer backend
         self._tokenizer_backend = self._get_tokenizer_backend()
 
-    def _get_tokenizer_backend(self) -> str:
+    def _get_tokenizer_backend(self) -> Literal["chonkie",
+                                                "transformers",
+                                                "tokenizers",
+                                                "tiktoken",
+                                                "callable"]:
         """Determine the tokenizer backend."""
         # Check if the tokenizer is a character or word tokenizer
         if "chonkie" in str(type(self.tokenizer)):
@@ -54,7 +65,14 @@ class Tokenizer:
                 f"Tokenizer backend {str(type(self.tokenizer))} not supported"
             )
 
-    def _load_tokenizer(self, tokenizer_name: str):
+    def _load_tokenizer(self,
+                        tokenizer_name: str) -> Union["CharacterTokenizer",
+                                                      "WordTokenizer",
+                                                      "tiktoken.Encoding",
+                                                      "tokenizers.Tokenizer",
+                                                      "transformers.PreTrainedTokenizer",
+                                                      "transformers.PreTrainedTokenizerFast", 
+                                                      Callable[[str], int]]:
         """Load a tokenizer based on the backend."""
         # Check if the string is equal to "character"
         if tokenizer_name == "character":
@@ -94,7 +112,7 @@ class Tokenizer:
                             "Tokenizer not found in the following libraries: transformers, tokenizers, tiktoken"
                         )
 
-    def encode(self, text: str) -> List[int]:
+    def encode(self, text: str) -> Sequence[int]:
         """Encode text to token ids."""
         if self._tokenizer_backend == "chonkie":
             return self.tokenizer.encode(text)
@@ -113,7 +131,7 @@ class Tokenizer:
                 f"Tokenizer backend {self._tokenizer_backend} not supported."
             )
 
-    def encode_batch(self, texts: List[str]) -> List[List[int]]:
+    def encode_batch(self, texts: Sequence[str]) -> Sequence[Sequence[int]]:
         """Encode a batch of texts."""
         if self._tokenizer_backend == "chonkie":
             return self.tokenizer.encode_batch(texts)
@@ -137,7 +155,7 @@ class Tokenizer:
                 f"Tokenizer backend {self._tokenizer_backend} not supported."
             )
 
-    def decode(self, tokens: List[int]) -> str:
+    def decode(self, tokens: Sequence[int]) -> str:
         """Decode token ids back to text."""
         if self._tokenizer_backend == "callable":
             raise NotImplementedError(
@@ -145,7 +163,7 @@ class Tokenizer:
             )
         return self.tokenizer.decode(tokens)
 
-    def decode_batch(self, token_lists: List[List[int]]) -> List[str]:
+    def decode_batch(self, token_lists: Sequence[Sequence[int]]) -> Sequence[str]:
         """Decode multiple token lists."""
         if self._tokenizer_backend == "chonkie":
             return self.tokenizer.decode_batch(token_lists)
@@ -179,7 +197,7 @@ class Tokenizer:
                 f"Tokenizer backend {self._tokenizer_backend} not supported."
             )
 
-    def count_tokens_batch(self, texts: List[str]) -> List[int]:
+    def count_tokens_batch(self, texts: Sequence[str]) -> Sequence[int]:
         """Count tokens in multiple texts."""
         if self._tokenizer_backend == "chonkie":
             return self.tokenizer.count_tokens_batch(texts)
@@ -216,7 +234,7 @@ class CharacterTokenizer:
 
     """Character-based tokenizer."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the tokenizer."""
         # Initialize the vocabulary with a space character
         self.vocab = []
@@ -226,7 +244,7 @@ class CharacterTokenizer:
         _ = self.token2id[" "]
         self.vocab.append(" ")
 
-    def get_vocab(self) -> List[str]:
+    def get_vocab(self) -> Sequence[str]:
         """Get the vocabulary."""
         return self.vocab
 
@@ -234,9 +252,9 @@ class CharacterTokenizer:
         """Get the token to id mapping."""
         return self.token2id
 
-    def encode(self, text: str) -> List[int]:
+    def encode(self, text: str) -> Sequence[int]:
         """Encode text to token ids."""
-        ids = []
+        ids: List[int] = []
         for token in text:
             token_id = self.token2id[token]
             if token_id >= len(self.vocab):
@@ -244,18 +262,18 @@ class CharacterTokenizer:
             ids.append(token_id)
         return ids
 
-    def encode_batch(self, texts: List[str]) -> List[List[int]]:
+    def encode_batch(self, texts: Sequence[str]) -> Sequence[Sequence[int]]:
         """Encode a batch of texts."""
         return [self.encode(text) for text in texts]
 
-    def decode(self, tokens: List[int]) -> str:
+    def decode(self, tokens: Sequence[int]) -> str:
         """Decode token ids back to text."""
         try:
             return "".join([self.vocab[token] for token in tokens])
         except IndexError:
             raise ValueError(f"Token {tokens} not found in vocabulary.")
 
-    def decode_batch(self, token_lists: List[List[int]]) -> List[str]:
+    def decode_batch(self, token_lists: Sequence[Sequence[int]]) -> Sequence[str]:
         """Decode multiple token lists."""
         return [self.decode(token_list) for token_list in token_lists]
 
@@ -263,7 +281,7 @@ class CharacterTokenizer:
         """Count number of tokens in text."""
         return len(text)
 
-    def count_tokens_batch(self, texts: List[str]) -> List[int]:
+    def count_tokens_batch(self, texts: Sequence[str]) -> Sequence[int]:
         """Count tokens in multiple texts."""
         return [len(text) for text in texts]
 
@@ -276,17 +294,17 @@ class WordTokenizer:
 
     """Word-based tokenizer."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the tokenizer."""
         # Initialize the vocabulary with a space character
-        self.vocab = []
-        self.token2id = defaultdict(lambda: len(self.vocab))
+        self.vocab: List[str] = []
+        self.token2id: Dict[str, int] = defaultdict(lambda: len(self.vocab))
 
         # Add space character to vocabulary
         _ = self.token2id[" "]
         self.vocab.append(" ")
 
-    def get_vocab(self) -> List[str]:
+    def get_vocab(self) -> Sequence[str]:
         """Get the vocabulary."""
         return self.vocab
 
@@ -294,15 +312,15 @@ class WordTokenizer:
         """Get the token to id mapping."""
         return self.token2id
 
-    def tokenize(self, text: str) -> List[str]:
+    def tokenize(self, text: str) -> Sequence[str]:
         """Tokenize text."""
-        words = text.split(" ")
+        words: List[str] = text.split(" ")
         return words
 
-    def encode(self, text: str) -> List[int]:
+    def encode(self, text: str) -> Sequence[int]:
         """Encode text to token ids."""
-        tokens = self.tokenize(text)
-        ids = []
+        tokens: Sequence[str] = self.tokenize(text)
+        ids: List[int] = []
         for token in tokens:
             token_id = self.token2id[token]
             if token_id >= len(self.vocab):
@@ -310,18 +328,18 @@ class WordTokenizer:
             ids.append(token_id)
         return ids
 
-    def encode_batch(self, texts: List[str]) -> List[List[int]]:
+    def encode_batch(self, texts: Sequence[str]) -> Sequence[Sequence[int]]:
         """Encode a batch of texts."""
         return [self.encode(text) for text in texts]
 
-    def decode(self, tokens: List[int]) -> str:
+    def decode(self, tokens: Sequence[int]) -> str:
         """Decode token ids back to text."""
         try:
             return " ".join([self.vocab[token] for token in tokens])
         except IndexError:
             raise ValueError(f"Token {tokens} not found in vocabulary.")
 
-    def decode_batch(self, token_lists: List[List[int]]) -> List[str]:
+    def decode_batch(self, token_lists: Sequence[Sequence[int]]) -> Sequence[str]:
         """Decode multiple token lists."""
         return [self.decode(token_list) for token_list in token_lists]
 
@@ -329,7 +347,7 @@ class WordTokenizer:
         """Count number of tokens in text."""
         return len(self.encode(text))
 
-    def count_tokens_batch(self, texts: List[str]) -> List[int]:
+    def count_tokens_batch(self, texts: Sequence[str]) -> Sequence[int]:
         """Count tokens in multiple texts."""
         return [len(self.encode(text)) for text in texts]
 

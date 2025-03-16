@@ -164,7 +164,7 @@ class TestFileHandling:
         file_path = tmp_path / "test.txt"
         file_path.write_text("Test   content")
         result = text_chef.process(files=str(file_path))
-        assert result == ["Test content"]
+        assert result == "Test content"
 
     def test_unsupported_extension(self, text_chef, tmp_path):
         """Test handling unsupported file extension."""

@@ -8,7 +8,8 @@ from chonkie.embeddings.base import BaseEmbeddings
 if TYPE_CHECKING:
     import numpy as np
     from sentence_transformers import SentenceTransformer
-
+    from tokenizers import Tokenizer
+    
 class SentenceTransformerEmbeddings(BaseEmbeddings):
 
     """Class for SentenceTransformer embeddings.
@@ -128,7 +129,7 @@ class SentenceTransformerEmbeddings(BaseEmbeddings):
         """Compute cosine similarity between two embeddings."""
         return self.model.similarity(u, v).item()
 
-    def get_tokenizer_or_token_counter(self):
+    def get_tokenizer_or_token_counter(self) -> "Tokenizer":
         """Return the tokenizer or token counter object."""
         return self.model.tokenizer
 

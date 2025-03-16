@@ -2,11 +2,12 @@
 
 import importlib
 from bisect import bisect_left
+from collections.abc import Sequence
 from itertools import accumulate
 from typing import TYPE_CHECKING, List, Literal, Union
 
-from chonkie.embeddings import BaseEmbeddings, SentenceTransformerEmbeddings
-from chonkie.types import LateChunk, Sentence
+from chonkie.embeddings import SentenceTransformerEmbeddings
+from chonkie.types import LateChunk, LateSentence
 
 from .base import BaseChunker
 
@@ -41,7 +42,7 @@ class LateChunker(BaseChunker):
 
     def __init__(
         self,
-        embedding_model: Union[str, BaseEmbeddings] = "all-minilm-l6-v2",
+        embedding_model: Union[str, SentenceTransformerEmbeddings] = "all-minilm-l6-v2",
         mode: str = "sentence",
         chunk_size: int = 512,
         min_sentences_per_chunk: int = 1,
@@ -81,7 +82,7 @@ class LateChunker(BaseChunker):
         self.sep = "🦛"
 
         # Initialise the embeddings via AutoEmbeddings
-        if isinstance(embedding_model, BaseEmbeddings):
+        if isinstance(embedding_model, SentenceTransformerEmbeddings):
             self.embedding_model = embedding_model
         elif isinstance(embedding_model, str):
             from chonkie.embeddings.auto import AutoEmbeddings
@@ -121,10 +122,10 @@ class LateChunker(BaseChunker):
         chunk_texts: List[str],
         token_counts: List[int],
         decoded_text: str,
-    ) -> List[LateChunk]:
+    ) -> Sequence[LateChunk]:
         """Create chunks from a list of texts."""
         # package everything as Chunk objects and send out the result
-        chunks = []
+        chunks: List[LateChunk] = []
         current_index = 0
         for chunk_text, token_count in zip(chunk_texts, token_counts):
             start_index = decoded_text.find(
@@ -142,7 +143,7 @@ class LateChunker(BaseChunker):
             current_index = end_index
         return chunks
 
-    def _token_chunk(self, text: str) -> List[LateChunk]:
+    def _token_chunk(self, text: str) -> Sequence[LateChunk]:
         """Split text into overlapping chunks of specified token size.
 
         Args:
@@ -183,7 +184,7 @@ class LateChunker(BaseChunker):
     def _split_sentences(
         self,
         text: str,
-    ) -> List[str]:
+    ) -> Sequence[str]:
         """Fast sentence splitting while maintaining accuracy.
 
         This method is faster than using regex for sentence splitting and is more accurate than using the spaCy sentence tokenizer.
@@ -266,7 +267,7 @@ class LateChunker(BaseChunker):
         feedback = 1 - ((estimate - actual) / estimate)
         return feedback
 
-    def _prepare_sentences(self, text: str) -> List[Sentence]:
+    def _prepare_sentences(self, text: str) -> List[LateSentence]:
         """Split text into sentences and calculate token counts for each sentence.
 
         Args:
@@ -299,14 +300,14 @@ class LateChunker(BaseChunker):
 
         # Create sentence objects
         return [
-            Sentence(
+            LateSentence(
                 text=sent, start_index=pos, end_index=pos + len(sent), token_count=count
             )
             for sent, pos, count in zip(sentence_texts, positions, token_counts)
         ]
 
     def _create_sentence_chunk(
-        self, sentences: List[Sentence], token_count: int
+        self, sentences: List[LateSentence], token_count: int
     ) -> LateChunk:
         """Create a chunk from a list of sentences.
 
@@ -327,7 +328,7 @@ class LateChunker(BaseChunker):
             sentences=sentences,
         )
 
-    def _sentence_chunk(self, text: str) -> List[LateChunk]:
+    def _sentence_chunk(self, text: str) -> Sequence[LateChunk]:
         """Chunk the text into sentences."""
         """Split text into overlapping chunks based on sentences while respecting token limits.
 
@@ -354,7 +355,7 @@ class LateChunker(BaseChunker):
             )
         )
 
-        chunks = []
+        chunks: List[LateChunk] = []
         feedback = 1.0
         pos = 0
 
@@ -401,7 +402,7 @@ class LateChunker(BaseChunker):
 
         return chunks
 
-    def _get_chunks(self, text: str) -> List[LateChunk]:
+    def _get_chunks(self, text: str) -> Sequence[LateChunk]:
         """Get chunks from the text."""
         if self.mode == "token":
             return self._token_chunk(text)
@@ -412,9 +413,9 @@ class LateChunker(BaseChunker):
 
     def _embedding_split(
         self, token_embeddings: "np.ndarray", token_counts: List[int]
-    ) -> List["np.ndarray"]:
+    ) -> Sequence["np.ndarray"]:
         """Split the embedding into chunks."""
-        embedding_splits = []
+        embedding_splits: List["np.ndarray"] = []
         current_index = 0
         for i, token_count in enumerate(token_counts):
             if i != len(token_counts) - 1:
@@ -430,9 +431,9 @@ class LateChunker(BaseChunker):
         """Mean pool the embeddings."""
         # Assuming that numpy is installed and imported as np
         # which is the case for the SentenceTransformerEmbeddings
-        return np.mean(embeddings, axis=0)
+        return np.mean(embeddings, axis=0)  # type: ignore
 
-    def chunk(self, text: str) -> List[LateChunk]:
+    def chunk(self, text: str) -> Sequence[LateChunk]:
         """Chunk the text via Late Chunking."""
         # Get the chunks first
         chunks = self._get_chunks(text)

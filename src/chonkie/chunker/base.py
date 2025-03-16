@@ -3,7 +3,7 @@
 import warnings
 from abc import ABC, abstractmethod
 from multiprocessing import Pool, cpu_count
-from typing import Any, Callable, List, Union
+from typing import Any, Callable, List, Sequence, Union
 
 from tqdm import tqdm
 
@@ -34,7 +34,7 @@ class BaseChunker(ABC):
         self._use_multiprocessing = True
 
     @abstractmethod
-    def chunk(self, text: str) -> List[Chunk]:
+    def chunk(self, text: str) -> Sequence[Chunk]:
         """Split text into chunks according to the implementation strategy.
 
         Args:
@@ -65,8 +65,8 @@ class BaseChunker(ABC):
             return 1
 
     def _process_batch_sequential(
-        self, texts: List[str], show_progress_bar: bool = True
-    ) -> List[List[Chunk]]:
+        self, texts: Sequence[str], show_progress_bar: bool = True
+    ) -> Sequence[Sequence[Chunk]]:
         """Process a batch of texts sequentially."""
         return [
             self.chunk(t)
@@ -81,8 +81,8 @@ class BaseChunker(ABC):
         ]
 
     def _process_batch_multiprocessing(
-        self, texts: List[str], show_progress_bar: bool = True
-    ) -> List[List[Chunk]]:
+        self, texts: Sequence[str], show_progress_bar: bool = True
+    ) -> Sequence[Sequence[Chunk]]:
         """Process a batch of texts using multiprocessing."""
         num_workers = self._determine_optimal_workers()
         total = len(texts)
@@ -107,7 +107,7 @@ class BaseChunker(ABC):
         self,
         texts: List[str],
         show_progress_bar: bool = True,
-    ) -> List[List[Chunk]]:
+    ) -> Sequence[Sequence[Chunk]]:
         """Split a List of texts into their respective chunks.
 
         By default, this method uses multiprocessing to parallelize the chunking process.
@@ -126,8 +126,8 @@ class BaseChunker(ABC):
             return self._process_batch_sequential(texts, show_progress_bar)
 
     def __call__(
-        self, text: Union[str, List[str]], show_progress_bar: bool = True
-    ) -> Union[List[Chunk], List[List[Chunk]]]:
+        self, text: Union[str, Sequence[str]], show_progress_bar: bool = True
+    ) -> Union[Sequence[Chunk], Sequence[Sequence[Chunk]]]:
         """Make the chunker callable directly.
 
         Args:
