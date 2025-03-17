@@ -120,6 +120,54 @@ class TestAbbreviations:
         result = text_chef.clean(text)
         assert all(c not in result for c in ["Prof.", "Ph.D.", "M.D."])
         assert all(c in result for c in ["Prof․", "Ph․D․", "M․D․"])
+        
+    def test_abbreviation_with_word_boundaries(self):
+        """Test handling abbreviation only with a word boundary beginning and a non-word character ending."""
+        text_chef_no_email = TextChef(email=False)
+        text = "My email is someone@domain.org. My height is 72 in."
+        result = text_chef_no_email.clean(text)
+        assert "someone@domain.org" in result  # dot leader shouldn't present here
+        assert "in․" in result  # dot replaced with dot leader
+        
+    def test_abbreviation_with_prefixes(self, text_chef):
+        """Test handling abbreviations with prefixes existing among themselves."""
+        text = "The time now is 7 a.m. I will increase 1 m. after 1 hour."
+        result = text_chef.clean(text)
+        assert "a․m․" in result          # a.m. should be replaced individually
+        assert "1 m․" in result         # m. should be replaced individually 
+        
+
+class TestEmail:
+    
+    """Test the emails feature."""
+    
+    def test_email(self, text_chef):
+        """Test handling emails."""
+        text = "someone@domain.org"
+        result = text_chef.clean(text)
+        assert "someone․domain․org" in result
+
+
+class TestURL:
+    
+    """Test the URLs feature."""
+    
+    def test_url(self, text_chef):
+        """Test handling URLs."""
+        text = "https://cloud.chonkie.ai/"
+        result = text_chef.clean(text)
+        assert "https://cloud․chonkie․ai/" in result
+
+
+class TestDecimalPoints:
+    
+    """Test the decimal points in between digits."""
+    
+    def test_decimals(self, text_chef):
+        """Test handling decimal points."""
+        text = "The average temperature in July was 25.5 degrees Celsius."
+        result = text_chef.clean(text)
+        assert "25․5" in result
 
 
 class TestFeatureToggling:
@@ -151,6 +199,27 @@ class TestFeatureToggling:
         """Test with ellipsis handling disabled."""
         chef = TextChef(ellipsis=False)
         text = "And then..."
+        result = chef.clean(text)
+        assert result == text
+        
+    def test_disable_emails(self):
+        """Test with emails handling disabled."""
+        chef = TextChef(email=False)
+        text = "someone@domain.org"
+        result = chef.clean(text)
+        assert result == text
+        
+    def test_disable_urls(self):
+        """Test with urls handling disabled."""
+        chef = TextChef(url=False)
+        text = "https://cloud․chonkie․ai/"
+        result = chef.clean(text)
+        assert result == text
+        
+    def test_disable_decimals(self):
+        """Test with decimals handling disabled."""
+        chef = TextChef(decimals=False)
+        text = "25.5"
         result = chef.clean(text)
         assert result == text
 

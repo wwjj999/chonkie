@@ -57,9 +57,10 @@ class TextChef(BaseChef):
 
     def _handle_abbreviations(self, text: str) -> str:
         """Replace the fullstop in abbreviations with a dot leader."""
-        for abbreviation in self._abbreviations:
-            # Only match the abbreviations that are surrounded by word boundaries
-            pattern = re.compile(rf'\b{re.escape(abbreviation)}\b')
+        sorted_abbreviations = sorted(self._abbreviations, key=len, reverse=True)   # processing the abbreviation based on their length
+        for abbreviation in sorted_abbreviations:
+            # Only match the abbreviations that are surrounded by word boundary at beginning and a non-word character at end
+            pattern = re.compile(r"\b" + re.escape(abbreviation) + r"(?=\W)")
             new_abbreviation = abbreviation.replace(
                 ".", self._unicode_replacements.DOT_LEADER
             )
@@ -224,7 +225,7 @@ class TextChef(BaseChef):
         return "\n\n".join(processed_paragraphs)
 
     def clean(self, text: str) -> str:
-        r"""Clean the text by performing basic text processing operations.
+        """Clean the text by performing basic text processing operations.
 
         A common function where one can enable/disable the operations supported by the chef.
 
@@ -271,3 +272,15 @@ class TextChef(BaseChef):
             text = self._replace_urls(text)
 
         return text
+    
+    def revert(self, text: str) -> str:
+        """Revert back the DOT LEADERS and ELLIPSIS replacing DOTs.
+        
+        Args:
+            text: The text to revert.
+
+        Returns:
+            The reverted text.
+        
+        """
+        return text.replace(self._unicode_replacements.DOT_LEADER, ".").replace(self._unicode_replacements.ELLIPSIS, "...")

@@ -144,7 +144,9 @@ TEMPORAL = {
     "Q1.",
     "Q2.",
     "Q3.",
-    "Q4."
+    "Q4.",
+    "a.m.",
+    "p.m."
 }
 
 # Geographical abbreviations
