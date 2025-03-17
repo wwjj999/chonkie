@@ -283,4 +283,4 @@ class TextChef(BaseChef):
             The reverted text.
         
         """
-        return text.replace(self._unicode_replacements.DOT_LEADER, ".").replace(self._unicode_replacements.ELLIPSIS, "...")
+        return text.replace(self._unicode_replacements.ELLIPSIS, "...").replace(self._unicode_replacements.DOT_LEADER, ".")
