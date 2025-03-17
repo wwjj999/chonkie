@@ -255,3 +255,15 @@ class TestFileHandling:
         assert len(result) == 2
         assert "File 1" in result
         assert "File 2" in result
+
+
+class TestRevert:
+    
+    """Test the cleaned text reverted back to the original text."""
+    
+    def test_reverted_text(self, text_chef):
+        """Test whether the cleaned text is reverted back to the original."""
+        text = "My email is john.doe@example.com. Visit https://cloud.chonkie.ai/ for details. Pi is 3.14. Meetings at 10.30 a.m. and 5.45 p.m. Dr. Smith is a good doctor."
+        cleaned_text = text_chef.clean(text)
+        reverted_text = text_chef.revert(cleaned_text)
+        assert reverted_text == text
