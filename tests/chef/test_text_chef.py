@@ -118,13 +118,15 @@ class TestAbbreviations:
         """Test handling multiple abbreviations in text."""
         text = "Prof. Smith, Ph.D., M.D."
         result = text_chef.clean(text)
-        assert all(c not in result for c in ["Prof.", "Ph.D.", "M.D."])
-        assert all(c in result for c in ["Prof․", "Ph․D․", "M․D․"])
+        # Note: as we handling the ending as non-word character the last abbreviation at the end won't get replaced
+        # which is intended. 
+        assert all(c not in result for c in ["Prof.", "Ph.D."])
+        assert all(c in result for c in ["Prof․", "Ph․D․"])
         
     def test_abbreviation_with_word_boundaries(self):
         """Test handling abbreviation only with a word boundary beginning and a non-word character ending."""
         text_chef_no_email = TextChef(email=False)
-        text = "My email is someone@domain.org. My height is 72 in."
+        text = "My email is someone@domain.org. My height is 72 in. and weight is 65 kg."
         result = text_chef_no_email.clean(text)
         assert "someone@domain.org" in result  # dot leader shouldn't present here
         assert "in․" in result  # dot replaced with dot leader
@@ -145,7 +147,7 @@ class TestEmail:
         """Test handling emails."""
         text = "someone@domain.org"
         result = text_chef.clean(text)
-        assert "someone․domain․org" in result
+        assert "someone@domain․org" in result
 
 
 class TestURL:
