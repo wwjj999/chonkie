@@ -7,7 +7,7 @@ from itertools import accumulate
 from typing import TYPE_CHECKING, List, Literal, Union
 
 from chonkie.embeddings import SentenceTransformerEmbeddings
-from chonkie.types import LateChunk, Sentence
+from chonkie.types import LateChunk, LateSentence
 
 from .base import BaseChunker
 
@@ -267,7 +267,7 @@ class LateChunker(BaseChunker):
         feedback = 1 - ((estimate - actual) / estimate)
         return feedback
 
-    def _prepare_sentences(self, text: str) -> List[Sentence]:
+    def _prepare_sentences(self, text: str) -> List[LateSentence]:
         """Split text into sentences and calculate token counts for each sentence.
 
         Args:
@@ -300,14 +300,14 @@ class LateChunker(BaseChunker):
 
         # Create sentence objects
         return [
-            Sentence(
+            LateSentence(
                 text=sent, start_index=pos, end_index=pos + len(sent), token_count=count
             )
             for sent, pos, count in zip(sentence_texts, positions, token_counts)
         ]
 
     def _create_sentence_chunk(
-        self, sentences: List[Sentence], token_count: int
+        self, sentences: List[LateSentence], token_count: int
     ) -> LateChunk:
         """Create a chunk from a list of sentences.
 
@@ -431,7 +431,7 @@ class LateChunker(BaseChunker):
         """Mean pool the embeddings."""
         # Assuming that numpy is installed and imported as np
         # which is the case for the SentenceTransformerEmbeddings
-        return np.mean(embeddings, axis=0)
+        return np.mean(embeddings, axis=0)  # type: ignore
 
     def chunk(self, text: str) -> Sequence[LateChunk]:
         """Chunk the text via Late Chunking."""
