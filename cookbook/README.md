@@ -32,11 +32,12 @@ Want to add your integration? Simply [raise an issue](https://github.com/bhavnic
 
 Share your knowledge and experiences with Chonkie! Whether it's a blog post, video tutorial, or technical deep-dive, we'd love to feature your content here.
 
-| Type | Title | Author | Description |
-|------|--------|--------|-------------|
-| Video | [Chonkie - RAG Chunking Library - Easy Local Installation and Testing](https://www.youtube.com/watch?v=f4f1TkeL5Hk) | Fahd Mirza | A quick walkthrough of how to install Chonkie and test it out for yourself! |
-| Blog | [Easy Late-Chunking with Chonkie](https://pub.towardsai.net/easy-late-chunking-with-chonkie-7f05e5916997) | Michael Ryaboy | This blog post is a quick look at how you can use Chonkie's LateChunker to chunk your documents and build a search pipeline over it with KDB.AI! |
-| Project | 
+| Type | Title | Description |
+|------|--------|-------------|
+| Video | [Chonkie - RAG Chunking Library - Easy Local Installation and Testing](https://www.youtube.com/watch?v=f4f1TkeL5Hk) | A quick walkthrough of how to install Chonkie and test it out for yourself! |
+| Blog | [Easy Late-Chunking with Chonkie](https://pub.towardsai.net/easy-late-chunking-with-chonkie-7f05e5916997) | This blog post is a quick look at how you can use Chonkie's LateChunker to chunk your documents and build a search pipeline over it with KDB.AI! |
+| Project | [Azure-Samples/Indexadillo](https://github.com/Azure-Samples/indexadillo) | The Indexadillo repository helps push data to Azure AI Search in a scalable, observable way using Azure Durable Functions for document parsing and embedding uploads. |
+| Project | [pengfeng/ask.py](https://github.com/pengfeng/ask.py) | The ask.py repository is designed to implement a search-extract-summarize flow, allowing users to perform automated web searches, extract relevant information, and summarize the results. |
 
 Have content to share? Open an issue with your resource and we'll get it added to the cookbook!
 
