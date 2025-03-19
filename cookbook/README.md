@@ -39,6 +39,7 @@ Share your knowledge and experiences with Chonkie! Whether it's a blog post, vid
 | Project | [Azure-Samples/Indexadillo](https://github.com/Azure-Samples/indexadillo) | The Indexadillo repository helps push data to Azure AI Search in a scalable, observable way using Azure Durable Functions for document parsing and embedding uploads. |
 | Project | [pengfeng/ask.py](https://github.com/pengfeng/ask.py) | The ask.py repository is designed to implement a search-extract-summarize flow, allowing users to perform automated web searches, extract relevant information, and summarize the results. |
 | Blog | [Introducing Chonkie: The Lightweight RAG Chunking Library](https://deeplearning.fr/introducing-chonkie-the-lightweight-rag-chunking-library/)| A gentle introduction to Chonkie for RAG chunking |
+
 Have content to share? Open an issue with your resource and we'll get it added to the cookbook!
 
 ## 📝 Contributing
