@@ -59,7 +59,7 @@ class SentenceTransformerEmbeddings(BaseEmbeddings):
 
     def embed_batch(self, texts: List[str]) -> List["np.ndarray"]:
         """Embed multiple texts using the sentence-transformers model."""
-        return self.model.encode(texts, convert_to_numpy=True)
+        return self.model.encode(texts, convert_to_numpy=True) # type: ignore
 
     def embed_as_tokens(self, text: str) -> "np.ndarray":
         """Embed the text as tokens using the sentence-transformers model.
@@ -110,7 +110,7 @@ class SentenceTransformerEmbeddings(BaseEmbeddings):
         #     (f"The number of token embeddings should be equal to the number of tokens in the text"
         #      f"Expected: {len(encodings)}, Got: {token_embeddings.shape[0]}")
 
-        return token_embeddings
+        return token_embeddings # type: ignore
 
     def embed_as_tokens_batch(self, texts: List[str]) -> List["np.ndarray"]:
         """Embed multiple texts as tokens using the sentence-transformers model."""
@@ -136,12 +136,12 @@ class SentenceTransformerEmbeddings(BaseEmbeddings):
     @property
     def dimension(self) -> int:
         """Return the embedding dimension."""
-        return self._dimension
+        return self._dimension # type: ignore
 
     @property
     def max_seq_length(self) -> int:
         """Return the maximum sequence length."""
-        return self.model.get_max_seq_length()
+        return self.model.get_max_seq_length() # type: ignore
 
     @classmethod
     def is_available(cls) -> bool:
@@ -167,6 +167,6 @@ class SentenceTransformerEmbeddings(BaseEmbeddings):
                 "sentence_transformers is not available. Please install it via `pip install chonkie[st]`"
             )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Representation of the SentenceTransformerEmbeddings instance."""
         return f"SentenceTransformerEmbeddings(model={self.model_name_or_path})"
