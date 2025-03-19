@@ -49,7 +49,7 @@ class SemanticChunker(BaseChunker):
         include_delim: Union[Literal["prev", "next"], None] = "prev",
         return_type: Literal["chunks", "texts"] = "chunks",
         **kwargs,
-    ) -> None:
+    ) -> None: # type: ignore
         """Initialize the SemanticChunker.
 
         SemanticChunkers split text into semantically coherent chunks using embeddings.

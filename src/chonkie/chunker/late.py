@@ -41,7 +41,7 @@ class LateChunker(BaseChunker):
     """
 
     def __init__(
-        self,
+        self, 
         embedding_model: Union[str, SentenceTransformerEmbeddings] = "all-minilm-l6-v2",
         mode: str = "sentence",
         chunk_size: int = 512,
@@ -51,7 +51,7 @@ class LateChunker(BaseChunker):
         delim: Union[str, List[str]] = [".", "!", "?", "\n"],
         include_delim: Union[Literal["prev", "next"], None] = "prev",
         **kwargs,
-    ) -> None:
+    ) -> None: # type: ignore
         """Initialise the LateChunker."""
         # Assign the values if they make sense
         if mode not in ["token", "sentence"]:
