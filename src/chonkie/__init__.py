@@ -43,7 +43,7 @@ from .types import (
 )
 
 # This hippo grows with every release 🦛✨~
-__version__ = "0.5.1"
+__version__ = "0.5.2rc1"
 __name__ = "chonkie"
 __author__ = "🦛 Chonkie AI Team"
 

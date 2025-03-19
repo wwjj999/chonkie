@@ -1,7 +1,7 @@
 """Dataclasses for Chonkie."""
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, List, Literal, Optional, Union
+from typing import TYPE_CHECKING, Iterable, List, Literal, Optional, Union
 
 if TYPE_CHECKING:
     import numpy as np
@@ -429,11 +429,11 @@ class RecursiveLevel:
     whitespace: bool = False
     include_delim: Union[Literal["prev", "next", None], None] = "prev"
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Post-initialize the recursive level."""
         self.validate()
 
-    def validate(self):
+    def validate(self) -> None:
         """Validate the recursive level."""
         if self.delimiters is not None and self.whitespace:
             raise ValueError(
@@ -477,7 +477,7 @@ class RecursiveRules:
 
     levels: Union[List[RecursiveLevel], RecursiveLevel, None] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Initialize the recursive rules if not already initialized."""
         # Set default levels if not already initialized
         if self.levels is None:
@@ -536,7 +536,7 @@ class RecursiveRules:
                 for level in self.levels:
                     level.validate()
 
-    def __iter__(self):
+    def __iter__(self) -> Iterable[RecursiveLevel]:
         """Iterate over the levels."""
         return iter(self.levels)
 
