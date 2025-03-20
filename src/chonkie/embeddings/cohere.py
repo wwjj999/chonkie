@@ -242,8 +242,9 @@ class CohereEmbeddings(BaseEmbeddings):
 
         """
         if cls.is_available():
-            global np, ClientV2
+            global np, tokenizers, ClientV2
             import numpy as np
+            import tokenizers
             from cohere import ClientV2
         else:
             raise ImportError(
