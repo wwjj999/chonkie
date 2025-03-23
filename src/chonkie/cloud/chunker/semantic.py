@@ -1,7 +1,7 @@
 """Semantic Chunking for Chonkie API."""
 
 import os
-from typing import Dict, List, Union, Literal, cast, Optional
+from typing import Dict, List, Literal, Optional, Union, cast
 
 import requests
 

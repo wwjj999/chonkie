@@ -6,6 +6,7 @@ import pytest
 
 from chonkie.cloud.chunker import LateChunker
 
+
 @pytest.mark.skipif(
     "CHONKIE_API_KEY" not in os.environ,
     reason="CHONKIE_API_KEY is not set",
