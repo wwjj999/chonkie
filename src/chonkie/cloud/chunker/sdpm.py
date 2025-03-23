@@ -1,7 +1,7 @@
 """SDPM Chunking for Chonkie API."""
 
 import os
-from typing import Dict, List, Optional, Union, cast
+from typing import Dict, List, Literal, Optional, Union, cast
 
 import requests
 
@@ -54,7 +54,10 @@ class SDPMChunker(CloudChunker):
             raise ValueError("Minimum chunk size must be greater than 0.")
         
         # Check if the threshold is valid
-        if threshold <= 0 or threshold > 1:
+        if isinstance(threshold, str) and threshold != "auto":
+            raise ValueError("Threshold must be either 'auto' or a number between 0 and 1.")
+            
+        elif isinstance(threshold, (float, int)) and (threshold <= 0 or threshold > 1):
             raise ValueError("Threshold must be between 0 and 1.")
         
         # Check if the threshold step is valid
