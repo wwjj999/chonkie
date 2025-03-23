@@ -1,5 +1,7 @@
 """Test the tokenizer module."""
 
+from typing import Callable, List
+
 import pytest
 import tiktoken
 from tokenizers import Tokenizer as HFTokenizer
@@ -10,7 +12,7 @@ from chonkie.tokenizer import CharacterTokenizer, Tokenizer, WordTokenizer
 
 # Rich test examples
 @pytest.fixture
-def sample_text():
+def sample_text() -> str:
     """Sample text for testing."""
     return """Natural language processing (NLP) is a field of artificial intelligence 
     that focuses on the interaction between computers and human language. It involves 
@@ -18,7 +20,7 @@ def sample_text():
 
 
 @pytest.fixture
-def sample_texts():
+def sample_texts() -> List[str]:
     """Sample texts for testing."""
     return [
         "The quick brown fox jumps over the lazy dog.",
@@ -35,42 +37,42 @@ def sample_texts():
 
 # Initialize the WordTokenizer
 @pytest.fixture
-def word_tokenizer():
+def word_tokenizer() -> WordTokenizer:
     """Word tokenizer fixture."""
     return WordTokenizer()
 
 
 # Initialize the CharacterTokenizer
 @pytest.fixture
-def char_tokenizer():
+def char_tokenizer() -> CharacterTokenizer:
     """Character tokenizer fixture."""
     return CharacterTokenizer()
 
 
 # Initialize the HuggingFace tokenizer
 @pytest.fixture
-def hf_tokenizer():
+def hf_tokenizer() -> HFTokenizer:
     """Create a HuggingFace tokenizer fixture."""
     return HFTokenizer.from_pretrained("gpt2")
 
 
 # Initialize the Tiktoken tokenizer
 @pytest.fixture
-def tiktoken_tokenizer():
+def tiktoken_tokenizer() -> tiktoken.Encoding:
     """Create a Tiktoken tokenizer fixture."""
     return tiktoken.get_encoding("gpt2")
 
 
 # Initialize the Transformer tokenizer
 @pytest.fixture
-def transformers_tokenizer():
+def transformers_tokenizer() -> AutoTokenizer:
     """Create a Transformer tokenizer fixture."""
     return AutoTokenizer.from_pretrained("gpt2")
 
 
 # Initialize the Callable tokenizer
 @pytest.fixture
-def callable_tokenizer():
+def callable_tokenizer() -> Callable[[str], int]:
     """Create a callable tokenizer fixture."""
     return lambda text: len(text.split())
 
@@ -80,7 +82,7 @@ def callable_tokenizer():
     "tokenizer_fixture",
     ["hf_tokenizer", "tiktoken_tokenizer", "transformers_tokenizer"],
 )
-def test_tokenizer_initialization(request, tokenizer_fixture):
+def test_tokenizer_initialization(request: pytest.FixtureRequest, tokenizer_fixture: str) -> None:
     """Test tokenizer initialization."""
     tokenizer = request.getfixturevalue(tokenizer_fixture)
     tokenizer = Tokenizer(tokenizer)
@@ -92,7 +94,7 @@ def test_tokenizer_initialization(request, tokenizer_fixture):
 @pytest.mark.parametrize(
     "model_name", ["gpt2", "bert-base-uncased", "cl100k_base", "p50k_base"]
 )
-def test_tokenizer_string_initialization(model_name):
+def test_tokenizer_string_initialization(model_name: str) -> None:
     """Test initialization of tokenizer with different model strings."""
     try:
         tokenizer = Tokenizer(model_name)
@@ -129,7 +131,7 @@ def test_tokenizer_string_initialization(model_name):
     "tokenizer_fixture",
     ["hf_tokenizer", "tiktoken_tokenizer", "transformers_tokenizer"],
 )
-def test_tokenizer_encode_decode(request, tokenizer_fixture, sample_text):
+def test_tokenizer_encode_decode(request: pytest.FixtureRequest, tokenizer_fixture: str, sample_text: str) -> None:
     """Test encoding and decoding across different backends."""
     try:
         tokenizer = request.getfixturevalue(tokenizer_fixture)
@@ -154,7 +156,7 @@ def test_tokenizer_encode_decode(request, tokenizer_fixture, sample_text):
     "tokenizer_fixture",
     ["hf_tokenizer", "tiktoken_tokenizer", "transformers_tokenizer"],
 )
-def test_tokenizer_batch_operations(request, tokenizer_fixture, sample_texts):
+def test_tokenizer_batch_operations(request: pytest.FixtureRequest, tokenizer_fixture: str, sample_texts: List[str]) -> None:
     """Test batch encoding and decoding across different backends."""
     try:
         tokenizer = request.getfixturevalue(tokenizer_fixture)
@@ -190,7 +192,7 @@ def test_tokenizer_batch_operations(request, tokenizer_fixture, sample_texts):
         "callable_tokenizer",
     ],
 )
-def test_tokenizer_token_counts(request, tokenizer_fixture, sample_text, sample_texts):
+def test_tokenizer_token_counts(request: pytest.FixtureRequest, tokenizer_fixture: str, sample_text: str, sample_texts: List[str]) -> None:
     """Test token counting across different backends."""
     try:
         tokenizer = request.getfixturevalue(tokenizer_fixture)
@@ -231,7 +233,7 @@ def test_tokenizer_token_counts(request, tokenizer_fixture, sample_text, sample_
         "callable_tokenizer",
     ],
 )
-def test_tokenizer_backend_detection(request, tokenizer_fixture):
+def test_tokenizer_backend_detection(request: pytest.FixtureRequest, tokenizer_fixture: str) -> None:
     """Test that the tokenizer correctly identifies its backend."""
     try:
         tokenizer = request.getfixturevalue(tokenizer_fixture)
@@ -247,11 +249,11 @@ def test_tokenizer_backend_detection(request, tokenizer_fixture):
     ]
 
 
-def test_tokenizer_error_handling():
+def test_tokenizer_error_handling() -> None:
     """Test error handling for unsupported operations."""
 
     # Test with callable tokenizer
-    def dummy_counter(text):
+    def dummy_counter(text: str) -> int:
         return len(text.split())
 
     tokenizer = Tokenizer(dummy_counter)
@@ -275,14 +277,14 @@ def test_tokenizer_error_handling():
 
 
 # Tests for WordTokenizer
-def test_word_tokenizer_initialization(word_tokenizer):
+def test_word_tokenizer_initialization(word_tokenizer: WordTokenizer) -> None:
     """Test WordTokenizer initialization."""
     assert word_tokenizer.vocab == [" "]
     assert len(word_tokenizer.token2id) == 1
     assert word_tokenizer.token2id[" "] == 0
 
 
-def test_word_tokenizer_encode_decode(word_tokenizer, sample_text):
+def test_word_tokenizer_encode_decode(word_tokenizer: WordTokenizer, sample_text: str) -> None:
     """Test encoding and decoding with WordTokenizer."""
     tokens = word_tokenizer.encode(sample_text)
     assert isinstance(tokens, list)
@@ -293,7 +295,7 @@ def test_word_tokenizer_encode_decode(word_tokenizer, sample_text):
     assert decoded.strip() == sample_text.strip()
 
 
-def test_word_tokenizer_batch_operations(word_tokenizer, sample_texts):
+def test_word_tokenizer_batch_operations(word_tokenizer: WordTokenizer, sample_texts: List[str]) -> None:
     """Test batch operations with WordTokenizer."""
     token_lists = word_tokenizer.encode_batch(sample_texts)
     assert isinstance(token_lists, list)
@@ -307,7 +309,7 @@ def test_word_tokenizer_batch_operations(word_tokenizer, sample_texts):
     ]
 
 
-def test_word_tokenizer_vocabulary_growth(word_tokenizer):
+def test_word_tokenizer_vocabulary_growth(word_tokenizer: WordTokenizer) -> None:
     """Test that vocabulary grows correctly with new words."""
     initial_vocab_size = len(word_tokenizer.vocab)
     word_tokenizer.encode("hello world")
@@ -317,14 +319,14 @@ def test_word_tokenizer_vocabulary_growth(word_tokenizer):
 
 
 # Tests for CharacterTokenizer
-def test_char_tokenizer_initialization(char_tokenizer):
+def test_char_tokenizer_initialization(char_tokenizer: CharacterTokenizer) -> None:
     """Test CharacterTokenizer initialization."""
     assert char_tokenizer.vocab == [" "]
     assert len(char_tokenizer.token2id) == 1
     assert char_tokenizer.token2id[" "] == 0
 
 
-def test_char_tokenizer_encode_decode(char_tokenizer, sample_text):
+def test_char_tokenizer_encode_decode(char_tokenizer: CharacterTokenizer, sample_text: str) -> None:
     """Test encoding and decoding with CharacterTokenizer."""
     tokens = char_tokenizer.encode(sample_text)
     assert isinstance(tokens, list)
@@ -336,7 +338,7 @@ def test_char_tokenizer_encode_decode(char_tokenizer, sample_text):
     assert decoded == sample_text
 
 
-def test_char_tokenizer_batch_operations(char_tokenizer, sample_texts):
+def test_char_tokenizer_batch_operations(char_tokenizer: CharacterTokenizer, sample_texts: List[str]) -> None:
     """Test batch operations with CharacterTokenizer."""
     token_lists = char_tokenizer.encode_batch(sample_texts)
     assert isinstance(token_lists, list)
@@ -351,7 +353,7 @@ def test_char_tokenizer_batch_operations(char_tokenizer, sample_texts):
     assert decoded_texts == sample_texts
 
 
-def test_char_tokenizer_count_tokens(char_tokenizer, sample_text, sample_texts):
+def test_char_tokenizer_count_tokens(char_tokenizer: CharacterTokenizer, sample_text: str, sample_texts: List[str]) -> None:
     """Test token counting with CharacterTokenizer."""
     count = char_tokenizer.count_tokens(sample_text)
     assert count == len(sample_text)
@@ -360,7 +362,7 @@ def test_char_tokenizer_count_tokens(char_tokenizer, sample_text, sample_texts):
     assert counts == [len(text) for text in sample_texts]
 
 
-def test_tokenizer_string_representation():
+def test_tokenizer_string_representation() -> None:
     """Test string representation of tokenizers."""
     char_tokenizer = CharacterTokenizer()
     word_tokenizer = WordTokenizer()
@@ -370,7 +372,7 @@ def test_tokenizer_string_representation():
 
 
 # Tests for vocabulary and token mapping
-def test_word_tokenizer_vocab_and_mapping(word_tokenizer, sample_text):
+def test_word_tokenizer_vocab_and_mapping(word_tokenizer: WordTokenizer, sample_text: str) -> None:
     """Test vocabulary building and token mapping in WordTokenizer."""
     # Initial state
     assert word_tokenizer.get_vocab() == [" "]
@@ -399,7 +401,7 @@ def test_word_tokenizer_vocab_and_mapping(word_tokenizer, sample_text):
         assert vocab[token2id[token]] == token
 
 
-def test_char_tokenizer_vocab_and_mapping(char_tokenizer, sample_text):
+def test_char_tokenizer_vocab_and_mapping(char_tokenizer: CharacterTokenizer, sample_text: str) -> None:
     """Test vocabulary building and token mapping in CharacterTokenizer."""
     # Initial state
     assert char_tokenizer.get_vocab() == [" "]
@@ -435,7 +437,7 @@ def test_char_tokenizer_vocab_and_mapping(char_tokenizer, sample_text):
         assert char in token2id
 
 
-def test_tokenizer_vocab_consistency(word_tokenizer, char_tokenizer):
+def test_tokenizer_vocab_consistency(word_tokenizer: WordTokenizer, char_tokenizer: CharacterTokenizer) -> None:
     """Test that vocabulary remains consistent across multiple encodings."""
     text1 = "Hello world"
     text2 = "Hello universe"
