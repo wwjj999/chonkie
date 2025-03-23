@@ -80,3 +80,22 @@ def test_cloud_token_chunker_batch() -> None:
         f"Expected a list of dictionaries with a 'start_index' key, got {type(result[0])}"
     assert all(isinstance(item["end_index"], int) for item in result[0]), \
         f"Expected a list of dictionaries with a 'end_index' key, got {type(result[0])}"
+
+
+@pytest.mark.skipif(
+    "CHONKIE_API_KEY" not in os.environ,
+    reason="CHONKIE_API_KEY is not set",
+)
+def test_cloud_token_chunker_return_type() -> None:
+    """Test that the token chunker works with a return type."""
+    token_chunker = TokenChunker(
+        tokenizer="gpt2",
+        chunk_size=512,
+        chunk_overlap=0,
+        return_type="texts",
+    )
+    result = token_chunker("Hello, world!")
+
+    # Check the result
+    assert isinstance(result, list)
+    assert all(isinstance(item, str) for item in result)
