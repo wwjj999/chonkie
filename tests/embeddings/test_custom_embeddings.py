@@ -19,7 +19,7 @@ class CustomEmbeddings(BaseEmbeddings):
 
     """Custom embeddings class."""
 
-    def __init__(self, dimension=4):
+    def __init__(self, dimension: int = 4) -> None:
         """Initialize the CustomEmbeddings class."""
         super().__init__()
         self._dimension = dimension
@@ -44,14 +44,14 @@ class CustomEmbeddings(BaseEmbeddings):
         return self._dimension
 
 
-def test_custom_embeddings_initialization():
+def test_custom_embeddings_initialization() -> None:
     """Test the initialization of the CustomEmbeddings class."""
     embeddings = CustomEmbeddings(dimension=4)
     assert isinstance(embeddings, BaseEmbeddings)
     assert embeddings.dimension == 4
 
 
-def test_custom_embeddings_single_text():
+def test_custom_embeddings_single_text() -> None:
     """Test the embedding of a single text string."""
     embeddings = CustomEmbeddings(dimension=4)
     text = "Test string"
@@ -60,7 +60,7 @@ def test_custom_embeddings_single_text():
     assert vector.shape == (4,)
 
 
-def test_custom_embeddings_batch_text():
+def test_custom_embeddings_batch_text() -> None:
     """Test the embedding of a batch of text strings."""
     embeddings = CustomEmbeddings(dimension=4)
     texts = ["Test string one", "Test string two"]
@@ -71,7 +71,7 @@ def test_custom_embeddings_batch_text():
         assert vec.shape == (4,)
 
 
-def test_custom_embeddings_token_count():
+def test_custom_embeddings_token_count() -> None:
     """Test the token counting functionality."""
     embeddings = CustomEmbeddings()
     text = "Test string for counting tokens"
@@ -80,7 +80,7 @@ def test_custom_embeddings_token_count():
     assert count == len(text.split())
 
 
-def test_custom_embeddings_similarity():
+def test_custom_embeddings_similarity() -> None:
     """Test the similarity calculation."""
     embeddings = CustomEmbeddings(dimension=4)
     vec1 = embeddings.embed("Text A")
