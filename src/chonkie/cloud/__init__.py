@@ -5,6 +5,7 @@ from chonkie.cloud.chunker import (
     RecursiveChunker,
     SDPMChunker,
     SemanticChunker,
+    SentenceChunker,
     TokenChunker,
     WordChunker,
 )
@@ -17,4 +18,5 @@ __all__ = [
     "SDPMChunker",
     "RecursiveChunker",
     "SemanticChunker",
+    "SentenceChunker",
 ]
