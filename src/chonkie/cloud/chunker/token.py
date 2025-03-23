@@ -68,9 +68,17 @@ class TokenChunker(CloudChunker):
             json=payload,
             headers={"Authorization": f"Bearer {self.api_key}"} 
         )
+        # Check if the response is successful
+        if response.status_code != 200:
+            raise ValueError(f"Error from the Chonkie API: {response.status_code} {response.text}")
 
         # Parse the response
-        result: List[Dict] = cast(List[Dict], response.json())
+        try:
+            result: List[Dict] = cast(List[Dict], response.json())
+        except Exception as error:
+            raise ValueError(f"Error parsing the response: {error}") from error
+        
+        # Return the result
         return result
 
     def __call__(self, text: Union[str, List[str]]) -> List[Dict]:
