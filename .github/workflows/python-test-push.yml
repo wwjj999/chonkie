@@ -39,6 +39,7 @@ jobs:
         env:
           CHONKIE_API_KEY: ${{ secrets.CHONKIE_API_KEY }}
           COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
       - name: Upload coverage report to Codecov
         uses: codecov/codecov-action@v5
