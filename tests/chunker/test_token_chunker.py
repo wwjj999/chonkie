@@ -24,14 +24,15 @@ from typing import List
 import pytest
 import tiktoken
 from datasets import load_dataset
+from tiktoken import Encoding
 from tokenizers import Tokenizer
-from transformers import AutoTokenizer
+from transformers import AutoTokenizer, PreTrainedTokenizerFast
 
 from chonkie import Chunk, TokenChunker
 
 
 @pytest.fixture
-def transformers_tokenizer():
+def transformers_tokenizer() -> PreTrainedTokenizerFast:
     """Fixture that returns a GPT-2 tokenizer from the transformers library.
 
     Returns:
@@ -42,7 +43,7 @@ def transformers_tokenizer():
 
 
 @pytest.fixture
-def tiktokenizer():
+def tiktokenizer() -> Encoding:
     """Fixture that returns a GPT-2 tokenizer from the tiktoken library.
 
     Returns:
@@ -53,7 +54,7 @@ def tiktokenizer():
 
 
 @pytest.fixture
-def tokenizer():
+def tokenizer() -> Tokenizer:
     """Fixture that returns a GPT-2 tokenizer from the tokenizers library.
 
     Returns:
@@ -64,7 +65,7 @@ def tokenizer():
 
 
 @pytest.fixture
-def sample_text():
+def sample_text() -> str:
     """Fixture that returns a sample text for testing the TokenChunker.
 
     Returns:
