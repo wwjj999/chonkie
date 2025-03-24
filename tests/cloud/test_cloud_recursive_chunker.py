@@ -5,7 +5,38 @@ import os
 import pytest
 
 from chonkie.cloud import RecursiveChunker
+from chonkie.types import RecursiveRules
 
+
+@pytest.mark.skipif(
+    "CHONKIE_API_KEY" not in os.environ,
+    reason="CHONKIE_API_KEY is not set",
+)
+def test_cloud_recursive_chunker_initialization() -> None:
+    """Test that the recursive chunker can be initialized."""
+    # Check if not passing the API key raises an error
+    with pytest.raises(ValueError):
+        RecursiveChunker(api_key=None)
+
+    # Check if the chunk_size < 0 raises an error
+    with pytest.raises(ValueError):
+        RecursiveChunker(tokenizer_or_token_counter="gpt2", chunk_size=-1)
+
+    # Check if the min_characters_per_chunk < 1 raises an error
+    with pytest.raises(ValueError):
+        RecursiveChunker(tokenizer_or_token_counter="gpt2", chunk_size=512, min_characters_per_chunk=-1)
+
+    # Check if the return_type is not "texts" or "chunks" raises an error
+    with pytest.raises(ValueError):
+        RecursiveChunker(tokenizer_or_token_counter="gpt2", chunk_size=512, return_type="not_a_string")
+    
+    # Finally, check if the attributes are set correctly
+    chunker = RecursiveChunker(tokenizer_or_token_counter="gpt2", chunk_size=512)
+    assert chunker.tokenizer_or_token_counter == "gpt2"
+    assert chunker.chunk_size == 512
+    assert chunker.min_characters_per_chunk == 12
+    assert chunker.return_type == "chunks"
+    assert isinstance(chunker.rules, RecursiveRules)
 
 @pytest.mark.skipif(
     "CHONKIE_API_KEY" not in os.environ,

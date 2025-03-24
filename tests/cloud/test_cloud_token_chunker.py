@@ -7,7 +7,35 @@ import pytest
 from chonkie.cloud import TokenChunker
 
 
-# A test to check that the token chunker works
+@pytest.mark.skipif(
+    "CHONKIE_API_KEY" not in os.environ,
+    reason="CHONKIE_API_KEY is not set",
+)
+def test_cloud_token_chunker_initialization() -> None:
+    """Test that the token chunker can be initialized."""
+    # Check if not passing the API key raises an error
+    with pytest.raises(ValueError):
+        TokenChunker(api_key=None)
+
+    # Check if the chunk_size < 0 raises an error
+    with pytest.raises(ValueError):
+        TokenChunker(tokenizer="gpt2", chunk_size=-1, chunk_overlap=0)
+
+    # Check if the chunk_overlap < 0 raises an error
+    with pytest.raises(ValueError):
+        TokenChunker(tokenizer="gpt2", chunk_size=512, chunk_overlap=-1)
+    
+    # Check if the return_type is not "texts" or "chunks" raises an error
+    with pytest.raises(ValueError):
+        TokenChunker(tokenizer="gpt2", chunk_size=512, chunk_overlap=0, return_type="bad_return_type")
+
+    # Finally, check if the attributes are set correctly
+    chunker = TokenChunker(tokenizer="gpt2", chunk_size=512, chunk_overlap=0)
+    assert chunker.tokenizer == "gpt2"
+    assert chunker.chunk_size == 512
+    assert chunker.chunk_overlap == 0
+    assert chunker.return_type == "chunks"
+
 @pytest.mark.skipif(
     "CHONKIE_API_KEY" not in os.environ,
     reason="CHONKIE_API_KEY is not set",
