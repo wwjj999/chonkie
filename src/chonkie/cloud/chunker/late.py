@@ -48,7 +48,10 @@ class LateChunker(CloudChunker):
             )
         if include_delim not in ["prev", "next", None]:
             raise ValueError("include_delim must be one of the following: ['prev', 'next', None]")
-        
+        if not (isinstance(delim, list) and isinstance(delim[0], str)) and not isinstance(delim, str):
+            raise ValueError("delim must be a list of strings or a string!")
+        if approximate not in [True, False]:
+            raise ValueError("approximate must be a boolean!")
 
         # Add all the attributes
         self.embedding_model = embedding_model
