@@ -73,12 +73,13 @@ packages = ["chonkie",
             "chonkie.chunker",
             "chonkie.embeddings", 
             "chonkie.refinery",
-            "chonkie.chef"]
+            "chonkie.chef",
+            "chonkie.cloud"]
 
 [tool.ruff]
 exclude = ["*.ipynb"]
 lint.select = ["F", "I", "D", "DOC"]
-lint.ignore = ["D211", "D213"]
+lint.ignore = ["D211", "D213", "D203"]
 
 [tool.ruff.format]
 preview = true
