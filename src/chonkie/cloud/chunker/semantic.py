@@ -63,8 +63,8 @@ class SemanticChunker(CloudChunker):
             raise ValueError("Minimum characters per sentence must be greater than 0.")
         
         # Check if the threshold step is valid
-        if threshold_step <= 0:
-            raise ValueError("Threshold step must be greater than 0.")
+        if threshold_step <= 0 or threshold_step > 1:
+            raise ValueError("Threshold step must be greater than 0 and less than or equal to 1.")
         
         # Check if the delim is valid
         if not isinstance(delim, (list, str)):
