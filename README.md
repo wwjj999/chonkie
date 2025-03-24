@@ -43,6 +43,7 @@ Well, look no further than Chonkie! (chonkie boi is a gud boi 🦛💕)
 **⚡ Fast**: CHONK at the speed of light! zooooom </br>
 **🌐 Wide support**: Supports all your favorite tokenizer CHONKS </br>
 **🪶 Light-weight**: No bloat, just CHONK </br>
+**☁️ Cloud-Ready**: CHONK locally or in the [Chonkie Cloud](https://cloud.chonkie.ai) </br>
 **🦛 Cute CHONK mascot**: psst it's a pygmy hippo btw </br>
 **❤️ [Moto Moto](#acknowledgements)'s favorite python library** </br>
 
@@ -68,15 +69,10 @@ Here's a basic example to get you started:
 
 ```python
 # First import the chunker you want from Chonkie 
-from chonkie import TokenChunker
-
-# Import your favorite tokenizer library
-# Also supports AutoTokenizers, TikToken and AutoTikTokenizer
-from tokenizers import Tokenizer 
-tokenizer = Tokenizer.from_pretrained("gpt2")
+from chonkie import RecursiveChunker
 
 # Initialize the chunker
-chunker = TokenChunker(tokenizer)
+chunker = RecursiveChunker()
 
 # Chunk some text
 chunks = chunker("Woah! Chonkie, the chunking library is so cool! I love the tiny hippo hehe.")
@@ -87,7 +83,7 @@ for chunk in chunks:
     print(f"Tokens: {chunk.token_count}")
 ```
 
-More example usages given inside the [DOCS](https://docs.chonkie.ai)
+Checkout more usage examples given in the [DOCS](https://docs.chonkie.ai) or have a look at the tutorials in the [Cookbook](/cookbook/README.md)!
 
 # Supported Methods
 
