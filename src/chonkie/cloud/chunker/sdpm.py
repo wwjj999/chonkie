@@ -53,6 +53,10 @@ class SDPMChunker(CloudChunker):
         if min_chunk_size <= 0:
             raise ValueError("Minimum chunk size must be greater than 0.")
         
+        # Check if the minimum characters per sentence is valid
+        if min_characters_per_sentence <= 0:
+            raise ValueError("Minimum characters per sentence must be greater than 0.")
+        
         # Check if the threshold is valid
         if isinstance(threshold, str) and threshold != "auto":
             raise ValueError("Threshold must be either 'auto' or a number between 0 and 1.")
