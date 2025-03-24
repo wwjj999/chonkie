@@ -56,17 +56,18 @@ class SDPMChunker(CloudChunker):
         # Check if the threshold is valid
         if isinstance(threshold, str) and threshold != "auto":
             raise ValueError("Threshold must be either 'auto' or a number between 0 and 1.")
-            
-        elif isinstance(threshold, (float, int)) and (threshold <= 0 or threshold > 1):
-            raise ValueError("Threshold must be between 0 and 1.")
+        elif isinstance(threshold, float) and (threshold <= 0 or threshold > 1):
+            raise ValueError("Threshold must be between 0 and 1 when a float.")
+        elif isinstance(threshold, int) and (threshold <= 1 or threshold > 100):
+            raise ValueError("Threshold must be between 1 and 100 when an int.")
         
         # Check if the threshold step is valid
         if threshold_step <= 0:
             raise ValueError("Threshold step must be greater than 0.")
 
         # Check if the delim is valid
-        if not isinstance(delim, list):
-            raise ValueError("Delim must be a list.")
+        if not (isinstance(delim, list) and isinstance(delim[0], str)) and not isinstance(delim, str):
+            raise ValueError("Delim must be a list of strings or a string.")
         
         # Check if the skip window is valid
         if skip_window <= 0:
