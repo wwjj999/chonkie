@@ -19,6 +19,11 @@ class SentenceChunker(CloudChunker):
                  tokenizer_or_token_counter: str = "gpt2",
                  chunk_size: int = 512,
                  chunk_overlap: int = 0,
+                 min_sentences_per_chunk: int = 1,
+                 min_characters_per_sentence: int = 12,
+                 approximate: bool = True,
+                 delim: Union[str, List[str]] = [".", "!", "?", "\n"],
+                 include_delim: Union[Literal["prev", "next"], None] = "prev",
                  return_type: Literal["texts", "chunks"] = "chunks",
                  api_key: Union[str, None] = None) -> None:
         """Initialize the SentenceChunker."""
@@ -33,6 +38,14 @@ class SentenceChunker(CloudChunker):
             raise ValueError("Chunk size must be greater than 0.")
         if chunk_overlap < 0:
             raise ValueError("Chunk overlap must be greater than or equal to 0.")
+        if min_sentences_per_chunk < 1:
+            raise ValueError("Minimum sentences per chunk must be greater than 0.")
+        if min_characters_per_sentence < 1:
+            raise ValueError("Minimum characters per sentence must be greater than 0.")
+        if approximate not in [True, False]:
+            raise ValueError("Approximate must be either True or False.")
+        if include_delim not in ["prev", "next", None]:
+            raise ValueError("Include delim must be either 'prev', 'next' or None.")
         if return_type not in ["texts", "chunks"]:
             raise ValueError("Return type must be either 'texts' or 'chunks'.")
         
@@ -40,6 +53,11 @@ class SentenceChunker(CloudChunker):
         self.tokenizer_or_token_counter = tokenizer_or_token_counter
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
+        self.min_sentences_per_chunk = min_sentences_per_chunk
+        self.min_characters_per_sentence = min_characters_per_sentence
+        self.approximate = approximate
+        self.delim = delim
+        self.include_delim = include_delim
         self.return_type = return_type
 
         # Check if the API is up right now
@@ -57,6 +75,11 @@ class SentenceChunker(CloudChunker):
             "tokenizer": self.tokenizer_or_token_counter,
             "chunk_size": self.chunk_size,
             "chunk_overlap": self.chunk_overlap,
+            "min_sentences_per_chunk": self.min_sentences_per_chunk,
+            "min_characters_per_sentence": self.min_characters_per_sentence,
+            "approximate": self.approximate,
+            "delim": self.delim,
+            "include_delim": self.include_delim,
             "return_type": self.return_type,
         }
 
