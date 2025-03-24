@@ -43,6 +43,7 @@ Well, look no further than Chonkie! (chonkie boi is a gud boi 🦛💕)
 **⚡ Fast**: CHONK at the speed of light! zooooom </br>
 **🌐 Wide support**: Supports all your favorite tokenizer CHONKS </br>
 **🪶 Light-weight**: No bloat, just CHONK </br>
+**☁️ Cloud-Ready**: CHONK locally or in the [Chonkie Cloud](https://chonkie.cloud) </br>
 **🦛 Cute CHONK mascot**: psst it's a pygmy hippo btw </br>
 **❤️ [Moto Moto](#acknowledgements)'s favorite python library** </br>
 
