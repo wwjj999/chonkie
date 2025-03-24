@@ -1,7 +1,7 @@
 """Recursive Chunking for Chonkie API."""
 
 import os
-from typing import Callable, Dict, List, Union, cast
+from typing import Callable, Dict, List, Literal, Union, cast
 
 import requests
 
@@ -19,7 +19,9 @@ class RecursiveChunker(CloudChunker):
     def __init__(self,
                  tokenizer_or_token_counter: Union[str, Callable] = "gpt2",
                  chunk_size: int = 512,
+                 min_characters_per_chunk: int = 12,
                  rules: RecursiveRules = RecursiveRules(),
+                 return_type: Literal["texts", "chunks"] = "chunks",
                  api_key: Union[str, None] = None,
                  ) -> None:
         """Initialize the RecursiveChunker."""
@@ -32,11 +34,17 @@ class RecursiveChunker(CloudChunker):
         # Check if the chunk size is valid
         if chunk_size <= 0:
             raise ValueError("Chunk size must be greater than 0.")
+        if min_characters_per_chunk < 1:
+            raise ValueError("Minimum characters per chunk must be greater than 0.")
+        if return_type not in ["texts", "chunks"]:
+            raise ValueError("Return type must be either 'texts' or 'chunks'.")
         
         # Add attributes
         self.tokenizer_or_token_counter = tokenizer_or_token_counter
         self.chunk_size = chunk_size
+        self.min_characters_per_chunk = min_characters_per_chunk
         self.rules = rules
+        self.return_type = return_type
 
         # Check if the API is up right now
         response = requests.get(f"{self.BASE_URL}/")
@@ -52,7 +60,9 @@ class RecursiveChunker(CloudChunker):
             "text": text,
             "tokenizer_or_token_counter": self.tokenizer_or_token_counter,
             "chunk_size": self.chunk_size,
+            "min_characters_per_chunk": self.min_characters_per_chunk,
             "rules": self.rules.to_dict(),
+            "return_type": self.return_type,
         }
         # Make the request to the Chonkie API
         response = requests.post(
