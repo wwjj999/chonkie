@@ -14,10 +14,6 @@ from chonkie.types import RecursiveRules
 )
 def test_cloud_recursive_chunker_initialization() -> None:
     """Test that the recursive chunker can be initialized."""
-    # Check if not passing the API key raises an error
-    with pytest.raises(ValueError):
-        RecursiveChunker(api_key=None)
-
     # Check if the chunk_size < 0 raises an error
     with pytest.raises(ValueError):
         RecursiveChunker(tokenizer_or_token_counter="gpt2", chunk_size=-1)

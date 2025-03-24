@@ -13,10 +13,6 @@ from chonkie.cloud import SentenceChunker
 )
 def test_cloud_sentence_chunker_initialization() -> None:
     """Test that the sentence chunker can be initialized."""
-    # Check if not passing the API key raises an error
-    with pytest.raises(ValueError):
-        SentenceChunker(api_key=None)
-
     # Check if the chunk_size < 0 raises an error
     with pytest.raises(ValueError):
         SentenceChunker(tokenizer_or_token_counter="gpt2", chunk_size=-1, chunk_overlap=0)

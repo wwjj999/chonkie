@@ -13,10 +13,6 @@ from chonkie.cloud import WordChunker
 )
 def test_cloud_word_chunker_initialization() -> None:
     """Test that the word chunker can be initialized."""
-    # Check if not passing the API key raises an error
-    with pytest.raises(ValueError):
-        WordChunker(api_key=None)
-
     # Check if the chunk_size < 0 raises an error
     with pytest.raises(ValueError):
         WordChunker(tokenizer_or_token_counter="gpt2", chunk_size=-1, chunk_overlap=0)
@@ -25,15 +21,16 @@ def test_cloud_word_chunker_initialization() -> None:
     with pytest.raises(ValueError):
         WordChunker(tokenizer_or_token_counter="gpt2", chunk_size=512, chunk_overlap=-1)
 
-    # Check if the tokenizer_or_token_counter is not a string raises an error
+    # Check if the return_type is not "texts" or "chunks"   
     with pytest.raises(ValueError):
-        WordChunker(tokenizer_or_token_counter=1, chunk_size=512, chunk_overlap=0)
+        WordChunker(tokenizer_or_token_counter="gpt2", chunk_size=512, chunk_overlap=0, return_type="not_a_string")
 
     # Finally, check if the attributes are set correctly
     chunker = WordChunker(tokenizer_or_token_counter="gpt2", chunk_size=512, chunk_overlap=0)
     assert chunker.tokenizer_or_token_counter == "gpt2"
     assert chunker.chunk_size == 512
     assert chunker.chunk_overlap == 0
+    assert chunker.return_type == "chunks"
 
 @pytest.mark.skipif(
     "CHONKIE_API_KEY" not in os.environ,

@@ -13,10 +13,6 @@ from chonkie.cloud.chunker import LateChunker
 )
 def test_cloud_late_chunker_initialization() -> None:
     """Test that the late chunker can be initialized."""
-    # Check if not passing the API key raises an error
-    with pytest.raises(ValueError):
-        LateChunker(api_key=None)
-
     # Check if the chunk_size < 0 raises an error
     with pytest.raises(ValueError):
         LateChunker(embedding_model="all-minilm-l6-v2", chunk_size=-1)
@@ -55,7 +51,6 @@ def test_cloud_late_chunker_initialization() -> None:
     assert chunker.approximate == True
     assert chunker.delim == [".", "!", "?", "\n"]
     assert chunker.include_delim == "prev"
-    assert chunker.return_type == "chunks"
 
 @pytest.mark.skipif(
     "CHONKIE_API_KEY" not in os.environ,

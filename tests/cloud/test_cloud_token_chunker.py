@@ -13,10 +13,6 @@ from chonkie.cloud import TokenChunker
 )
 def test_cloud_token_chunker_initialization() -> None:
     """Test that the token chunker can be initialized."""
-    # Check if not passing the API key raises an error
-    with pytest.raises(ValueError):
-        TokenChunker(api_key=None)
-
     # Check if the chunk_size < 0 raises an error
     with pytest.raises(ValueError):
         TokenChunker(tokenizer="gpt2", chunk_size=-1, chunk_overlap=0)

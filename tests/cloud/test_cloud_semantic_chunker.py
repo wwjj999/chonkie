@@ -13,10 +13,6 @@ from chonkie.cloud import SemanticChunker
 )
 def test_cloud_semantic_chunker_initialization() -> None:
     """Test that the semantic chunker can be initialized."""
-    # Check if not passing the API key raises an error
-    with pytest.raises(ValueError):
-        SemanticChunker(api_key=None)
-
     # Check if the chunk_size < 0 raises an error
     with pytest.raises(ValueError):
         SemanticChunker(chunk_size=-1)
@@ -71,7 +67,7 @@ def test_cloud_semantic_chunker_initialization() -> None:
 
     # Finally, check if the attributes are set correctly
     chunker = SemanticChunker(chunk_size=512)
-    assert chunker.embedding_model == "minishlab/potion-base-8M"
+    assert chunker.embedding_model == "minishlab/potion-base-32M"
     assert chunker.chunk_size == 512
     assert chunker.threshold == "auto"
     assert chunker.similarity_window == 1

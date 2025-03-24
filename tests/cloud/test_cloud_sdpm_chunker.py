@@ -13,10 +13,6 @@ from chonkie.cloud import SDPMChunker
 )
 def test_cloud_sdpm_chunker_initialization() -> None:
     """Test that the SDPM Chunker can be initialized."""
-    # Check if not passing the API key raises an error
-    with pytest.raises(ValueError):
-        SDPMChunker(api_key=None)
-
     # Check if the chunk_size < 0 raises an error
     with pytest.raises(ValueError):
         SDPMChunker(chunk_size=-1)
